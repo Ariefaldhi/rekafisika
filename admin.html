@@ -37,6 +37,24 @@
             color: #22d3ee;
         }
     </style>
+    <script>
+            (function () {
+                const session = localStorage.getItem('user_session');
+                if (!session) {
+                    window.location.href = 'login.html';
+                } else {
+                    try {
+                        const user = JSON.parse(session);
+                        if (user.role !== 'admin') {
+                            window.location.href = 'index.html';
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('user_session');
+                        window.location.href = 'login.html';
+                    }
+                }
+            })();
+    </script>
 </head>
 
 <body class="bg-abstract text-slate-100 font-inter min-h-screen flex">
