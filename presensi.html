@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presensi | KawanFismat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bg-abstract {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+
+        th,
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        th:first-child,
+        td:first-child {
+            position: sticky;
+            left: 0;
+            background: inherit;
+            z-index: 20;
+            text-align: left;
+        }
+
+        td:first-child {
+            background: rgba(30, 41, 59, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-hadir {
+            color: #34d399;
+        }
+
+        /* Emerald */
+        .status-sakit {
+            color: #facc15;
+        }
+
+        /* Yellow */
+        .status-izin {
+            color: #60a5fa;
+        }
+
+        /* Blue */
+        .status-alfa {
+            color: #f87171;
+        }
+
+        /* Red */
+    </style>
+</head>
+
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
+                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="tugas.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
+                        <a href="presensi.html"
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Presensi</a>
+                        <a href="keaktifan.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
+                        <a href="modul.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
+                        <a href="profil.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
+                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
+                            class="fa-solid fa-bars text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
+                <a href="presensi.html"
+                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
+                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
+                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
+                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 w-full flex-grow">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold mb-4">Presensi Mahasiswa</h1>
+                    <p class="text-slate-400">Menampilkan transparansi presensi mahasiswa</p>
+                </div>
+                <div class="text-xs flex gap-3 bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-emerald-400 text-[8px]"></i>
+                        Hadir</span>
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-yellow-400 text-[8px]"></i>
+                        Izin/Sakit</span>
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-red-400 text-[8px]"></i>
+                        Alfa</span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl overflow-hidden shadow-2xl">
+                <div class="table-container max-h-[70vh]">
+                    <table id="attendance-table">
+                        <thead>
+                            <tr id="table-header">
+                                <th class="min-w-[150px]">Nama Mahasiswa</th>
+                                <!-- Columns 1-1 to 16-2 injected by JS -->
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Rows injected by JS -->
+                            <tr>
+                                <td class="p-8 text-center" colspan="33">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        async function loadAttendance() {
+            if (!supabaseClient) return;
+
+            // Generate Headers (1-1 to 16-2)
+            const headerRow = document.getElementById('table-header');
+            const weeks = 16;
+            const sessions = 2;
+            const columns = [];
+
+            for (let w = 1; w <= weeks; w++) {
+                for (let s = 1; s <= sessions; s++) {
+                    const code = `${w}-${s}`;
+                    columns.push(code);
+                    const th = document.createElement('th');
+                    th.innerText = code;
+                    headerRow.appendChild(th);
+                }
+            }
+
+            // Fetch Students & Logs
+            const { data: students } = await supabaseClient.from('students').select('*').order('name');
+            const { data: logs } = await supabaseClient.from('attendance_logs').select('*');
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (!students || students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="33" class="text-center py-4">Belum ada data mahasiswa.</td></tr>';
+                return;
+            }
+
+            students.forEach(student => {
+                const tr = document.createElement('tr');
+
+                // Name Cell
+                const tdName = document.createElement('td');
+                tdName.className = 'font-medium text-slate-200';
+                tdName.innerText = student.name;
+                tr.appendChild(tdName);
+
+                // Attendance Cells
+                columns.forEach(code => {
+                    const td = document.createElement('td');
+                    // Find log for this student & code
+                    const log = logs.find(l => l.student_nim === student.nim && l.meeting_code === code);
+
+                    if (log) {
+                        const icon = document.createElement('i');
+                        icon.className = 'fa-solid';
+
+                        if (log.status === 'Hadir') {
+                            icon.classList.add('fa-check', 'status-hadir');
+                        } else if (log.status === 'Sakit') {
+                            icon.classList.add('fa-briefcase-medical', 'status-sakit');
+                            td.title = 'Sakit';
+                        } else if (log.status === 'Izin') {
+                            icon.classList.add('fa-envelope-open-text', 'status-izin');
+                            td.title = 'Izin';
+                        } else if (log.status === 'Alfa') {
+                            icon.classList.add('fa-xmark', 'status-alfa');
+                            td.title = 'Alfa';
+                        }
+                        td.appendChild(icon);
+                    } else {
+                        td.innerHTML = '<span class="text-slate-700">-</span>';
+                    }
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAttendance);
+    </script>
+</body>
+
+</html>

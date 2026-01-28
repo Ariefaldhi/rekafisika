@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya | KawanFismat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bg-abstract {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
+                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="tugas.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
+                        <a href="presensi.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
+                        <a href="keaktifan.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
+                        <a href="modul.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
+                        <a href="profil.html"
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Profil</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
+                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
+                            class="fa-solid fa-bars text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
+                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
+                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
+                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
+                <a href="profil.html"
+                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Profil</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex-grow">
+
+        <!-- Profile Header -->
+        <div class="glass-card rounded-2xl p-8 mb-8 flex flex-col md:flex-row items-center gap-8 relative">
+            <div class="relative group">
+                <div class="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-4xl text-slate-400 ring-4 ring-slate-800 overflow-hidden"
+                    id="p-avatar-container">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <button onclick="document.getElementById('edit-photo-modal').classList.remove('hidden')"
+                    class="absolute bottom-0 right-0 bg-accent-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:bg-accent-600 transition-colors"
+                    title="Ganti Foto">
+                    <i class="fa-solid fa-camera text-xs"></i>
+                </button>
+            </div>
+
+            <div class="text-center md:text-left flex-grow">
+                <h1 class="text-3xl font-bold text-white mb-2" id="p-name">Loading...</h1>
+                <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start text-sm text-slate-400">
+                    <span class="bg-slate-800 px-3 py-1 rounded border border-slate-700"><i
+                            class="fa-solid fa-id-card mr-2"></i> <span id="p-nim">...</span></span>
+                    <span class="bg-slate-800 px-3 py-1 rounded border border-slate-700"><i
+                            class="fa-solid fa-graduation-cap mr-2"></i> Mahasiswa Fisika</span>
+                </div>
+            </div>
+            <div>
+                <button onclick="logout()"
+                    class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors border border-red-500">Logout</button>
+            </div>
+        </div>
+
+        <!-- Edit Photo Modal -->
+        <div id="edit-photo-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+            <div class="glass-card max-w-lg w-full p-6 rounded-xl flex flex-col max-h-[90vh]">
+                <h3 class="text-xl font-bold mb-4">Ganti Foto Profil</h3>
+
+                <!-- Step 1: Upload -->
+                <div id="step-upload">
+                    <div class="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-accent-500 transition-colors cursor-pointer"
+                        onclick="document.getElementById('file-input').click()">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-2"></i>
+                        <p class="text-slate-300">Klik untuk upload foto</p>
+                        <p class="text-xs text-slate-500 mt-1">Format: JPG/PNG, Max 2MB</p>
+                    </div>
+                    <input type="file" id="file-input" class="hidden" accept="image/*"
+                        onchange="handleFileSelect(event)">
+                </div>
+
+                <!-- Step 2: Crop (Hidden initially) -->
+                <div id="step-crop" class="hidden flex-grow flex flex-col min-h-0">
+                    <div class="relative flex-grow bg-slate-900 rounded overflow-hidden min-h-[300px]">
+                        <img id="crop-image" class="max-w-full" src="">
+                    </div>
+                    <div class="mt-4 flex justify-between items-center">
+                        <div class="flex gap-2">
+                            <button type="button" onclick="rotateImage(-90)"
+                                class="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 text-white"><i
+                                    class="fa-solid fa-rotate-left"></i></button>
+                            <button type="button" onclick="rotateImage(90)"
+                                class="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 text-white"><i
+                                    class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="resetModal()"
+                                class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
+                            <button type="button" onclick="saveCroppedImage()" id="btn-save-crop"
+                                class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded font-bold shadow-lg shadow-accent-500/20">
+                                <i class="fa-solid fa-check mr-2"></i>Simpan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancel for Step 1 -->
+                <div id="action-upload" class="mt-4 flex justify-end">
+                    <button type="button" onclick="document.getElementById('edit-photo-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-slate-400 hover:text-white">Tutup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Attendance Stat -->
+            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-user-check text-6xl"></i>
+                </div>
+                <h3 class="text-slate-400 font-medium mb-1">Statistik Presensi</h3>
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-bold text-white" id="stat-hadir">0</span>
+                    <span class="text-sm text-slate-500 mb-1">Pertemuan Hadir</span>
+                </div>
+                <div class="mt-4 flex gap-2 text-xs">
+                    <span class="px-2 py-1 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Sakit:
+                        <span id="stat-sakit">0</span></span>
+                    <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">Izin: <span
+                            id="stat-izin">0</span></span>
+                    <span class="px-2 py-1 rounded bg-red-500/10 text-red-500 border border-red-500/20">Alfa: <span
+                            id="stat-alfa">0</span></span>
+                </div>
+            </div>
+
+            <!-- Participation Stat -->
+            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-star text-6xl text-yellow-400"></i>
+                </div>
+                <h3 class="text-slate-400 font-medium mb-1">Total Poin Keaktifan</h3>
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-bold text-yellow-400" id="stat-poin">0</span>
+                    <span class="text-sm text-slate-500 mb-1">Poin</span>
+                </div>
+                <p class="mt-4 text-xs text-slate-500">Semakin aktif bertanya dan menjawab, semakin tinggi poinmu!</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-8 border-t border-slate-800 bg-slate-900 text-center mt-auto">
+        <p class="text-slate-500 text-xs">&copy; 2026 KawanFismat.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        async function loadProfile() {
+            const session = localStorage.getItem('user_session');
+            if (!session) return;
+
+            const user = JSON.parse(session);
+
+            // Handle Admin
+            // Handle Admin (Visual only, allow fetching stats if NIM exists)
+            if (user.role === 'admin') {
+                document.getElementById('p-name').innerText = (user.name || 'Administrator') + ' (Admin)';
+                // We do NOT return here anymore, so it will try to fetch stats for user.nim
+            } else {
+                document.getElementById('p-name').innerText = user.name;
+            }
+
+            document.getElementById('p-nim').innerText = user.nim;
+
+            // Set basic info
+            document.getElementById('p-name').innerText = user.name;
+            document.getElementById('p-nim').innerText = user.nim;
+
+            if (!supabaseClient) return;
+
+            // Fetch Student Details (Photo)
+            const { data: studentData } = await supabaseClient.from('students').select('profile_photo_url').eq('nim', user.nim).single();
+            if (studentData && studentData.profile_photo_url) {
+                document.getElementById('p-avatar-container').innerHTML = `<img src="${studentData.profile_photo_url}" class="w-full h-full object-cover">`;
+            }
+
+            // Fetch Stats
+            // 1. Attendance
+            const { data: attendance } = await supabaseClient
+                .from('attendance_logs')
+                .select('*')
+                .eq('student_nim', user.nim);
+
+            if (attendance) {
+                const hadir = attendance.filter(l => l.status === 'Hadir').length;
+                const sakit = attendance.filter(l => l.status === 'Sakit').length;
+                const izin = attendance.filter(l => l.status === 'Izin').length;
+                const alfa = attendance.filter(l => l.status === 'Alfa').length;
+
+                document.getElementById('stat-hadir').innerText = hadir;
+                document.getElementById('stat-sakit').innerText = sakit;
+                document.getElementById('stat-izin').innerText = izin;
+                document.getElementById('stat-alfa').innerText = alfa;
+            }
+
+            // 2. Points
+            const { data: points } = await supabaseClient
+                .from('participation_logs')
+                .select('points')
+                .eq('student_nim', user.nim);
+
+            if (points) {
+                const total = points.reduce((sum, item) => sum + (item.points || 0), 0);
+                document.getElementById('stat-poin').innerText = total;
+            }
+        }
+
+        let cropper;
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validation
+            if (!file.type.startsWith('image/')) {
+                alert('Harap upload file gambar (JPG/PNG).');
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) { // 2MB
+                alert('Ukuran file maksimal 2MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('crop-image');
+                img.src = e.target.result;
+
+                // Switch view
+                document.getElementById('step-upload').classList.add('hidden');
+                document.getElementById('action-upload').classList.add('hidden');
+                document.getElementById('step-crop').classList.remove('hidden');
+
+                // Init Cropper
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(img, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    background: false,
+                    autoCropArea: 0.8,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function rotateImage(deg) {
+            if (cropper) cropper.rotate(deg);
+        }
+
+        function resetModal() {
+            document.getElementById('edit-photo-modal').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('step-upload').classList.remove('hidden');
+                document.getElementById('action-upload').classList.remove('hidden');
+                document.getElementById('step-crop').classList.add('hidden');
+                document.getElementById('file-input').value = '';
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                document.getElementById('crop-image').src = '';
+            }, 300);
+        }
+
+        async function saveCroppedImage() {
+            if (!cropper) return;
+
+            const btn = document.getElementById('btn-save-crop');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                // Get canvas
+                const canvas = cropper.getCroppedCanvas({
+                    width: 500,
+                    height: 500,
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+
+                // Compress to JPEG 80% quality
+                const base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                const session = localStorage.getItem('user_session');
+                const user = JSON.parse(session);
+
+                // Save to DB
+                const { error } = await supabaseClient
+                    .from('students')
+                    .update({ profile_photo_url: base64 })
+                    .eq('nim', user.nim);
+
+                if (error) throw error;
+
+                alert('Foto profil berhasil diupdate!');
+                window.location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert('Gagal menyimpan foto: ' + err.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user_session');
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | KawanFismat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bg-abstract {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.1) 0px, transparent 50%);
+        }
+
+        /* Tab Active State */
+        .tab-active {
+            background-color: rgba(6, 182, 212, 0.1);
+            border-left: 3px solid #06b6d4;
+            color: #22d3ee;
+        }
+    </style>
+</head>
+
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 hidden md:block">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <span class="font-bold text-xl tracking-wide text-red-400">Admin Panel</span>
+        </div>
+        <nav class="p-4 space-y-2">
+            <button onclick="showSection('tugas')" id="nav-tugas"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors tab-active">
+                <i class="fa-solid fa-clipboard-list w-6"></i> Manajemen Tugas
+            </button>
+            <button onclick="showSection('berita')" id="nav-berita"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+                <i class="fa-solid fa-newspaper w-6"></i> Manajemen Berita
+            </button>
+            <button onclick="showSection('presensi')" id="nav-presensi"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+                <i class="fa-solid fa-user-check w-6"></i> Manajemen Presensi
+            </button>
+            <button onclick="showSection('keaktifan')" id="nav-keaktifan"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+                <i class="fa-solid fa-star w-6"></i> Input Keaktifan
+            </button>
+            <button onclick="showSection('mahasiswa')" id="nav-mahasiswa"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+                <i class="fa-solid fa-users-gear w-6"></i> Kelola Mahasiswa
+            </button>
+            <button onclick="showSection('modul')" id="nav-modul"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+                <i class="fa-solid fa-book-open w-6"></i> Manajemen Modul
+            </button>
+            <div class="pt-8 border-t border-slate-800 mt-4">
+                <a href="index.html"
+                    class="block w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-house w-6"></i> Website Utama
+                </a>
+                <button onclick="logout()"
+                    class="w-full text-left px-4 py-3 rounded hover:bg-red-900/20 text-red-400 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket w-6"></i> Logout
+                </button>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 md:ml-64 p-8">
+        <!-- Header Mobile -->
+        <div class="md:hidden flex justify-between items-center mb-6">
+            <span class="font-bold text-xl text-red-400">Admin Panel</span>
+            <button onclick="logout()" class="text-sm text-red-400">Logout</button>
+        </div>
+
+        <!-- Section: Manajemen Tugas -->
+        <section id="section-tugas" class="space-y-6">
+            <h1 class="text-2xl font-bold mb-6">Manajemen Tugas</h1>
+
+            <!-- Form Buat/Edit Tugas -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <h2 class="font-semibold mb-4 text-accent-400" id="form-title">Buat Tugas Baru</h2>
+                <form onsubmit="handleAssignmentSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="t-id"> <!-- Hidden ID for Edit Mode -->
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Judul Tugas</label>
+                        <input type="text" id="t-title"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi</label>
+                        <textarea id="t-desc"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
+                            required></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Pengerjaan / Info</label>
+                            <input type="text" id="t-sub"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                                placeholder="https://..." required>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Deadline</label>
+                            <input type="datetime-local" id="t-deadline"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500 text-slate-100"
+                                required>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-submit-task"
+                            class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
+                            Publish Tugas
+                        </button>
+                        <button type="button" onclick="resetTaskForm()" id="btn-cancel-edit"
+                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
+                            Batal Edit
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- List Tugas -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <h2 class="font-semibold mb-4 text-slate-300">Daftar Tugas Aktif</h2>
+                <div id="admin-tugas-list" class="space-y-2">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Manajemen Berita (News) -->
+        <section id="section-berita" class="space-y-6 hidden">
+            <h1 class="text-2xl font-bold mb-6">Manajemen Berita</h1>
+
+            <!-- Form Buat Berita -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                <h2 class="font-semibold mb-4 text-accent-400" id="news-form-title">Buat Berita / Pengumuman</h2>
+                <form onsubmit="handleAnnouncementSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="n-id"> <!-- Hidden ID -->
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Judul Berita</label>
+                        <input type="text" id="n-title"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                            required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Tipe</label>
+                            <select id="n-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                                <option value="info">Info (Biru)</option>
+                                <option value="warning">Penting (Kuning)</option>
+                                <option value="urgent">Mendesak (Merah)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Penulis</label>
+                            <input type="text" id="n-author"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="Tim Dosen"
+                                required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Konten Berita</label>
+                        <textarea id="n-content"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
+                            required></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-submit-news"
+                            class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
+                            Posting Berita
+                        </button>
+                        <button type="button" onclick="resetNewsForm()" id="btn-cancel-news"
+                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
+                            Batal Edit
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- List Berita -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <h2 class="font-semibold mb-4 text-slate-300">Daftar Berita Aktif</h2>
+                <div id="admin-news-list" class="space-y-3">
+                    <!-- Injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Manajemen Mahasiswa -->
+        <section id="section-mahasiswa" class="space-y-6 hidden">
+            <h1 class="text-2xl font-bold mb-6">Manajemen Mahasiswa</h1>
+
+            <!-- Add Student Form -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                <h2 class="font-semibold mb-4 text-emerald-400">Tambah Mahasiswa</h2>
+                <form onsubmit="addStudent(event)" class="flex gap-4 items-end">
+                    <div class="flex-1">
+                        <label class="block text-xs uppercase text-slate-500 mb-1">NIM</label>
+                        <input type="text" id="s-nim"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                    </div>
+                    <div class="flex-[2]">
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Nama Lengkap</label>
+                        <input type="text" id="s-name"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Kode Akses</label>
+                        <input type="text" id="s-code"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                    </div>
+                    <button type="submit"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded mb-px">Tambah</button>
+                </form>
+            </div>
+
+            <!-- Student List -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-400">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
+                            <tr>
+                                <th class="px-4 py-3">NIM</th>
+                                <th class="px-4 py-3">Nama</th>
+                                <th class="px-4 py-3">Kode Akses</th>
+                                <th class="px-4 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body" class="divide-y divide-slate-700">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Manajemen Modul -->
+        <section id="section-modul" class="space-y-6 hidden">
+            <h1 class="text-2xl font-bold mb-6">Manajemen Modul</h1>
+
+            <!-- Form Buat/Edit Modul -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                <h2 class="font-semibold mb-4 text-blue-400" id="modul-form-title">Tambah Modul Baru</h2>
+                <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="m-id">
+                    <div class="grid grid-cols-6 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Minggu Ke-</label>
+                            <input type="number" id="m-week"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                        </div>
+                        <div class="col-span-5">
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Topik / Judul</label>
+                            <input type="text" id="m-topic"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi Singkat</label>
+                        <textarea id="m-desc"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-20"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Rumus Penting (LaTeX)</label>
+                        <input type="text" id="m-formula"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                            placeholder="e.g. $$E=mc^2$$">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Slide (PDF)</label>
+                            <input type="text" id="m-slide"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Rekaman</label>
+                            <input type="text" id="m-rec"
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-submit-modul"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Simpan
+                            Modul</button>
+                        <button type="button" onclick="resetModulForm()" id="btn-cancel-modul"
+                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">Batal</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Module List -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <div class="space-y-3" id="admin-modul-list">
+                    <!-- Injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Manajemen Presensi -->
+        <section id="section-presensi" class="space-y-6 hidden">
+            <h1 class="text-2xl font-bold mb-6">Manajemen Presensi</h1>
+
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Pertemuan Ke-</label>
+                        <select id="a-meet-code" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                            <!-- JS will populate 1-1 to 16-2 -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-slate-500 bg-slate-900">
+                            <tr>
+                                <th class="p-3">Nama Mahasiswa</th>
+                                <th class="p-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="absen-table-body" class="divide-y divide-slate-700">
+                            <!-- JS populates students -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="saveAttendanceBatch()"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded font-medium">Simpan
+                        Perubahan</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Input Keaktifan -->
+        <section id="section-keaktifan" class="space-y-6 hidden">
+            <h1 class="text-2xl font-bold mb-6">Input Poin Keaktifan</h1>
+
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 max-w-xl">
+                <form onsubmit="addPoints(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Pilih Mahasiswa</label>
+                        <select id="k-student"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                            <option value="">-- Cari Nama --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tambahan</label>
+                        <input type="number" id="k-points"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="10" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Keterangan / Pertanyaan</label>
+                        <input type="text" id="k-note"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                            placeholder="e.g. Bertanya tentang tensor" required>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded font-medium">Berikan
+                        Poin</button>
+                </form>
+            </div>
+
+            <!-- List Poin Log (New Feature: Edit/Delete) -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mt-6">
+                <h2 class="font-semibold mb-4 text-slate-300">Riwayat Poin Terakhir</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-400">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
+                            <tr>
+                                <th class="px-4 py-3">Nama</th>
+                                <th class="px-4 py-3">Poin</th>
+                                <th class="px-4 py-3">Catatan</th>
+                                <th class="px-4 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poin-log-body" class="divide-y divide-slate-700">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // --- Navigation ---
+        function showSection(id) {
+            ['tugas', 'berita', 'presensi', 'keaktifan', 'mahasiswa', 'modul'].forEach(sec => {
+                document.getElementById(`section-${sec}`).classList.add('hidden');
+                document.getElementById(`nav-${sec}`).classList.remove('tab-active', 'text-accent-400');
+                document.getElementById(`nav-${sec}`).classList.add('text-slate-400');
+            });
+            document.getElementById(`section-${id}`).classList.remove('hidden');
+            document.getElementById(`nav-${id}`).classList.add('tab-active');
+            document.getElementById(`nav-${id}`).classList.remove('text-slate-400');
+        }
+
+        function logout() {
+            localStorage.removeItem('user_session');
+            window.location.href = 'login.html';
+        }
+
+        // --- Logic ---
+        let allStudents = [];
+
+        async function initAdmin() {
+            // Populate Meeting Codes
+            const meetSelect = document.getElementById('a-meet-code');
+            for (let w = 1; w <= 16; w++) {
+                for (let s = 1; s <= 2; s++) {
+                    const opt = document.createElement('option');
+                    opt.value = `${w}-${s}`;
+                    opt.text = `Minggu ${w} - Pertemuan ${s}`;
+                    meetSelect.appendChild(opt);
+                }
+            }
+
+            // Fetch Students
+            const { data, error } = await supabaseClient.from('students').select('*').order('name');
+            if (data) {
+                allStudents = data;
+                renderAbsenTable();
+
+                // Populate Keaktifan Select
+                const kSelect = document.getElementById('k-student');
+                data.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.nim;
+                    opt.text = `${s.name} (${s.nim})`;
+                    kSelect.appendChild(opt);
+                });
+            }
+
+
+
+            loadAssignmentsAdmin();
+            loadStudentsAdmin();
+            loadModulesAdmin();
+            loadAssignmentsAdmin();
+            loadAnnouncementsAdmin();
+            loadStudentsAdmin();
+            loadModulesAdmin();
+            loadPointLogs();
+        }
+
+        // --- News Management ---
+        async function loadAnnouncementsAdmin() {
+            const list = document.getElementById('admin-news-list');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('announcements')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (data) {
+                    list.innerHTML = data.map(n => `
+                        <div class="flex justify-between items-start bg-slate-900 border border-slate-700 p-4 rounded group">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-sm font-bold text-white">${n.title}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded uppercase font-bold 
+                                        ${n.type === 'urgent' ? 'bg-red-500/20 text-red-400' : n.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/20 text-blue-400'}">
+                                        ${n.type}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 line-clamp-1">${n.content}</p>
+                                <span class="text-[10px] text-slate-600">${new Date(n.created_at).toLocaleDateString()} oleh ${n.author}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editAnnouncement('${n.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAnnouncement('${n.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function handleAnnouncementSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('n-id').value;
+            const title = document.getElementById('n-title').value;
+            const content = document.getElementById('n-content').value;
+            const type = document.getElementById('n-type').value;
+            const author = document.getElementById('n-author').value;
+
+            const payload = { title, content, type, author, is_active: true };
+
+            let error;
+            if (id) {
+                // Update
+                const { error: err } = await supabaseClient.from('announcements').update(payload).eq('id', id);
+                error = err;
+            } else {
+                // Insert
+                const { error: err } = await supabaseClient.from('announcements').insert([payload]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Berita berhasil diupdate!' : 'Berita berhasil diposting!');
+                resetNewsForm();
+                loadAnnouncementsAdmin();
+            }
+        }
+
+        async function editAnnouncement(id) {
+            const { data } = await supabaseClient.from('announcements').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('n-id').value = data.id;
+                document.getElementById('n-title').value = data.title;
+                document.getElementById('n-content').value = data.content;
+                document.getElementById('n-type').value = data.type;
+                document.getElementById('n-author').value = data.author;
+
+                document.getElementById('news-form-title').innerText = 'Edit Berita';
+                document.getElementById('btn-submit-news').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-news').classList.remove('hidden');
+                document.getElementById('n-title').focus();
+            }
+        }
+
+        function resetNewsForm() {
+            document.querySelector('#section-berita form').reset();
+            document.getElementById('n-id').value = '';
+            document.getElementById('news-form-title').innerText = 'Buat Berita / Pengumuman';
+            document.getElementById('btn-submit-news').innerText = 'Posting Berita';
+            document.getElementById('btn-cancel-news').classList.add('hidden');
+        }
+
+        async function deleteAnnouncement(id) {
+            if (confirm('Hapus berita ini?')) {
+                await supabaseClient.from('announcements').delete().eq('id', id);
+                loadAnnouncementsAdmin();
+            }
+        }
+
+        // ... [Assignments] ...
+
+        // ... [Students] ...
+        // ... [Modules] ...
+
+        // 3. Participation Logic
+        async function loadPointLogs() {
+            const { data: logs, error } = await supabaseClient
+                .from('participation_logs')
+                .select('*, students(name)')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            const tbody = document.getElementById('poin-log-body');
+            if (logs) {
+                tbody.innerHTML = logs.map(log => `
+                    <tr class="hover:bg-slate-800/50">
+                        <td class="px-4 py-3 text-white">${log.students?.name || log.student_nim}</td>
+                        <td class="px-4 py-3 text-emerald-400 font-bold">+${log.points}</td>
+                        <td class="px-4 py-3 text-slate-500 italic">${log.note}</td>
+                        <td class="px-4 py-3 text-right">
+                             <button onclick="deletePointLog('${log.id}')" class="text-red-400 hover:text-red-300" title="Hapus Poin"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                 `).join('');
+            }
+        }
+
+        async function addPoints(e) {
+            e.preventDefault();
+            const nim = document.getElementById('k-student').value;
+            const pts = document.getElementById('k-points').value;
+            const note = document.getElementById('k-note').value;
+
+            if (!nim) return alert('Pilih mahasiswa dulu!');
+
+            const { error } = await supabaseClient.from('participation_logs').insert([{
+                student_nim: nim,
+                points: parseInt(pts),
+                note: note
+            }]);
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert('Poin berhasil ditambahkan!');
+                e.target.reset();
+                loadPointLogs(); // Refresh log
+            }
+        }
+
+        async function deletePointLog(id) {
+            if (confirm('Hapus log poin ini? Poin mahasiswa akan berkurang.')) {
+                await supabaseClient.from('participation_logs').delete().eq('id', id);
+                loadPointLogs();
+            }
+        }
+        async function handleAssignmentSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('t-id').value;
+            const title = document.getElementById('t-title').value;
+            const desc = document.getElementById('t-desc').value;
+            const sub = document.getElementById('t-sub').value; // submission_link
+            const deadline = document.getElementById('t-deadline').value;
+
+            const payload = {
+                title,
+                description: desc,
+                submission_link: sub,
+                deadline: new Date(deadline).toISOString(),
+                is_active: true
+            };
+
+            let error;
+            if (id) {
+                // Update
+                const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id);
+                error = err;
+            } else {
+                // Create
+                const { error: err } = await supabaseClient.from('assignments').insert([payload]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Tugas berhasil diupdate!' : 'Tugas berhasil dibuat!');
+                resetTaskForm();
+                loadAssignmentsAdmin();
+            }
+        }
+
+        async function editAss(id) {
+            const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('t-id').value = data.id;
+                document.getElementById('t-title').value = data.title;
+                document.getElementById('t-desc').value = data.description;
+                document.getElementById('t-sub').value = data.submission_link || '';
+                // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+                const d = new Date(data.deadline);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+
+                document.getElementById('form-title').innerText = 'Edit Tugas';
+                document.getElementById('btn-submit-task').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-edit').classList.remove('hidden');
+                document.getElementById('t-title').focus();
+            }
+        }
+
+        function resetTaskForm() {
+            document.querySelector('#section-tugas form').reset();
+            document.getElementById('t-id').value = '';
+            document.getElementById('form-title').innerText = 'Buat Tugas Baru';
+            document.getElementById('btn-submit-task').innerText = 'Publish Tugas';
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
+
+        async function loadAssignmentsAdmin() {
+            const { data } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
+            const list = document.getElementById('admin-tugas-list');
+            list.innerHTML = data.map(t => `
+                <div class="flex justify-between items-center bg-slate-900 border border-slate-700 p-3 rounded">
+                    <div>
+                        <div class="font-bold flex items-center gap-2">
+                            ${t.title}
+                            <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
+                        </div>
+                        <div class="text-xs text-slate-500">${new Date(t.deadline).toLocaleDateString()}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editAss('${t.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteAss('${t.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Student Management Logic
+        async function loadStudentsAdmin() {
+            const { data } = await supabaseClient.from('students').select('*').order('name');
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = data.map(s => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="px-4 py-3 font-mono text-slate-300">${s.nim}</td>
+                    <td class="px-4 py-3 font-bold text-white">${s.name}</td>
+                    <td class="px-4 py-3 font-mono text-emerald-400 tracking-wider">${s.access_code}</td>
+                    <td class="px-4 py-3 text-right">
+                         <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            const nim = document.getElementById('s-nim').value;
+            const name = document.getElementById('s-name').value;
+            const code = document.getElementById('s-code').value;
+
+            const { error } = await supabaseClient.from('students').insert([{ nim, name, access_code: code }]);
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert('Mahasiswa berhasil ditambahkan.');
+                e.target.reset();
+                loadStudentsAdmin();
+                initAdmin(); // Refresh helper lists
+            }
+        }
+
+        async function deleteStudent(nim) {
+            if (confirm(`Hapus mahasiswa NIM ${nim}?`)) {
+                await supabaseClient.from('students').delete().eq('nim', nim);
+                loadStudentsAdmin();
+            }
+        }
+
+        async function deleteAss(id) {
+            if (confirm('Hapus tugas ini?')) {
+                await supabaseClient.from('assignments').delete().eq('id', id);
+                loadAssignmentsAdmin();
+            }
+        }
+
+        // 2. Attendance Logic
+        function renderAbsenTable() {
+            const tbody = document.getElementById('absen-table-body');
+            tbody.innerHTML = allStudents.map(s => `
+                <tr>
+                    <td class="p-3 border-b border-slate-700">${s.name}</td>
+                    <td class="p-3 border-b border-slate-700 text-center">
+                        <select class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs absen-input" data-nim="${s.nim}">
+                            <option value="">- Belum Input -</option>
+                            <option value="Hadir">Hadir</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Alfa">Alfa</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveAttendanceBatch() {
+            const meetingCode = document.getElementById('a-meet-code').value;
+            const inputs = document.querySelectorAll('.absen-input');
+            const upserts = [];
+
+            inputs.forEach(input => {
+                if (input.value) {
+                    upserts.push({
+                        student_nim: input.dataset.nim,
+                        meeting_code: meetingCode,
+                        status: input.value
+                    });
+                }
+            });
+
+            const { error } = await supabaseClient.from('attendance_logs').upsert(upserts, { onConflict: 'student_nim, meeting_code' });
+
+            if (error) alert('Gagal menyimpan: ' + error.message);
+            else alert('Presensi berhasil disimpan!');
+        }
+
+        // 3. Participation Logic
+        async function addPoints(e) {
+            e.preventDefault();
+            const nim = document.getElementById('k-student').value;
+            const pts = document.getElementById('k-points').value;
+            const note = document.getElementById('k-note').value;
+
+            if (!nim) return alert('Pilih mahasiswa dulu!');
+
+            const { error } = await supabaseClient.from('participation_logs').insert([{
+                student_nim: nim,
+                points: parseInt(pts),
+                note: note
+            }]);
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert('Poin berhasil ditambahkan!');
+                e.target.reset();
+            }
+        }
+
+        // 4. Module Management Logic
+        async function loadModulesAdmin() {
+            const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+            const list = document.getElementById('admin-modul-list');
+
+            if (!data || data.length === 0) list.innerHTML = '<p class="text-slate-500 italic">Belum ada modul.</p>';
+            else {
+                list.innerHTML = data.map(m => `
+                    <div class="glass-card p-4 flex items-center justify-between group">
+                        <div class="flex items-center gap-4">
+                            <span class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-sm">${m.week}</span>
+                            <div>
+                                <h4 class="font-bold text-slate-200">${m.topic}</h4>
+                                <span class="text-xs ${m.is_visible ? 'text-emerald-400' : 'text-slate-500'}">
+                                    <i class="fa-solid fa-eye${m.is_visible ? '' : '-slash'} mr-1"></i>
+                                    ${m.is_visible ? 'Ditampilkan' : 'Disembunyikan'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- Toggle Switch -->
+                            <label class="relative inline-flex items-center cursor-pointer mr-2">
+                                <input type="checkbox" onclick="toggleModulVisibility('${m.id}', this.checked)" class="sr-only peer" ${m.is_visible ? 'checked' : ''}>
+                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                            
+                            <button onclick="editModul('${m.id}')" class="p-2 text-blue-400 hover:bg-blue-500/10 rounded"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteModul('${m.id}')" class="p-2 text-red-400 hover:bg-red-500/10 rounded"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function handleModuleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('m-id').value;
+            const payload = {
+                week: document.getElementById('m-week').value,
+                topic: document.getElementById('m-topic').value,
+                description: document.getElementById('m-desc').value,
+                formula: document.getElementById('m-formula').value,
+                link_slide: document.getElementById('m-slide').value,
+                link_recording: document.getElementById('m-rec').value
+            };
+
+            let error;
+            if (id) {
+                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('modules').insert([{ ...payload, is_visible: true }]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Modul diupdate!' : 'Modul dibuat!');
+                resetModulForm();
+                loadModulesAdmin();
+            }
+        }
+
+        async function editModul(id) {
+            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('m-id').value = data.id;
+                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-topic').value = data.topic;
+                document.getElementById('m-desc').value = data.description;
+                document.getElementById('m-formula').value = data.formula;
+                document.getElementById('m-slide').value = data.link_slide;
+                document.getElementById('m-rec').value = data.link_recording;
+
+                document.getElementById('modul-form-title').innerText = 'Edit Modul';
+                document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-modul').classList.remove('hidden');
+                document.getElementById('m-week').focus();
+            }
+        }
+
+        async function toggleModulVisibility(id, status) {
+            const { error } = await supabaseClient.from('modules').update({ is_visible: status }).eq('id', id);
+            if (error) alert('Gagal update visibility');
+            else loadModulesAdmin(); // Refresh UI
+        }
+
+        async function deleteModul(id) {
+            if (confirm('Hapus modul ini?')) {
+                const { error } = await supabaseClient.from('modules').delete().eq('id', id);
+                if (error) alert('Gagal hapus');
+                else loadModulesAdmin();
+            }
+        }
+
+        function resetModulForm() {
+            document.querySelector('#section-modul form').reset();
+            document.getElementById('m-id').value = '';
+            document.getElementById('modul-form-title').innerText = 'Tambah Modul Baru';
+            document.getElementById('btn-submit-modul').innerText = 'Simpan Modul';
+            document.getElementById('btn-cancel-modul').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', initAdmin);
+    </script>
+</body>
+
+</html>

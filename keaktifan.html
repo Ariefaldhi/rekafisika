@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keaktifan | KawanFismat</title>
+    <!-- Fonts, Tailwind, FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bg-abstract {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #FDE68A 0%, #D97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #FDBA74 0%, #B45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="flex items-center gap-2">
+                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
+                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
+                </a>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="tugas.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
+                        <a href="presensi.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
+                        <a href="keaktifan.html"
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Keaktifan</a>
+                        <a href="modul.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
+                        <a href="profil.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full flex-grow">
+        <div class="text-center mb-12">
+            <span
+                class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-wider border border-purple-500/20 mb-4 inline-block">Wall
+                of Fame</span>
+            <h1 class="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                Papan Keaktifan</h1>
+            <p class="text-slate-400 max-w-lg mx-auto">Apresiasi untuk mahasiswa yang aktif berdiskusi bertanya, dan
+                menjawab di kelas Fisika Matematika I.</p>
+        </div>
+
+        <!-- Podium Section (Top 3) -->
+        <div id="podium-container"
+            class="flex flex-col md:flex-row items-end justify-center gap-6 mb-16 h-auto md:h-80 opacity-0 animate-slide-up">
+            <!-- Loading -->
+            <div class="w-full text-center text-slate-500 animate-pulse">Memuat Top Students...</div>
+        </div>
+
+        <!-- Leaderboard List (Rank 4+) -->
+        <div
+            class="glass-card rounded-xl overflow-hidden border border-slate-700/50 opacity-0 animate-[slideUp_0.5s_ease-out_0.3s_forwards]">
+            <div class="p-4 bg-slate-900/50 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="font-bold text-slate-300">Peringkat Lainnya</h3>
+                <span class="text-xs text-slate-500 uppercase tracking-widest">Update Real-time</span>
+            </div>
+            <div id="leaderboard-list"
+                class="divide-y divide-slate-800/50 max-h-[500px] overflow-y-auto custom-scrollbar">
+                <!-- Injected -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
+        <p class="text-slate-400 text-sm">&copy; 2026 KawanFismat.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        async function loadParticipation() {
+            if (!supabaseClient) return;
+            const podiumContainer = document.getElementById('podium-container');
+            const listContainer = document.getElementById('leaderboard-list');
+
+            try {
+                // Fetch Students & Logs
+                const { data: students } = await supabaseClient.from('students').select('nim, name');
+                const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+
+                if (!students || !logs) {
+                    podiumContainer.innerHTML = '<div class="text-red-400">Gagal memuat data.</div>';
+                    return;
+                }
+
+                // Calculate Totals
+                const leaderboard = students.map(student => {
+                    const totalPoints = logs
+                        .filter(log => log.student_nim === student.nim)
+                        .reduce((sum, log) => sum + (log.points || 0), 0);
+                    return { ...student, totalPoints };
+                });
+
+                // Sort: Points DESC, then Name ASC (for ties)
+                leaderboard.sort((a, b) => {
+                    if (b.totalPoints !== a.totalPoints) {
+                        return b.totalPoints - a.totalPoints;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
+                // Show ALL students (removed the > 0 filter)
+                const activeStudents = leaderboard;
+
+                // --- Render Podium (Top 3) ---
+                const top3 = activeStudents.slice(0, 3);
+
+                // Helper to create Podium Item
+                const createPodium = (student, rank) => {
+                    if (!student) return `<div class="w-full md:w-1/3 h-40"></div>`; // Spacer for missing ranks
+
+                    let heightClass = rank === 1 ? 'h-64 md:h-80 order-1 md:order-2' :
+                        rank === 2 ? 'h-56 md:h-64 order-2 md:order-1' :
+                            'h-48 md:h-56 order-3 md:order-3'; // Rank 3
+
+                    let colorClass = rank === 1 ? 'from-yellow-400/20 to-yellow-600/10 border-yellow-500/50 shadow-yellow-500/10' :
+                        rank === 2 ? 'from-slate-300/20 to-slate-500/10 border-slate-400/50 shadow-slate-500/10' :
+                            'from-orange-400/20 to-orange-600/10 border-orange-500/50 shadow-orange-500/10';
+
+                    let iconColor = rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-slate-300' : 'text-orange-400';
+                    let rankTitle = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
+                    let animate = rank === 1 ? 'animate-float' : '';
+
+                    return `
+                        <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass}">
+                            <!-- Crown for #1 -->
+                            ${rank === 1 ? '<div class="absolute -top-12 text-5xl text-yellow-400 animate-bounce"><i class="fa-solid fa-crown"></i></div>' : ''}
+                            
+                            <div class="w-full h-full bg-gradient-to-b ${colorClass} rounded-t-xl border-t border-x p-6 flex flex-col items-center justify-end relative backdrop-blur-sm transition-all hover:bg-white/5 group">
+                                <div class="absolute top-4 text-xs font-bold tracking-widest uppercase ${iconColor} opacity-50">Rank ${rank}</div>
+                                
+                                <div class="text-center mb-4 z-10 ${animate}">
+                                    <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1">${student.name}</h3>
+                                    <p class="text-xs text-slate-400 font-mono mb-2">${student.nim}</p>
+                                    <div class="inline-flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700">
+                                        <i class="fa-solid fa-bolt ${iconColor}"></i>
+                                        <span class="font-bold text-lg md:text-2xl text-white font-mono">${student.totalPoints}</span>
+                                    </div>
+                                </div>
+                                <div class="w-full h-2 bg-${rank === 1 ? 'yellow' : rank === 2 ? 'slate' : 'orange'}-500/20 rounded-full mt-2"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (top3.length > 0) {
+                    podiumContainer.innerHTML = [
+                        createPodium(top3[1], 2), // 2nd (Left)
+                        createPodium(top3[0], 1), // 1st (Center)
+                        createPodium(top3[2], 3)  // 3rd (Right)
+                    ].join('');
+                } else {
+                    podiumContainer.innerHTML = '<div class="w-full text-center text-slate-500 italic">Belum ada data keaktifan.</div>';
+                }
+
+                // --- Render List (Rank 4+) ---
+                const rest = activeStudents.slice(3);
+                if (rest.length > 0) {
+                    listContainer.innerHTML = rest.map((s, idx) => `
+                        <div class="flex items-center p-4 hover:bg-slate-800/30 transition-colors group">
+                            <div class="w-12 text-center text-slate-500 font-bold text-lg">#${idx + 4}</div>
+                            <div class="flex-1 px-4">
+                                <div class="font-semibold text-slate-300 group-hover:text-white transition-colors">${s.name}</div>
+                                <div class="text-xs text-slate-500">${s.nim}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-mono font-bold text-slate-400 group-hover:text-accent-400 transition-colors">${s.totalPoints} pts</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listContainer.innerHTML = `
+                        <div class="p-8 text-center text-slate-500">
+                            <i class="fa-solid fa-users-slash text-4xl mb-4 opacity-50"></i>
+                            <p>Belum ada mahasiswa lain di peringkat ini.</p>
+                        </div>
+                    `;
+                }
+
+            } catch (err) {
+                console.error(err);
+                podiumContainer.innerHTML = '<p class="text-red-400 text-center">Terjadi kesalahan memuat data.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadParticipation);
+    </script>
+</body>
+
+</html>

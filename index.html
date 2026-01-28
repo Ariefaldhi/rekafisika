@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KawanFismat | Fisika Matematika I</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            400: '#22d3ee', // cyan-400
+                            500: '#06b6d4', // cyan-500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Abstract Background */
+        .bg-abstract {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Accordion Transition */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+            /* Arbitrary large height */
+        }
+    </style>
+</head>
+
+<body class="bg-abstract text-slate-100 font-inter relative min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
+                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <!-- Student Menu (Default Hidden, shown by JS) -->
+                    <div id="nav-student" class="hidden ml-10 flex items-baseline space-x-8">
+                        <a href="index.html"
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Beranda</a>
+                        <a href="tugas.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
+                        <a href="presensi.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
+                        <a href="keaktifan.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
+                        <a href="modul.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
+                        <a href="profil.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
+                    </div>
+
+                    <!-- Guest Menu -->
+                    <div id="nav-guest" class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html"
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Beranda</a>
+                        <a href="panduan.html"
+                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Panduan</a>
+                        <a href="login.html"
+                            class="px-4 py-2 rounded-md text-sm font-bold bg-gradient-to-r from-accent-500 to-blue-600 text-white hover:from-accent-400 hover:to-blue-500 transition-all shadow shadow-accent-500/20">
+                            Login <i class="fa-solid fa-right-to-bracket ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
+                        aria-controls="mobile-menu" aria-expanded="false"
+                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <!-- Student Mobile -->
+            <div id="mobile-nav-student" class="hidden px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html"
+                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
+                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
+                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
+                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
+                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
+            </div>
+            <!-- Guest Mobile -->
+            <div id="mobile-nav-guest" class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html"
+                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="panduan.html" class="block px-3 py-2 rounded-md text-base font-medium">Panduan Website</a>
+                <a href="login.html"
+                    class="block px-3 py-2 rounded-md text-base font-bold text-accent-400 bg-slate-800/50 mt-2 border border-slate-700">Masuk
+                    / Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home"
+        class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left space-y-6">
+            <div
+                class="inline-block px-4 py-1.5 rounded-full bg-accent-500/10 border border-accent-500/20 text-accent-400 text-sm font-semibold mb-2">
+                Pendidikan Fisika UPI 2025
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+                Fisika <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-blue-500">Matematika
+                    I</span>
+            </h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-2xl">
+                Mengeksplorasi fondasi matematika alam semesta fisik.
+                Platform pembelajaran terintegrasi untuk mahasiswa Fisika.
+            </p>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start pt-4 text-sm text-slate-300">
+                <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-chalkboard-user text-accent-400"></i>
+                    <span>Dosen: <strong class="text-white">Dr. Achmad Samsudin, S.Pd., M.Pd.</strong></span>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-user-graduate text-accent-400"></i>
+                    <span>PJ: <strong class="text-white">Faldhi Muhammad Ariefaldhi</strong></span>
+                </div>
+            </div>
+
+            <div class="pt-8">
+                <!-- CTA Button -->
+                <a href="panduan.html"
+                    class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-slate-900 bg-accent-400 hover:bg-accent-500 transition-all shadow-lg shadow-accent-500/20">
+                    Panduan Website
+                    <i class="fa-solid fa-book-open ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Smart Countdown Widget -->
+        <div class="w-full md:w-auto flex-shrink-0" id="schedule">
+            <!-- Content will be handled by JS (Guest will see Generic, Student see real) -->
+            <div
+                class="glass-card rounded-2xl p-6 md:p-8 max-w-sm mx-auto md:mx-0 w-full relative overflow-hidden group">
+                <h3 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-accent-400"></i> Kelas Berikutnya:
+                </h3>
+                <div class="grid grid-cols-4 gap-2 text-center mb-6">
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-days" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Hari</span>
+                    </div>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-hours" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Jam</span>
+                    </div>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-mins" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Mnt</span>
+                    </div>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-secs" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Dtk</span>
+                    </div>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center py-2 border-b border-slate-700/50 gap-4">
+                        <span class="text-slate-400">Ruangan</span>
+                        <span id="next-room"
+                            class="font-mono bg-accent-500/20 text-accent-300 px-2 py-0.5 rounded text-right">...</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 gap-4">
+                        <span class="text-slate-400 shrink-0">Hari & Waktu</span>
+                        <span id="next-time" class="text-slate-200 text-right font-medium">...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News/Announcements Section -->
+    <section id="news-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 hidden">
+        <div class="flex items-center gap-3 mb-6">
+            <h2 class="text-2xl font-bold text-white">Berita & Pengumuman</h2>
+            <span
+                class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/30">Terbaru</span>
+        </div>
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- News injected via JS -->
+            <div class="col-span-full text-center py-12 text-slate-500">
+                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>Memuat berita...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Assignment Section (Active) - Hidden for Guest -->
+    <section id="assignment-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 hidden">
+        <div class="flex items-center gap-3 mb-6">
+            <h2 class="text-2xl font-bold text-white">Tugas Perkuliahan</h2>
+            <span
+                class="px-2 py-0.5 rounded-full bg-accent-500/10 text-accent-400 text-xs font-bold border border-accent-500/20">Wajib</span>
+        </div>
+        <div id="assignment-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Injected by JS -->
+            <div class="col-span-full text-center py-12 text-slate-500">
+                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>Memuat tugas...</p>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Resources Section -->
+    <section id="resources" class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30 w-full">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-12 text-center">Sumber Belajar</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <a href="#"
+                    class="group glass-card p-6 rounded-xl hover:border-accent-500/50 transition-all hover:-translate-y-1 block">
+                    <div
+                        class="h-12 w-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-colors">
+                        <i class="fa-brands fa-google-drive text-2xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Google Drive Kelas</h3>
+                    <p class="text-slate-400 text-sm">Akses slide kuliah, ujian lalu, dan materi tambahan.</p>
+                </a>
+
+                <!-- Card 2 -->
+                <a href="#"
+                    class="group glass-card p-6 rounded-xl hover:border-accent-500/50 transition-all hover:-translate-y-1 block">
+                    <div
+                        class="h-12 w-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-500/30 transition-colors">
+                        <i class="fa-solid fa-book-open text-2xl text-emerald-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Buku Referensi</h3>
+                    <p class="text-slate-400 text-sm">Mathematical Methods in the Physical Sciences oleh Mary L. Boas.
+                    </p>
+                </a>
+
+                <!-- Card 3 -->
+                <a href="#"
+                    class="group glass-card p-6 rounded-xl hover:border-accent-500/50 transition-all hover:-translate-y-1 block">
+                    <div
+                        class="h-12 w-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-500/30 transition-colors">
+                        <i class="fa-solid fa-file-arrow-up text-2xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Submit Tugas</h3>
+                    <p class="text-slate-400 text-sm">Unggah tugas mingguan dan pekerjaan rumah Anda di sini.</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta dilindungi.</p>
+            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
+                Dibuat dengan <i class="fa-solid fa-code text-accent-500"></i> & <i
+                    class="fa-solid fa-atom text-accent-500"></i>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript logic -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // --- Load Announcements (Berita) ---
+        async function loadAnnouncements() {
+            const container = document.getElementById('news-grid');
+            const section = document.getElementById('news-section');
+
+            // Guest check logic is handled in updateViewMode, but we double check here
+            if (section.classList.contains('hidden')) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('announcements')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                container.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(news => {
+                        const date = new Date(news.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                        const typeClass = news.type === 'urgent' ? 'border-red-500/50 bg-red-900/10' :
+                            news.type === 'warning' ? 'border-yellow-500/50 bg-yellow-900/10' :
+                                'border-slate-700/50 bg-slate-800/20';
+                        const icon = news.type === 'urgent' ? '<i class="fa-solid fa-circle-exclamation text-red-400"></i>' :
+                            news.type === 'warning' ? '<i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>' :
+                                '<i class="fa-solid fa-circle-info text-accent-400"></i>';
+
+                        const card = `
+                            <div class="glass-card p-6 rounded-xl border ${typeClass} hover:-translate-y-1 transition-transform">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="flex items-center gap-2">
+                                        ${icon}
+                                        <span class="text-xs font-mono text-slate-400">${date}</span>
+                                    </div>
+                                    <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-300 border border-slate-700">${news.author}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white mb-2">${news.title}</h3>
+                                <p class="text-slate-300 text-sm leading-relaxed">${news.content}</p>
+                            </div>
+                        `;
+                        container.innerHTML += card;
+                    });
+                } else {
+                    container.innerHTML = `<p class="text-slate-500 col-span-full text-center italic">Belum ada berita terbaru.</p>`;
+                }
+            } catch (err) {
+                console.error('News Error:', err);
+            }
+        }
+
+        // --- Fetch & Display Active Assignment (Tugas) ---
+        async function loadActiveAssignment() {
+            const container = document.getElementById('assignment-grid');
+            const user = typeof checkAuth === 'function' ? checkAuth() : null;
+            const isStudent = !!user;
+
+            // Loading State (handled by HTML init, but good to have safety)
+            if (!container) return;
+
+            if (!window.isSupabaseReady) {
+                document.addEventListener('supabaseReady', loadActiveAssignment, { once: true });
+                return;
+            }
+
+            try {
+                const nowISO = new Date().toISOString();
+
+                // Fetch Active Tasks (Limit 3)
+                const { data, error } = await supabaseClient
+                    .from('assignments')
+                    .select('*')
+                    .eq('is_active', true)
+                    .gt('deadline', nowISO)
+                    .order('deadline', { ascending: true })
+                    .limit(3);
+
+                if (error) throw error;
+
+                container.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    // Check student status per task (optional, for now just show open tasks)
+                    if (isStudent) {
+                        data.forEach(tugas => {
+                            const deadlineDate = new Date(tugas.deadline);
+                            const card = `
+                                <div class="glass-card rounded-xl p-6 border border-slate-700/50 hover:border-accent-500/50 transition-all hover:-translate-y-1 group relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <i class="fa-solid fa-rocket text-6xl text-accent-500"></i>
+                                    </div>
+                                    <div class="relative z-10">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <span class="px-2 py-1 rounded bg-slate-800 text-xs text-slate-300 border border-slate-700">Tugas</span>
+                                            <span class="text-xs font-mono text-accent-400"><i class="fa-regular fa-clock mr-1"></i>${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-white mb-2 line-clamp-1" title="${tugas.title}">${tugas.title}</h3>
+                                        <p class="text-slate-400 text-sm mb-6 line-clamp-2">${tugas.description}</p>
+                                        
+                                        <a href="tugas.html" class="block w-full text-center px-4 py-2 bg-slate-800 hover:bg-mid-slate-800 text-white rounded-lg border border-slate-700 hover:border-accent-500 transition-colors">
+                                            Lihat Detail
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            container.innerHTML += card;
+                        });
+                    } else {
+                        // Guest View (Show 1 generic card)
+                        container.innerHTML = `
+                            <div class="col-span-full glass-card rounded-xl p-8 border-l-4 border-slate-600 relative overflow-hidden text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-300 mb-1"><i class="fa-solid fa-lock mr-2"></i>Area Mahasiswa</h3>
+                                    <p class="text-slate-500 text-sm">Silakan login untuk melihat daftar tugas aktif.</p>
+                                </div>
+                                <a href="login.html" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-lg border border-slate-700 transition-colors">
+                                    Login Sekarang
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else if (isStudent) {
+                    container.innerHTML = `
+                        <div class="col-span-full glass-card rounded-xl p-8 text-center border border-slate-700/50">
+                            <i class="fa-solid fa-mug-hot text-4xl text-slate-600 mb-4"></i>
+                            <h3 class="text-lg font-bold text-slate-300">Tidak Ada Tugas Aktif</h3>
+                            <p class="text-slate-500 text-sm">Anda bebas tugas untuk saat ini. Selamat beristirahat!</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p class="col-span-full text-center text-red-400">Gagal memuat tugas.</p>`;
+            }
+        }
+
+        async function toggleTaskStatus(taskId, status) {
+            const user = checkAuth();
+            if (!user) return;
+
+            try {
+                // Upsert status
+                const { error } = await supabaseClient
+                    .from('student_task_status')
+                    .upsert({
+                        student_id: user.nim,
+                        assignment_id: taskId,
+                        is_completed: status,
+                        updated_at: new Date()
+                    }, { onConflict: 'student_id, assignment_id' });
+
+                if (error) throw error;
+                // Reload widget
+                loadActiveAssignment();
+            } catch (err) {
+                alert('Gagal update status: ' + err.message);
+            }
+        }
+
+        // --- View Logic (Guest vs Student) ---
+        function updateViewMode() {
+            // checkAuth() comes from config.js
+            const user = typeof checkAuth === 'function' ? checkAuth() : null;
+            const isStudent = !!user;
+
+            const navStudent = document.getElementById('nav-student');
+            const navGuest = document.getElementById('nav-guest');
+            const mobileNavStudent = document.getElementById('mobile-nav-student');
+            const mobileNavGuest = document.getElementById('mobile-nav-guest');
+            const assignmentSection = document.getElementById('assignment-section');
+            const newsSection = document.getElementById('news-section');
+
+            if (assignmentSection) assignmentSection.classList.remove('hidden'); // Always show container, content handled by loader
+
+            if (isStudent) {
+                // Show Student Menu
+                if (navStudent) navStudent.classList.remove('hidden');
+                if (navGuest) navGuest.classList.add('hidden');
+                if (mobileNavStudent) mobileNavStudent.classList.remove('hidden');
+                if (mobileNavGuest) mobileNavGuest.classList.add('hidden');
+
+                // Show News
+                if (newsSection) {
+                    newsSection.classList.remove('hidden');
+                    loadAnnouncements();
+                }
+            } else {
+                // Show Guest Menu
+                if (navStudent) navStudent.classList.add('hidden');
+                if (navGuest) navGuest.classList.remove('hidden');
+                if (mobileNavStudent) mobileNavStudent.classList.add('hidden');
+                if (mobileNavGuest) mobileNavGuest.classList.remove('hidden');
+
+                // Hide News
+                if (newsSection) newsSection.classList.add('hidden');
+
+                // Show Assignment Widget for Guest (Restricted View)
+                if (assignmentSection) assignmentSection.classList.remove('hidden');
+            }
+
+            // Always try to load assignment (it handles guest logic inside)
+            loadActiveAssignment();
+        }
+
+        // Init on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                updateViewMode();
+                updateCountdown(); // Always run countdown
+            });
+        } else {
+            updateViewMode();
+            updateCountdown();
+        }
+
+        // --- Data ---
+        const syllabusData = [
+            { week: 1, topic: "Sistem Koordinat & Bilangan Kompleks", desc: "Koordinat Polar, Silinder, Bola & Aljabar bilangan kompleks.", formula: "$$z = r(\\cos \\theta + i \\sin \\theta) = re^{i\\theta}$$" },
+            { week: 2, topic: "Deret & Fungsi Analitik", desc: "Deret tak hingga, deret Taylor, dan fungsi analitik.", formula: "$$f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!} (x-a)^n$$" },
+            { week: 3, topic: "Analisis Vektor", desc: "Gradien, Divergensi, Curl, dan Integrasi Vektor.", formula: "$$\\nabla \\cdot \\mathbf{F} = \\frac{\\partial F_x}{\\partial x} + \\frac{\\partial F_y}{\\partial y} + \\frac{\\partial F_z}{\\partial z}$$" },
+            { week: 4, topic: "Teorema Integral Vektor", desc: "Teorema Divergensi & Teorema Stokes.", formula: "$$\\oiint_S \\mathbf{F} \\cdot d\\mathbf{S} = \\iiint_V (\\nabla \\cdot \\mathbf{F}) \\, dV$$" },
+            { week: 5, topic: "Determinan & Matriks", desc: "Dasar-dasar aljabar linear untuk fisika.", formula: "$$\\det(A - \\lambda I) = 0$$" },
+            { week: 6, topic: "Persamaan Diferensial Biasa (PDB)", desc: "PDB orde satu dan dua.", formula: "$$\\frac{d^2y}{dx^2} + k^2y = 0$$" },
+            { week: 7, topic: "Transformasi Laplace", desc: "Menyelesaikan persamaan diferensial menggunakan transformasi Laplace.", formula: "$$\\mathcal{L}\\{f(t)\\} = \\int_0^\\infty f(t) e^{-st} dt$$" },
+            { week: 8, topic: "Evaluasi Tengah Semester (ETS)", desc: "Ujian Tengah Semester.", formula: "$$\\text{Nilai} \\ge 85 \\implies A$$" },
+            { week: 9, topic: "Fungsi Gamma & Beta", desc: "Fungsi-fungsi khusus dalam fisika.", formula: "$$\\Gamma(n) = (n-1)!$$" },
+            { week: 10, topic: "Deret Fourier", desc: "Analisis fungsi periodik.", formula: "$$f(x) = \\frac{a_0}{2} + \\sum_{n=1}^{\\infty} [a_n \\cos(nx) + b_n \\sin(nx)]$$" },
+            { week: 11, topic: "Transformasi Fourier", desc: "Analisis fungsi non-periodik.", formula: "$$\\hat{f}(\\xi) = \\int_{-\\infty}^{\\infty} f(x) e^{-2\\pi i x \\xi} dx$$" },
+            { week: 12, topic: "Persamaan Diferensial Parsial", desc: "Persamaan gelombang, Persamaan panas.", formula: "$$\\frac{\\partial^2 u}{\\partial t^2} = c^2 \\nabla^2 u$$" },
+            { week: 13, topic: "Fungsi Khusus: Legendre", desc: "Polinomial Legendre.", formula: "$$(1-x^2)y'' - 2xy' + n(n+1)y = 0$$" },
+            { week: 14, topic: "Fungsi Khusus: Bessel", desc: "Fungsi Bessel.", formula: "$$x^2 y'' + xy' + (x^2 - n^2)y = 0$$" },
+            { week: 15, topic: "Kalkulus Variasi", desc: "Persamaan Euler-Lagrange.", formula: "$$\\frac{\\partial L}{\\partial q} - \\frac{d}{dt}\\left(\\frac{\\partial L}{\\partial \\dot{q}}\\right) = 0$$" },
+            { week: 16, topic: "Evaluasi Akhir Semester (EAS)", desc: "Ujian Akhir Semester.", formula: "$$\\psi_{akhir} = \\sum_{i=1}^{16} \\text{Usaha}_i$$" },
+        ];
+
+        // --- Accordion Renderer ---
+        const accordionContainer = document.getElementById('accordion-container');
+
+        if (accordionContainer) {
+            syllabusData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'glass-card rounded-lg overflow-hidden border border-slate-700/50';
+                div.innerHTML = `
+                    <button class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors focus:outline-none" onclick="toggleAccordion(${index})">
+                        <div class="flex items-center gap-4">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-accent-500/10 text-accent-400 text-sm font-bold border border-accent-500/20">
+                                ${item.week}
+                            </span>
+                            <h3 class="text-lg font-semibold text-slate-100">${item.topic}</h3>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300" id="icon-${index}"></i>
+                    </button>
+                    <div id="content-${index}" class="accordion-content bg-slate-900/30">
+                        <div class="px-6 py-5 border-t border-slate-700/50">
+                            <p class="text-slate-300 mb-4">${item.desc}</p>
+                            <div class="bg-slate-950/50 rounded-lg p-4 mb-4 border border-slate-800 flex justify-center overflow-x-auto">
+                                ${item.formula}
+                            </div>
+                            <div class="flex gap-3">
+                                <button class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors">
+                                    <i class="fa-solid fa-file-pdf mr-2 text-red-400"></i>Unduh Slide
+                                </button>
+                                <button class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors">
+                                    <i class="fa-solid fa-play mr-2 text-red-500"></i>Tonton Rekaman
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accordionContainer.appendChild(div);
+            });
+        }
+
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+
+            // Toggle current
+            const isActive = content.classList.contains('active');
+
+            // Close all others
+            document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
+
+            if (!isActive) {
+                content.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+                // Re-render MathJax if hidden previously
+                if (window.MathJax) {
+                    MathJax.typesetPromise([content]).catch(() => { });
+                }
+            }
+        }
+
+        // --- Countdown Logic ---
+        function updateCountdown() {
+            try {
+                const now = new Date();
+                const currentDay = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+                const currentHour = now.getHours();
+                const currentMin = now.getMinutes();
+
+                // Schedule: Mon 07:00, Tue 07:00 (Duration assumed 100 mins / 2 SKS+ for simplicity)
+                const classes = [
+                    { day: 1, hour: 7, minute: 0, duration: 100, room: "B-114 (FPMIPA B Lt. 1)" },
+                    { day: 2, hour: 7, minute: 0, duration: 100, room: "E-406 (FPMIPA A Lt. 4)" }
+                ];
+
+                let nextClass = null;
+                let minDiff = Infinity;
+                let onGoing = null;
+
+                classes.forEach(cls => {
+                    // Check if currently ongoing
+                    if (currentDay === cls.day) {
+                        const startMins = cls.hour * 60 + cls.minute;
+                        const nowMins = currentHour * 60 + currentMin;
+                        const endMins = startMins + cls.duration;
+
+                        if (nowMins >= startMins && nowMins < endMins) {
+                            onGoing = cls;
+                        }
+                    }
+
+                    // Calculate next occurrence
+                    let target = new Date(now);
+                    target.setHours(cls.hour, cls.minute, 0, 0);
+
+                    let dayDiff = cls.day - currentDay;
+                    // If day is past, or today but time is past
+                    if (dayDiff < 0 || (dayDiff === 0 && target <= now)) {
+                        dayDiff += 7;
+                    }
+
+                    // Re-set date with new diff
+                    target.setDate(now.getDate() + dayDiff);
+
+                    // Recalculate diff timestamp
+                    const diff = target.getTime() - now.getTime();
+
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        nextClass = { time: target, room: cls.room };
+                    }
+                });
+
+                // DOM Elements
+                const daysEl = document.getElementById('cd-days');
+                const hoursEl = document.getElementById('cd-hours');
+                const minsEl = document.getElementById('cd-mins');
+                const secsEl = document.getElementById('cd-secs');
+
+                if (!daysEl) return; // Safety check
+
+                if (onGoing) {
+                    daysEl.innerText = "00";
+                    hoursEl.innerText = "00";
+                    minsEl.innerText = "00";
+                    secsEl.innerText = "00";
+                    document.getElementById('next-room').innerText = onGoing.room;
+                    document.getElementById('next-time').innerHTML = "<span class='text-emerald-400 font-bold animate-pulse'>SEDANG BERLANGSUNG!</span>";
+                    return;
+                }
+
+                if (!nextClass) {
+                    document.getElementById('next-time').innerText = "Belum ada jadwal";
+                    return;
+                }
+
+                const days = Math.floor(minDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((minDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((minDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((minDiff % (1000 * 60)) / 1000);
+
+                daysEl.innerText = String(days).padStart(2, '0');
+                hoursEl.innerText = String(hours).padStart(2, '0');
+                minsEl.innerText = String(minutes).padStart(2, '0');
+                secsEl.innerText = String(seconds).padStart(2, '0');
+
+                document.getElementById('next-room').innerText = nextClass.room;
+                const options = { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
+                document.getElementById('next-time').innerText = nextClass.time.toLocaleDateString('id-ID', options);
+
+            } catch (err) {
+                console.error("Countdown Error:", err);
+            }
+        }
+
+        setInterval(updateCountdown, 1000);
+
+        // Initial call with a slight delay to ensure DOM is ready
+        setTimeout(updateCountdown, 500);
+
+        // --- Scroll Logic for Navbar Glass Effect opacity change (Optional) ---
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg');
+                nav.style.background = 'rgba(15, 23, 42, 0.9)';
+            } else {
+                nav.classList.remove('shadow-lg');
+                nav.style.background = 'rgba(15, 23, 42, 0.7)';
+            }
+        });
+
+    </script>
+</body>
+
+</html>
