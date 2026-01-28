@@ -46,10 +46,13 @@
     <nav class="fixed top-0 w-full z-50 glass">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
                 <a href="index.html" class="flex items-center gap-2">
                     <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
                     <span class="font-bold text-xl tracking-wide">KawanFismat</span>
                 </a>
+
+                <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
                         <a href="index.html"
@@ -66,6 +69,26 @@
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
+                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="tugas.html" class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
+                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
+                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
+                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
+                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
             </div>
         </div>
     </nav>

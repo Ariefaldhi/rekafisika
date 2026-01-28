@@ -78,10 +78,13 @@
     <nav class="fixed top-0 w-full z-50 glass">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
                 <a href="index.html" class="flex items-center gap-2">
                     <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
                     <span class="font-bold text-xl tracking-wide">KawanFismat</span>
                 </a>
+
+                <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
                         <a href="index.html"
@@ -98,6 +101,27 @@
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
+                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
+                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
+                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
+                <a href="keaktifan.html"
+                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
+                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
+                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
             </div>
         </div>
     </nav>
@@ -109,7 +133,7 @@
                 class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-wider border border-purple-500/20 mb-4 inline-block">Wall
                 of Fame</span>
             <h1 class="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                Papan Keaktifan</h1>
+                Papan Keaktifan (v2)</h1>
             <p class="text-slate-400 max-w-lg mx-auto">Apresiasi untuk mahasiswa yang aktif berdiskusi bertanya, dan
                 menjawab di kelas Fisika Matematika I.</p>
         </div>
@@ -118,7 +142,7 @@
         <div id="podium-container"
             class="flex flex-col md:flex-row items-end justify-center gap-6 mb-16 h-auto md:h-80 opacity-0 animate-slide-up">
             <!-- Loading -->
-            <div class="w-full text-center text-slate-500 animate-pulse">Memuat Top Students...</div>
+            <div class="w-full text-center text-slate-500 animate-pulse">Memuat Data Keaktifan & Foto...</div>
         </div>
 
         <!-- Leaderboard List (Rank 4+) -->
@@ -151,8 +175,19 @@
 
             try {
                 // Fetch Students & Logs
-                const { data: students } = await supabaseClient.from('students').select('nim, name');
-                const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+                const { data: students, error: errStudents } = await supabaseClient.from('students').select('*'); // Fetch all to be safe
+                const { data: logs, error: errLogs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+
+                if (errStudents || errLogs) {
+                    console.error('Error fetching data:', errStudents, errLogs);
+                    podiumContainer.innerHTML = '<div class="text-red-400">Gagal memuat data (DB Error).</div>';
+                    return;
+                }
+
+                // Debugging
+                console.log('Students fetched:', students.length);
+                const sample = students.find(s => s.profile_photo_url);
+                console.log('Sample student with photo:', sample ? sample.name : 'None');
 
                 if (!students || !logs) {
                     podiumContainer.innerHTML = '<div class="text-red-400">Gagal memuat data.</div>';
@@ -198,15 +233,23 @@
                     let animate = rank === 1 ? 'animate-float' : '';
 
                     return `
-                        <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass}">
+                        <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass} mb-8 sm:mb-0">
                             <!-- Crown for #1 -->
                             ${rank === 1 ? '<div class="absolute -top-12 text-5xl text-yellow-400 animate-bounce"><i class="fa-solid fa-crown"></i></div>' : ''}
                             
                             <div class="w-full h-full bg-gradient-to-b ${colorClass} rounded-t-xl border-t border-x p-6 flex flex-col items-center justify-end relative backdrop-blur-sm transition-all hover:bg-white/5 group">
                                 <div class="absolute top-4 text-xs font-bold tracking-widest uppercase ${iconColor} opacity-50">Rank ${rank}</div>
                                 
-                                <div class="text-center mb-4 z-10 ${animate}">
-                                    <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1">${student.name}</h3>
+                                <div class="text-center mb-4 z-10 ${animate} w-full flex flex-col items-center">
+                                    <!-- Avatar -->
+                                    <div class="w-20 h-20 rounded-full border-4 ${iconColor.replace('text', 'border')} overflow-hidden mb-3 bg-slate-800 shadow-lg">
+                                        ${student.profile_photo_url
+                            ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex items-center justify-center text-3xl text-slate-500"><i class="fa-solid fa-user"></i></div>`
+                        }
+                                    </div>
+
+                                    <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1 w-full">${student.name}</h3>
                                     <p class="text-xs text-slate-400 font-mono mb-2">${student.nim}</p>
                                     <div class="inline-flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700">
                                         <i class="fa-solid fa-bolt ${iconColor}"></i>
@@ -235,8 +278,17 @@
                     listContainer.innerHTML = rest.map((s, idx) => `
                         <div class="flex items-center p-4 hover:bg-slate-800/30 transition-colors group">
                             <div class="w-12 text-center text-slate-500 font-bold text-lg">#${idx + 4}</div>
+                            
+                            <!-- Avatar Small -->
+                            <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden shrink-0 mr-3 border border-slate-600">
+                                ${s.profile_photo_url
+                            ? `<img src="${s.profile_photo_url}" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-user text-xs"></i></div>`
+                        }
+                            </div>
+
                             <div class="flex-1 px-4">
-                                <div class="font-semibold text-slate-300 group-hover:text-white transition-colors">${s.name}</div>
+                                <div class="font-semibold text-slate-300 group-hover:text-white transition-colors line-clamp-1">${s.name}</div>
                                 <div class="text-xs text-slate-500">${s.nim}</div>
                             </div>
                             <div class="text-right">

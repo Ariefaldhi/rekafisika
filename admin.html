@@ -41,8 +41,13 @@
 
 <body class="bg-abstract text-slate-100 font-inter min-h-screen flex">
 
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden glass">
+    </div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 hidden md:block">
+    <aside id="admin-sidebar"
+        class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
         <div class="h-16 flex items-center px-6 border-b border-slate-800">
             <span class="font-bold text-xl tracking-wide text-red-400">Admin Panel</span>
         </div>
@@ -88,7 +93,12 @@
     <main class="flex-1 md:ml-64 p-8">
         <!-- Header Mobile -->
         <div class="md:hidden flex justify-between items-center mb-6">
-            <span class="font-bold text-xl text-red-400">Admin Panel</span>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <span class="font-bold text-xl text-red-400">Admin Panel</span>
+            </div>
             <button onclick="logout()" class="text-sm text-red-400">Logout</button>
         </div>
 
@@ -427,6 +437,21 @@
         }
 
         // --- Logic ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                // Close
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
         let allStudents = [];
 
         async function initAdmin() {
