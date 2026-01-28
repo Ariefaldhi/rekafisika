@@ -221,7 +221,7 @@
             </div>
 
             <!-- Canvas -->
-            <div class="relative bg-slate-500/10 min-h-[500px] flex items-center justify-center overflow-auto p-4 md:p-8"
+            <div class="relative bg-slate-500/10 min-h-[500px] flex items-center justify-center overflow-auto p-2 md:p-8"
                 id="canvas-container">
                 <canvas id="pdf-render" class="shadow-xl"></canvas>
 
@@ -355,11 +355,14 @@
         }
 
         function onPrevPage() {
-            if (pageNum <= 1) return; pageNum--; queueRenderPage(pageNum);
+            if (pageNum <= 1) return;
+            pageNum--;
+            queueRenderPage(pageNum);
         }
-        document.getElementById('prev-page').addEventListener('click', onPrevPage); function onNextPage() {
-            if (pageNum >
-        = pdfDoc.numPages) return;
+        document.getElementById('prev-page').addEventListener('click', onPrevPage);
+
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages) return;
             pageNum++;
             queueRenderPage(pageNum);
         }
@@ -371,16 +374,24 @@
         });
 
         document.getElementById('zoom-out').addEventListener('click', () => {
-            if (scale <= 0.5) return; scale -= 0.25; queueRenderPage(pageNum);
+            if (scale <= 0.5) return;
+            scale -= 0.25;
+            queueRenderPage(pageNum);
         });
+
         document.getElementById('goto-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const inputVal = parseInt(document.getElementById('goto-page').value);
-            if (inputVal >= 1 && inputVal <= pdfDoc.numPages) { pageNum = inputVal; queueRenderPage(pageNum); }
+            if (inputVal >= 1 && inputVal <= pdfDoc.numPages) {
+                pageNum = inputVal;
+                queueRenderPage(pageNum);
+            }
         });
+
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
             pdfDoc = pdfDoc_;
-            document.getElementById('page-count').textContent = pdfDoc.numPages; renderPage(pageNum);
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+            renderPage(pageNum);
         }).catch(err => {
             console.error("Error loading PDF:", err);
             loadingSpinner.classList.add('hidden');
@@ -413,9 +424,9 @@
             aiLoading.classList.add('hidden');
             aiPlaceholder.classList.add('hidden');
 
-            if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
-                aiPlaceholder.innerHTML = `<strong>Konfigurasi Diperlukan:</strong><br>Silakan masukkan API Key Groq
-                Anda di file code <code>buku.html</code> (baris ~330).`;
+            // Use the global variable from config.js
+            if (typeof GROQ_API_KEY === 'undefined' || !GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_") || GROQ_API_KEY.includes("your-groq")) {
+                aiPlaceholder.innerHTML = `<strong>Konfigurasi Diperlukan:</strong><br>Silakan masukkan API Key Groq Anda di file <code>.env</code> atau <code>config.js</code>.`;
                 aiPlaceholder.classList.remove('hidden');
                 return;
             }
@@ -427,6 +438,7 @@
                 const page = await pdfDoc.getPage(pageNum);
                 const textContent = await page.getTextContent();
                 let rawText = textContent.items.map(item => item.str).join(' ');
+                // Fix spacing
                 rawText = rawText.replace(/\s+/g, ' ').trim();
 
                 if (!rawText) {
