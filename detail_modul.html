@@ -388,7 +388,7 @@
             finishBtn.classList.add('hidden');
         }
 
-        // Reuse render logic but add Checkbox
+        // Render Step Card
         function renderStepCard(step, index, moduleId, isComplete, savedAnswer = null) {
             let icon = 'fa-circle';
             let color = 'bg-slate-500';
@@ -396,66 +396,76 @@
             let extensionHtml = '';
             let isQuestionStep = false;
 
-            // Questions Logic (Same as before)
+            // Questions Logic
             if (step.questions && step.questions.length > 0) {
                 isQuestionStep = true;
 
+                // Generate Form HTML (Reusable)
+                const generateFormHtml = (isHidden) => {
+                    const questionsHtml = step.questions.map((q, qIdx) => {
+                        const existingVal = savedAnswer ? (savedAnswer[q.id] || '') : '';
+                        return `
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
+                                <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda...">${existingVal}</textarea>
+                            </div>
+                         `;
+                    }).join('');
+
+                    return `
+                        <div id="form-${step.id}" class="${isHidden ? 'hidden' : ''} bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="fa-solid fa-pen-to-square text-purple-400"></i>
+                                <h5 class="font-bold text-slate-200">${savedAnswer ? 'Edit Jawaban' : 'Latihan / Tugas'}</h5>
+                            </div>
+                            ${questionsHtml}
+                            <div class="flex gap-2">
+                                <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
+                                    Simpan Jawaban
+                                </button>
+                                ${savedAnswer ? `<button onclick="toggleEditMode('${step.id}', false)" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">Batal</button>` : ''}
+                            </div>
+                        </div>
+                     `;
+                };
+
                 if (savedAnswer) {
-                    // RENDER READ-ONLY VIEW
+                    // RENDER READ-ONLY VIEW + HIDDEN FORM
                     const qnaHtml = step.questions.map((q, qIdx) => {
                         const userAns = savedAnswer[q.id] || '-';
                         return `
                             <div class="mb-4 text-sm">
                                 <p class="text-slate-300 font-bold mb-1">${qIdx + 1}. ${q.text}</p>
-                                <div class="bg-slate-900/50 p-3 rounded border border-slate-700/50 text-emerald-400 font-mono">
-                                    <span class="text-xs text-slate-500 block mb-1 uppercase">Jawaban Anda:</span>
-                                    ${userAns}
-                                </div>
+                                <div class="bg-slate-900/50 p-3 rounded border border-slate-700/50 text-emerald-400 font-mono whitespace-pre-wrap">${userAns}</div>
                             </div>
                          `;
                     }).join('');
 
                     extensionHtml = `
-                        <div class="bg-slate-800/50 p-4 rounded-xl border border-emerald-500/30 mt-4">
-                            <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-2">
-                                <i class="fa-solid fa-check-double text-emerald-400"></i>
-                                <h5 class="font-bold text-emerald-400">Tugas Selesai</h5>
+                        <div id="read-only-${step.id}" class="bg-slate-800/50 p-4 rounded-xl border border-emerald-500/30 mt-4">
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-check-double text-emerald-400"></i>
+                                    <h5 class="font-bold text-emerald-400">Tugas Selesai</h5>
+                                </div>
+                                <button onclick="toggleEditMode('${step.id}', true)" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded transition-colors">
+                                    <i class="fa-solid fa-pen mr-1"></i> Edit
+                                </button>
                             </div>
                             ${qnaHtml}
                         </div>
+                        ${generateFormHtml(true)} 
                     `;
                 } else {
-                    // RENDER INPUT FORM
-                    const questionsHtml = step.questions.map((q, qIdx) => `
-                        <div class="mb-4">
-                            <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
-                            <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
-                        </div>
-                    `).join('');
-
-                    extensionHtml = `
-                        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="fa-solid fa-pen-to-square text-purple-400"></i>
-                                <h5 class="font-bold text-slate-200">Latihan / Tugas</h5>
-                            </div>
-                            ${questionsHtml}
-                            <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
-                                Simpan Semua Jawaban
-                            </button>
-                        </div>
-                    `;
+                    // RENDER INPUT FORM ONLY
+                    extensionHtml = generateFormHtml(false);
                 }
             }
 
             // Auto check override for question steps
-            // If it has questions, checkbox is managed by answer existence
-            // We can disable the checkbox for manual toggle if it's a question step
             const disableCheckbox = isQuestionStep ? 'disabled opacity-50 cursor-not-allowed' : '';
-            // If it IS a question step, isComplete should match savedAnswer existence actually.
-            // But we trust the DB 'student_progress' state primarily, though we auto-sync it on submit.
 
-            // Media Logic (Simplified Copy)
+            // Media Logic (No Changes)
             switch (step.type) {
                 case 'youtube':
                     icon = 'fa-play'; color = 'bg-red-500';
@@ -465,35 +475,20 @@
                     break;
                 case 'pdf':
                     icon = 'fa-file-pdf'; color = 'bg-red-400';
-                    // USE NEW VIEWER
                     let pdfUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
                     if (step.start_page) pdfUrl += `&start=${step.start_page}`;
                     if (step.end_page) pdfUrl += `&end=${step.end_page}`;
-
                     mediaContent = `<div class="mt-3"><iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
                     break;
                 case 'ppt':
-                    // PPT usually converted to PDF for viewer, or if actual PPT file standard viewer might not work well unless PDF.js handles it?
-                    // PDF.js only handles PDF. If it's a PPT file link, we can't use PDF.js.
-                    // Assuming 'ppt' type in this system currently implies PDF-exported slides mostly, or the user knows to upload PDFs.
-                    // If it is actual .ppt, standard iframe download/view might be needed.
-                    // For now, treat same as PDF if we assume slides are PDFs. 
-                    // If it's Google Slides link, it's different. 
-                    // Let's stick to generic iframe if not PDF?
-                    // Actually, let's try the viewer for consistency if it's a file.
-                    // But if it's .pptx, PDF.js fails.
-                    // Let's check extension?
-
                     const isPdf = step.content.toLowerCase().includes('.pdf');
                     icon = 'fa-file-powerpoint'; color = 'bg-orange-500';
-
                     if (isPdf) {
                         let pptUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
                         if (step.start_page) pptUrl += `&start=${step.start_page}`;
                         if (step.end_page) pptUrl += `&end=${step.end_page}`;
                         mediaContent = `<div class="mt-3"><iframe src="${pptUrl}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
                     } else {
-                        // Fallback for real PPT/other
                         mediaContent = `<div class="mt-3"><iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe></div>`;
                     }
                     break;
@@ -503,7 +498,6 @@
                     break;
                 case 'quiz':
                     icon = 'fa-question-circle'; color = 'bg-purple-500';
-                    // Simplify legacy quiz
                     mediaContent = `<div class="mt-3 space-y-3">${step.content ? `<div class="rounded overflow-hidden border border-slate-700"><img src="${step.content}" class="w-full object-contain max-h-[400px] bg-black"></div>` : ''}${(!step.questions || step.questions.length === 0) ? `<div class="bg-slate-800 p-4 rounded border border-slate-700 text-xs text-slate-400">Kuis Legacy (Tidak Support Auto-Check)</div>` : ''}</div>`;
                     break;
             }
@@ -532,6 +526,20 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Helper: Toggle Edit Mode
+        function toggleEditMode(stepId, show) {
+            const readOnlyDiv = document.getElementById(`read-only-${stepId}`);
+            const formDiv = document.getElementById(`form-${stepId}`);
+
+            if (show) {
+                if (readOnlyDiv) readOnlyDiv.classList.add('hidden');
+                if (formDiv) formDiv.classList.remove('hidden');
+            } else {
+                if (readOnlyDiv) readOnlyDiv.classList.remove('hidden');
+                if (formDiv) formDiv.classList.add('hidden');
+            }
         }
 
         // Helper Functions (Copy specific logic as needed or ensure global availability if common)
