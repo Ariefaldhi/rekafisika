@@ -618,8 +618,12 @@
         // ... [MODULES LOGIC] ...
         let currentSteps = [];
 
+        function uID() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
         function addStep(existingData = null) {
-            const id = existingData ? existingData.id : crypto.randomUUID();
+            const id = existingData ? existingData.id : uID();
             const step = existingData || {
                 id: id,
                 type: 'youtube',
@@ -630,6 +634,46 @@
             if (!existingData) currentSteps.push(step);
 
             renderSteps();
+        }
+
+        async function toggleModulVisibility(id, status) {
+            const { error } = await supabaseClient.from('modules').update({ is_visible: status }).eq('id', id);
+            if (error) alert('Gagal update visibility');
+            else loadModulesAdmin();
+        }
+
+        async function loadModulesAdmin() {
+            const list = document.getElementById('admin-modul-list');
+            const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+
+            if (data) {
+                list.innerHTML = data.map(m => `
+                    <div class="bg-slate-900 border border-slate-700 p-4 rounded flex justify-between items-center group">
+                        <div class="flex items-center gap-4">
+                            <span class="flex items-center justify-center w-8 h-8 rounded bg-slate-800 text-slate-400 font-bold border border-slate-700">${m.week}</span>
+                            <div>
+                                <h3 class="font-bold text-slate-200">${m.topic}</h3>
+                                <div class="text-xs text-slate-500 mt-1 flex gap-2">
+                                    <span>${Array.isArray(m.content_steps) ? m.content_steps.length : 0} Langkah</span>
+                                    <span class="${m.is_visible ? 'text-emerald-400' : 'text-slate-500'} ml-2">
+                                        <i class="fa-solid fa-eye${m.is_visible ? '' : '-slash'} mr-1"></i>
+                                        ${m.is_visible ? 'Aktif' : 'Hidden'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                             <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" onclick="toggleModulVisibility('${m.id}', this.checked)" class="sr-only peer" ${m.is_visible ? 'checked' : ''}>
+                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+
+                            <button onclick="editModul('${m.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteModul('${m.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         function removeStep(id) {
@@ -1057,108 +1101,7 @@
             }
         }
 
-        // 4. Module Management Logic
-        async function loadModulesAdmin() {
-            const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
-            const list = document.getElementById('admin-modul-list');
 
-            if (!data || data.length === 0) list.innerHTML = '<p class="text-slate-500 italic">Belum ada modul.</p>';
-            else {
-                list.innerHTML = data.map(m => `
-                    <div class="glass-card p-4 flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <span class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-sm">${m.week}</span>
-                            <div>
-                                <h4 class="font-bold text-slate-200">${m.topic}</h4>
-                                <span class="text-xs ${m.is_visible ? 'text-emerald-400' : 'text-slate-500'}">
-                                    <i class="fa-solid fa-eye${m.is_visible ? '' : '-slash'} mr-1"></i>
-                                    ${m.is_visible ? 'Ditampilkan' : 'Disembunyikan'}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Toggle Switch -->
-                            <label class="relative inline-flex items-center cursor-pointer mr-2">
-                                <input type="checkbox" onclick="toggleModulVisibility('${m.id}', this.checked)" class="sr-only peer" ${m.is_visible ? 'checked' : ''}>
-                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                            </label>
-                            
-                            <button onclick="editModul('${m.id}')" class="p-2 text-blue-400 hover:bg-blue-500/10 rounded"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteModul('${m.id}')" class="p-2 text-red-400 hover:bg-red-500/10 rounded"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function handleModuleSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('m-id').value;
-            const payload = {
-                week: document.getElementById('m-week').value,
-                topic: document.getElementById('m-topic').value,
-                description: document.getElementById('m-desc').value,
-                formula: document.getElementById('m-formula').value,
-                link_slide: document.getElementById('m-slide').value,
-                link_recording: document.getElementById('m-rec').value
-            };
-
-            let error;
-            if (id) {
-                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
-                error = err;
-            } else {
-                const { error: err } = await supabaseClient.from('modules').insert([{ ...payload, is_visible: true }]);
-                error = err;
-            }
-
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert(id ? 'Modul diupdate!' : 'Modul dibuat!');
-                resetModulForm();
-                loadModulesAdmin();
-            }
-        }
-
-        async function editModul(id) {
-            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('m-id').value = data.id;
-                document.getElementById('m-week').value = data.week;
-                document.getElementById('m-topic').value = data.topic;
-                document.getElementById('m-desc').value = data.description;
-                document.getElementById('m-formula').value = data.formula;
-                document.getElementById('m-slide').value = data.link_slide;
-                document.getElementById('m-rec').value = data.link_recording;
-
-                document.getElementById('modul-form-title').innerText = 'Edit Modul';
-                document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
-                document.getElementById('btn-cancel-modul').classList.remove('hidden');
-                document.getElementById('m-week').focus();
-            }
-        }
-
-        async function toggleModulVisibility(id, status) {
-            const { error } = await supabaseClient.from('modules').update({ is_visible: status }).eq('id', id);
-            if (error) alert('Gagal update visibility');
-            else loadModulesAdmin(); // Refresh UI
-        }
-
-        async function deleteModul(id) {
-            if (confirm('Hapus modul ini?')) {
-                const { error } = await supabaseClient.from('modules').delete().eq('id', id);
-                if (error) alert('Gagal hapus');
-                else loadModulesAdmin();
-            }
-        }
-
-        function resetModulForm() {
-            document.querySelector('#section-modul form').reset();
-            document.getElementById('m-id').value = '';
-            document.getElementById('modul-form-title').innerText = 'Tambah Modul Baru';
-            document.getElementById('btn-submit-modul').innerText = 'Simpan Modul';
-            document.getElementById('btn-cancel-modul').classList.add('hidden');
-        }
 
         document.addEventListener('DOMContentLoaded', initAdmin);
     </script>
