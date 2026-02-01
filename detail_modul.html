@@ -403,7 +403,7 @@
                 case 'pdf':
                     icon = 'fa-file-pdf'; color = 'bg-red-400';
                     // USE NEW VIEWER
-                    let pdfUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true`;
+                    let pdfUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
                     if (step.start_page) pdfUrl += `&start=${step.start_page}`;
                     if (step.end_page) pdfUrl += `&end=${step.end_page}`;
 
@@ -425,7 +425,7 @@
                     icon = 'fa-file-powerpoint'; color = 'bg-orange-500';
 
                     if (isPdf) {
-                        let pptUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true`;
+                        let pptUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
                         if (step.start_page) pptUrl += `&start=${step.start_page}`;
                         if (step.end_page) pptUrl += `&end=${step.end_page}`;
                         mediaContent = `<div class="mt-3"><iframe src="${pptUrl}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;

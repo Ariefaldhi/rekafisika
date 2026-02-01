@@ -289,6 +289,7 @@
         const startPage = parseInt(urlParams.get('start')) || 1;
         const endPage = parseInt(urlParams.get('end')) || null;
         const isEmbed = urlParams.get('embed') === 'true';
+        const showAI = urlParams.get('ai') !== 'false';
 
         if (!url) {
             alert("File tidak ditentukan!");
@@ -309,6 +310,12 @@
             const fileName = url.split('/').pop().replace('.pdf', '').replace(/_/g, ' ');
             document.title = `${fileName} | Viewer`;
             document.querySelector('h1').innerText = fileName;
+        }
+
+        // Hide AI if requested
+        if (!showAI) {
+            const explainBtn = document.getElementById('explain-btn');
+            if (explainBtn) explainBtn.classList.add('hidden');
         }
 
         const downloadBtn = document.querySelector('a[download]');
