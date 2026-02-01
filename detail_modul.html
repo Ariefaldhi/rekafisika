@@ -266,7 +266,27 @@
 
                 const completedStepIds = new Set(progressData?.map(p => p.step_id) || []);
 
-                // 3. Render Steps
+                // 3. Fetch Answers 
+                const { data: answersData } = await supabaseClient
+                    .from('student_answers')
+                    .select('step_id, answer')
+                    .eq('student_nim', userNim)
+                    .eq('module_id', moduleId);
+
+                const answersMap = new Map();
+                if (answersData) {
+                    answersData.forEach(row => {
+                        try {
+                            // Answer can be JSON string or plain text
+                            const parsed = JSON.parse(row.answer);
+                            answersMap.set(row.step_id, parsed);
+                        } catch (e) {
+                            answersMap.set(row.step_id, row.answer);
+                        }
+                    });
+                }
+
+                // 4. Render Steps
                 const container = document.getElementById('steps-list');
                 container.innerHTML = '';
 
@@ -283,7 +303,8 @@
 
                 steps.forEach((step, index) => {
                     const isChecked = completedStepIds.has(step.id);
-                    const stepHtml = renderStepCard(step, index, moduleId, isChecked);
+                    const savedAnswer = answersMap.get(step.id);
+                    const stepHtml = renderStepCard(step, index, moduleId, isChecked, savedAnswer);
                     container.insertAdjacentHTML('beforeend', stepHtml);
                 });
 
@@ -299,7 +320,11 @@
             }
         }
 
-        async function toggleStepCompletion(stepId, isChecked) {
+        async function toggleStepCompletion(stepId, isChecked, isManual = true) {
+            // Block manual uncheck/check for steps that have Questions but no answers yet
+            // Actually, the UI checkbox will be disabled, but good to have logic check.
+            // We rely on 'disabled' attribute in DOM for manual block.
+
             const { error } = await supabaseClient
                 .from('student_progress')
                 .upsert({
@@ -311,14 +336,17 @@
 
             if (error) {
                 console.error(error);
-                alert('Gagal menyimpan progress.');
+                if (isManual) alert('Gagal menyimpan progress.');
                 // Revert checkbox visual
-                document.getElementById(`check-${stepId}`).checked = !isChecked;
+                const cb = document.getElementById(`check-${stepId}`);
+                if (cb) cb.checked = !isChecked;
                 return;
             }
 
             // Re-calc completion
             const totalSteps = currentSteps.length;
+            // We need to re-fetch or track local state accurately if we want perfect total.
+            // But selector query is fine for now as long as DOM is updated.
             const checkedCount = document.querySelectorAll('.step-checkbox:checked').length;
             checkCompletionStatus(totalSteps, checkedCount);
         }
@@ -327,7 +355,6 @@
             const finishSection = document.getElementById('finish-section');
             const finishBtn = document.getElementById('finish-module-btn');
 
-            // Only update button state if it exists (it should)
             if (finishBtn) {
                 if (total > 0 && total === completed) {
                     finishBtn.disabled = false;
@@ -337,14 +364,12 @@
                     finishBtn.disabled = true;
                     finishBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     finishBtn.classList.remove('hover:bg-accent-500', 'hover:shadow-lg');
-                    // Hide success message if we unchecked something
                     finishSection.classList.add('hidden');
                 }
             }
         }
 
         function finishModule() {
-            // Check again for safety
             const totalSteps = currentSteps.length;
             const checkedCount = document.querySelectorAll('.step-checkbox:checked').length;
 
@@ -353,44 +378,82 @@
                 return;
             }
 
-            // Show Success UI
             const finishSection = document.getElementById('finish-section');
+            const finishBtn = document.getElementById('finish-module-btn');
+
             finishSection.classList.remove('hidden');
             finishSection.scrollIntoView({ behavior: 'smooth' });
 
-            // Celebration Confetti or simple alert? 
-            // Stick to UI reveal for now as requested.
+            // Hide button after clicking?
+            finishBtn.classList.add('hidden');
         }
 
         // Reuse render logic but add Checkbox
-        function renderStepCard(step, index, moduleId, isComplete) {
+        function renderStepCard(step, index, moduleId, isComplete, savedAnswer = null) {
             let icon = 'fa-circle';
             let color = 'bg-slate-500';
             let mediaContent = '';
             let extensionHtml = '';
+            let isQuestionStep = false;
 
             // Questions Logic (Same as before)
             if (step.questions && step.questions.length > 0) {
-                const questionsHtml = step.questions.map((q, qIdx) => `
-                    <div class="mb-4">
-                        <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
-                        <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
-                    </div>
-                `).join('');
+                isQuestionStep = true;
 
-                extensionHtml = `
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
-                        <div class="flex items-center gap-2 mb-4">
-                            <i class="fa-solid fa-pen-to-square text-purple-400"></i>
-                            <h5 class="font-bold text-slate-200">Latihan / Tugas</h5>
+                if (savedAnswer) {
+                    // RENDER READ-ONLY VIEW
+                    const qnaHtml = step.questions.map((q, qIdx) => {
+                        const userAns = savedAnswer[q.id] || '-';
+                        return `
+                            <div class="mb-4 text-sm">
+                                <p class="text-slate-300 font-bold mb-1">${qIdx + 1}. ${q.text}</p>
+                                <div class="bg-slate-900/50 p-3 rounded border border-slate-700/50 text-emerald-400 font-mono">
+                                    <span class="text-xs text-slate-500 block mb-1 uppercase">Jawaban Anda:</span>
+                                    ${userAns}
+                                </div>
+                            </div>
+                         `;
+                    }).join('');
+
+                    extensionHtml = `
+                        <div class="bg-slate-800/50 p-4 rounded-xl border border-emerald-500/30 mt-4">
+                            <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-2">
+                                <i class="fa-solid fa-check-double text-emerald-400"></i>
+                                <h5 class="font-bold text-emerald-400">Tugas Selesai</h5>
+                            </div>
+                            ${qnaHtml}
                         </div>
-                        ${questionsHtml}
-                        <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
-                            Simpan Semua Jawaban
-                        </button>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // RENDER INPUT FORM
+                    const questionsHtml = step.questions.map((q, qIdx) => `
+                        <div class="mb-4">
+                            <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
+                            <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
+                        </div>
+                    `).join('');
+
+                    extensionHtml = `
+                        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="fa-solid fa-pen-to-square text-purple-400"></i>
+                                <h5 class="font-bold text-slate-200">Latihan / Tugas</h5>
+                            </div>
+                            ${questionsHtml}
+                            <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
+                                Simpan Semua Jawaban
+                            </button>
+                        </div>
+                    `;
+                }
             }
+
+            // Auto check override for question steps
+            // If it has questions, checkbox is managed by answer existence
+            // We can disable the checkbox for manual toggle if it's a question step
+            const disableCheckbox = isQuestionStep ? 'disabled opacity-50 cursor-not-allowed' : '';
+            // If it IS a question step, isComplete should match savedAnswer existence actually.
+            // But we trust the DB 'student_progress' state primarily, though we auto-sync it on submit.
 
             // Media Logic (Simplified Copy)
             switch (step.type) {
@@ -440,7 +503,8 @@
                     break;
                 case 'quiz':
                     icon = 'fa-question-circle'; color = 'bg-purple-500';
-                    mediaContent = `<div class="mt-3 space-y-3">${step.content ? `<div class="rounded overflow-hidden border border-slate-700"><img src="${step.content}" class="w-full object-contain max-h-[400px] bg-black"></div>` : ''}${(!step.questions || step.questions.length === 0) ? `<div class="bg-slate-800 p-4 rounded border border-slate-700">${step.question ? `<p class="font-bold text-white mb-2">${step.question}</p>` : ''}<textarea id="ans-${step.id}" class="w-full bg-slate-900 border border-slate-600 p-2 text-white h-24" placeholder="Jawab..."></textarea><button onclick="submitQuizAnswer('${moduleId}', '${step.id}', document.getElementById('ans-${step.id}').value)" class="mt-2 bg-purple-600 text-white px-4 py-2 rounded text-sm">Simpan</button></div>` : ''}</div>`;
+                    // Simplify legacy quiz
+                    mediaContent = `<div class="mt-3 space-y-3">${step.content ? `<div class="rounded overflow-hidden border border-slate-700"><img src="${step.content}" class="w-full object-contain max-h-[400px] bg-black"></div>` : ''}${(!step.questions || step.questions.length === 0) ? `<div class="bg-slate-800 p-4 rounded border border-slate-700 text-xs text-slate-400">Kuis Legacy (Tidak Support Auto-Check)</div>` : ''}</div>`;
                     break;
             }
 
@@ -456,10 +520,11 @@
                                 <span class="text-xs uppercase font-bold tracking-wider text-slate-500">${step.type}</span>
                             </div>
                             <div class="flex flex-col items-center">
-                                <input type="checkbox" id="check-${step.id}" class="step-checkbox" 
+                                <input type="checkbox" id="check-${step.id}" class="step-checkbox ${disableCheckbox}" 
                                     ${isComplete ? 'checked' : ''} 
+                                    ${disableCheckbox ? 'disabled' : ''}
                                     onchange="toggleStepCompletion('${step.id}', this.checked)">
-                                <label for="check-${step.id}" class="text-[10px] text-slate-400 mt-1 cursor-pointer">Selesai</label>
+                                <label for="check-${step.id}" class="text-[10px] text-slate-400 mt-1 cursor-pointer ${disableCheckbox ? 'opacity-50' : ''}">Selesai</label>
                             </div>
                         </div>
                         ${mediaContent}
@@ -489,6 +554,7 @@
 
             if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
 
+            // 1. Save Answers
             const { error } = await supabaseClient.from('student_answers').upsert({
                 student_nim: userNim,
                 module_id: moduleId,
@@ -497,8 +563,18 @@
                 score: 0
             }, { onConflict: 'student_nim, step_id' });
 
-            if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-            else alert('Jawaban berhasil disimpan!');
+            if (error) {
+                alert('Gagal menyimpan jawaban: ' + error.message);
+                return;
+            }
+
+            // 2. Mark as Complete (Auto-check)
+            await toggleStepCompletion(stepId, true, false);
+
+            alert('Jawaban berhasil disimpan!');
+
+            // Reload to show static view
+            loadModuleDetail();
         }
         async function submitQuizAnswer(moduleId, stepId, answer) {
             const { error } = await supabaseClient.from('student_answers').insert([{
