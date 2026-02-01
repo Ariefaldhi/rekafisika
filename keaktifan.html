@@ -135,10 +135,23 @@
             <span
                 class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-wider border border-purple-500/20 mb-4 inline-block">Wall
                 of Fame</span>
-            <h1 class="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+            <h1 id="page-title"
+                class="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
                 Papan Keaktifan</h1>
-            <p class="text-slate-400 max-w-lg mx-auto">Apresiasi untuk mahasiswa yang aktif berdiskusi bertanya, dan
-                menjawab di kelas Fisika Matematika I.</p>
+            <p class="text-slate-400 max-w-lg mx-auto" id="page-desc">Apresiasi untuk mahasiswa yang aktif berdiskusi
+                bertanya, dan menjawab di kelas Fisika Matematika I.</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex justify-center mb-12 gap-4">
+            <button onclick="switchTab('participation')" id="tab-participation"
+                class="px-6 py-2 rounded-full font-bold text-white bg-accent-500 shadow-lg shadow-accent-500/20 transition-all">
+                Keaktifan
+            </button>
+            <button onclick="switchTab('diligence')" id="tab-diligence"
+                class="px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all">
+                Kerajinan
+            </button>
         </div>
 
         <!-- Podium Section (Top 3) -->
@@ -171,195 +184,98 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
-        async function loadParticipation() {
+        let currentTab = 'participation'; // 'participation' or 'diligence'
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update UI
+            document.getElementById('tab-participation').className = tab === 'participation'
+                ? 'px-6 py-2 rounded-full font-bold text-white bg-accent-500 shadow-lg shadow-accent-500/20 transition-all'
+                : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
+
+            document.getElementById('tab-diligence').className = tab === 'diligence'
+                ? 'px-6 py-2 rounded-full font-bold text-white bg-pink-500 shadow-lg shadow-pink-500/20 transition-all'
+                : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
+
+            // Change Title & Color Theme based on tab
+            const titleEl = document.getElementById('page-title');
+            const descEl = document.getElementById('page-desc');
+
+            if (tab === 'participation') {
+                titleEl.innerHTML = 'Papan Keaktifan';
+                titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400';
+                descEl.innerText = 'Apresiasi untuk mahasiswa yang aktif berdiskusi, bertanya, dan menjawab di kelas.';
+            } else {
+                titleEl.innerHTML = 'Papan Kerajinan';
+                titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-400';
+                descEl.innerText = 'Ranking mahasiswa paling rajin mengerjakan tugas tepat waktu.';
+            }
+
+            loadData();
+        }
+
+        async function loadData() {
             if (!supabaseClient) return;
             const podiumContainer = document.getElementById('podium-container');
             const listContainer = document.getElementById('leaderboard-list');
 
+            podiumContainer.innerHTML = '<div class="w-full text-center text-slate-500 animate-pulse">Memuat Data...</div>';
+            listContainer.innerHTML = '';
+
             try {
-                // Fetch Students & Logs
-                const { data: students, error: errStudents } = await supabaseClient.from('students').select('*'); // Fetch all to be safe
-                const { data: logs, error: errLogs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+                // Fetch Students
+                const { data: students, error: errStudents } = await supabaseClient.from('students').select('*');
 
-                if (errStudents || errLogs) {
-                    console.error('Error fetching data:', errStudents, errLogs);
-                    podiumContainer.innerHTML = '<div class="text-red-400">Gagal memuat data (DB Error).</div>';
-                    return;
-                }
+                if (errStudents || !students) throw new Error('Gagal memuat mahasiswa');
 
-                // Debugging
-                console.log('Students fetched:', students.length);
-                const sample = students.find(s => s.profile_photo_url);
-                console.log('Sample student with photo:', sample ? sample.name : 'None');
+                let leaderboard = [];
 
-                if (!students || !logs) {
-                    podiumContainer.innerHTML = '<div class="text-red-400">Gagal memuat data.</div>';
-                    return;
-                }
-
-                // Calculate Totals
-                const leaderboard = students.map(student => {
-                    const totalPoints = logs
-                        .filter(log => log.student_nim === student.nim)
-                        .reduce((sum, log) => sum + (log.points || 0), 0);
-                    return { ...student, totalPoints };
-                });
-
-                // Sort: Points DESC, then Name ASC (for ties)
-                leaderboard.sort((a, b) => {
-                    if (b.totalPoints !== a.totalPoints) {
-                        return b.totalPoints - a.totalPoints;
+                if (currentTab === 'participation') {
+                    // --- LOGIC KEAKTIFAN ---
+                    const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+                    if (logs) {
+                        leaderboard = students.map(student => {
+                            const totalPoints = logs
+                                .filter(log => log.student_nim === student.nim)
+                                .reduce((sum, log) => sum + (log.points || 0), 0);
+                            return { ...student, totalPoints };
+                        });
                     }
+                } else {
+                    // --- LOGIC KERAJINAN (Diligence) ---
+                    // 1. Fetch Assignments (Id, Points)
+                    const { data: assignments } = await supabaseClient.from('assignments').select('id, points').eq('is_active', true);
+
+                    // 2. Fetch Completion Status
+                    const { data: taskStatus } = await supabaseClient.from('student_task_status').select('student_id, assignment_id').eq('is_completed', true);
+
+                    if (assignments && taskStatus) {
+                        // Create Map of Assignment Points
+                        const assignmentPoints = {};
+                        assignments.forEach(a => assignmentPoints[a.id] = (a.points || 10)); // Default 10 if null
+
+                        leaderboard = students.map(student => {
+                            // Find all completed tasks for this student
+                            const completedTasks = taskStatus.filter(t => t.student_id === student.nim);
+
+                            // Sum points
+                            const totalPoints = completedTasks.reduce((sum, t) => {
+                                return sum + (assignmentPoints[t.assignment_id] || 0);
+                            }, 0);
+
+                            return { ...student, totalPoints };
+                        });
+                    }
+                }
+
+                // Sort: Points DESC, then Name ASC
+                leaderboard.sort((a, b) => {
+                    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
                     return a.name.localeCompare(b.name);
                 });
 
-                // Show ALL students (removed the > 0 filter)
-                const activeStudents = leaderboard;
-
-                // --- Render Podium (Top 3) ---
-                const top3 = activeStudents.slice(0, 3);
-
-                // Helper to create Podium Item
-                const createPodium = (student, rank) => {
-                    if (!student) return `<div class="w-full md:w-1/3 h-40"></div>`; // Spacer for missing ranks
-
-                    let heightClass = rank === 1 ? 'h-64 md:h-80 order-1 md:order-2' :
-                        rank === 2 ? 'h-56 md:h-64 order-2 md:order-1' :
-                            'h-48 md:h-56 order-3 md:order-3'; // Rank 3
-
-                    let colorClass = rank === 1 ? 'from-yellow-400/20 to-yellow-600/10 border-yellow-500/50 shadow-yellow-500/10' :
-                        rank === 2 ? 'from-slate-300/20 to-slate-500/10 border-slate-400/50 shadow-slate-500/10' :
-                            'from-orange-400/20 to-orange-600/10 border-orange-500/50 shadow-orange-500/10';
-
-                    let iconColor = rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-slate-300' : 'text-orange-400';
-                    let rankTitle = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
-                    let animate = rank === 1 ? 'animate-float' : '';
-
-                    return `
-                        <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass} mb-8 sm:mb-0">
-                            <!-- Crown for #1 -->
-                            ${rank === 1 ? '<div class="absolute -top-12 text-5xl text-yellow-400 animate-bounce"><i class="fa-solid fa-crown"></i></div>' : ''}
-                            
-                            <div class="w-full h-full bg-gradient-to-b ${colorClass} rounded-t-xl border-t border-x p-6 flex flex-col items-center justify-end relative backdrop-blur-sm transition-all hover:bg-white/5 group">
-                                <div class="absolute top-4 text-xs font-bold tracking-widest uppercase ${iconColor} opacity-50">Rank ${rank}</div>
-                                
-                                <div class="text-center mb-4 z-10 ${animate} w-full flex flex-col items-center">
-                                    <!-- Avatar -->
-                                    <div class="w-20 h-20 rounded-full border-4 ${iconColor.replace('text', 'border')} overflow-hidden mb-3 bg-slate-800 shadow-lg">
-                                        ${student.profile_photo_url
-                            ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex items-center justify-center text-3xl text-slate-500"><i class="fa-solid fa-user"></i></div>`
-                        }
-                                    </div>
-
-                                    <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1 w-full">${student.name}</h3>
-                                    <p class="text-xs text-slate-400 font-mono mb-2">${student.nim}</p>
-                                    <div class="inline-flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700">
-                                        <i class="fa-solid fa-bolt ${iconColor}"></i>
-                                        <span class="font-bold text-lg md:text-2xl text-white font-mono">${student.totalPoints}</span>
-                                    </div>
-                                </div>
-                                <div class="w-full h-2 bg-${rank === 1 ? 'yellow' : rank === 2 ? 'slate' : 'orange'}-500/20 rounded-full mt-2"></div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (top3.length > 0) {
-                    const isMobile = window.innerWidth < 768; // Tailwind md breakpoint
-
-                    if (isMobile) {
-                        // Mobile View: Vertical Cards with Gold/Silver/Bronze styling
-                        podiumContainer.innerHTML = top3.map((student, index) => {
-                            const rank = index + 1;
-                            let borderClass = rank === 1 ? 'border-yellow-500/50 bg-yellow-500/10' :
-                                rank === 2 ? 'border-slate-400/50 bg-slate-500/10' :
-                                    'border-orange-500/50 bg-orange-500/10';
-
-                            let textClass = rank === 1 ? 'text-yellow-400' :
-                                rank === 2 ? 'text-slate-300' :
-                                    'text-orange-400';
-
-                            let icon = rank === 1 ? '<i class="fa-solid fa-crown text-xl mb-1"></i>' :
-                                rank === 2 ? '<span class="text-xl font-bold mb-1">#2</span>' :
-                                    '<span class="text-xl font-bold mb-1">#3</span>';
-
-                            return `
-                                <div class="w-full mb-4 p-4 rounded-xl border ${borderClass} flex items-center gap-4 relative overflow-hidden glass-card">
-                                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-xl"></div>
-                                    
-                                    <div class="flex flex-col items-center justify-center w-12 text-center shrink-0 ${textClass}">
-                                        ${icon}
-                                    </div>
-
-                                    <div class="w-12 h-12 rounded-full border-2 ${textClass.replace('text', 'border')} overflow-hidden shrink-0 bg-slate-800">
-                                         ${student.profile_photo_url
-                                    ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
-                                    : `<div class="w-full h-full flex items-center justify-center text-slate-500"><i class="fa-solid fa-user"></i></div>`
-                                }
-                                    </div>
-
-                                    <div class="min-w-0 flex-1">
-                                        <h3 class="font-bold text-white text-lg truncate">${student.name}</h3>
-                                        <p class="text-xs text-slate-400 font-mono">${student.nim}</p>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div class="font-mono font-bold text-xl text-white">${student.totalPoints}</div>
-                                        <div class="text-[10px] text-slate-400 uppercase">Points</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-
-                        // Fix container layout for mobile
-                        podiumContainer.classList.remove('items-end', 'h-80');
-                        podiumContainer.classList.add('flex-col', 'h-auto');
-
-                    } else {
-                        // Desktop View: Original Podium
-                        podiumContainer.innerHTML = [
-                            createPodium(top3[1], 2), // 2nd (Left)
-                            createPodium(top3[0], 1), // 1st (Center)
-                            createPodium(top3[2], 3)  // 3rd (Right)
-                        ].join('');
-                    }
-                } else {
-                    podiumContainer.innerHTML = '<div class="w-full text-center text-slate-500 italic">Belum ada data keaktifan.</div>';
-                }
-
-                // --- Render List (Rank 4+) ---
-                const rest = activeStudents.slice(3);
-                if (rest.length > 0) {
-                    listContainer.innerHTML = rest.map((s, idx) => `
-                        <div class="flex items-center p-4 hover:bg-slate-800/30 transition-colors group">
-                            <div class="w-12 text-center text-slate-500 font-bold text-lg">#${idx + 4}</div>
-                            
-                            <!-- Avatar Small -->
-                            <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden shrink-0 mr-3 border border-slate-600">
-                                ${s.profile_photo_url
-                            ? `<img src="${s.profile_photo_url}" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-user text-xs"></i></div>`
-                        }
-                            </div>
-
-                            <div class="flex-1 px-4">
-                                <div class="font-semibold text-slate-300 group-hover:text-white transition-colors line-clamp-1">${s.name}</div>
-                                <div class="text-xs text-slate-500">${s.nim}</div>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-mono font-bold text-slate-400 group-hover:text-accent-400 transition-colors">${s.totalPoints} pts</span>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    listContainer.innerHTML = `
-                        <div class="p-8 text-center text-slate-500">
-                            <i class="fa-solid fa-users-slash text-4xl mb-4 opacity-50"></i>
-                            <p>Belum ada mahasiswa lain di peringkat ini.</p>
-                        </div>
-                    `;
-                }
+                renderLeaderboard(leaderboard, podiumContainer, listContainer);
 
             } catch (err) {
                 console.error(err);
@@ -367,16 +283,121 @@
             }
         }
 
-        // Debounce resize event to prevent excessive re-renders
+        function renderLeaderboard(data, podiumContainer, listContainer) {
+            // Filter > 0 points? Optional. Let's show everyone or maybe > 0
+            // const activeStudents = data.filter(s => s.totalPoints > 0);
+            const activeStudents = data;
+
+            const top3 = activeStudents.slice(0, 3);
+            const rest = activeStudents.slice(3);
+
+            // --- Render Podium ---
+            const isMobile = window.innerWidth < 768;
+
+            // Helper podium Item
+            const createPodium = (student, rank) => {
+                if (!student) return `<div class="w-full md:w-1/3 h-40"></div>`;
+
+                let heightClass = rank === 1 ? 'h-64 md:h-80 order-1 md:order-2' : rank === 2 ? 'h-56 md:h-64 order-2 md:order-1' : 'h-48 md:h-56 order-3 md:order-3';
+
+                // Color Themes
+                let colorBase = currentTab === 'participation'
+                    ? (rank === 1 ? 'yellow' : rank === 2 ? 'slate' : 'orange')
+                    : (rank === 1 ? 'pink' : rank === 2 ? 'slate' : 'purple'); // Pink/Purple theme for Diligence
+
+                let colorClass = `from-${colorBase}-400/20 to-${colorBase}-600/10 border-${colorBase}-500/50 shadow-${colorBase}-500/10`;
+                let iconColor = `text-${colorBase}-400`;
+                let animate = rank === 1 ? 'animate-float' : '';
+
+                return `
+                    <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass} mb-8 sm:mb-0">
+                        ${rank === 1 ? `<div class="absolute -top-12 text-5xl ${iconColor} animate-bounce"><i class="fa-solid fa-crown"></i></div>` : ''}
+                        <div class="w-full h-full bg-gradient-to-b ${colorClass} rounded-t-xl border-t border-x p-6 flex flex-col items-center justify-end relative backdrop-blur-sm transition-all hover:bg-white/5 group">
+                            <div class="absolute top-4 text-xs font-bold tracking-widest uppercase ${iconColor} opacity-50">Rank ${rank}</div>
+                            <div class="text-center mb-4 z-10 ${animate} w-full flex flex-col items-center">
+                                <div class="w-20 h-20 rounded-full border-4 ${iconColor.replace('text', 'border')} overflow-hidden mb-3 bg-slate-800 shadow-lg">
+                                    ${student.profile_photo_url
+                        ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
+                        : `<div class="w-full h-full flex items-center justify-center text-3xl text-slate-500"><i class="fa-solid fa-user"></i></div>`
+                    }
+                                </div>
+                                <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1 w-full">${student.name}</h3>
+                                <p class="text-xs text-slate-400 font-mono mb-2">${student.nim}</p>
+                                <div class="inline-flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700">
+                                    <i class="fa-solid fa-bolt ${iconColor}"></i>
+                                    <span class="font-bold text-lg md:text-2xl text-white font-mono">${student.totalPoints}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            if (top3.length > 0) {
+                if (isMobile) {
+                    podiumContainer.innerHTML = top3.map((student, index) => {
+                        // Simplified Mobile Card Logic (reusing general style but adapting colors dynamically if needed)
+                        // For brevity, using a standard card style
+                        const rank = index + 1;
+                        return `
+                            <div class="w-full mb-4 p-4 rounded-xl border border-slate-700 bg-slate-800/50 flex items-center gap-4 relative overflow-hidden">
+                                <div class="flex flex-col items-center justify-center w-8 text-center shrink-0 font-bold text-xl ${rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-slate-300' : 'text-orange-400'}">
+                                    ${rank === 1 ? '<i class="fa-solid fa-crown"></i>' : `#${rank}`}
+                                </div>
+                                <div class="w-12 h-12 rounded-full overflow-hidden bg-slate-700 border border-slate-600">
+                                     ${student.profile_photo_url ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">` : ''}
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-white truncate">${student.name}</h3>
+                                    <p class="text-xs text-slate-400">${student.nim}</p>
+                                </div>
+                                <div class="font-bold text-white font-mono text-lg">${student.totalPoints} <span class="text-[10px] font-sans text-slate-500">Pts</span></div>
+                            </div>
+                         `;
+                    }).join('');
+                    podiumContainer.classList.remove('items-end', 'h-80');
+                    podiumContainer.classList.add('flex-col', 'h-auto');
+                } else {
+                    podiumContainer.innerHTML = [createPodium(top3[1], 2), createPodium(top3[0], 1), createPodium(top3[2], 3)].join('');
+                    podiumContainer.classList.add('items-end', 'h-80');
+                    podiumContainer.classList.remove('flex-col', 'h-auto');
+                }
+            } else {
+                podiumContainer.innerHTML = '<div class="text-slate-500 italic">Belum ada data.</div>';
+            }
+
+            // --- Render Rest ---
+            if (rest.length > 0) {
+                listContainer.innerHTML = rest.map((s, idx) => `
+                    <div class="flex items-center p-4 hover:bg-slate-800/30 transition-colors group">
+                        <div class="w-12 text-center text-slate-500 font-bold text-lg">#${idx + 4}</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden shrink-0 mr-3 border border-slate-600">
+                            ${s.profile_photo_url ? `<img src="${s.profile_photo_url}" class="w-full h-full object-cover">` : ''}
+                        </div>
+                        <div class="flex-1 px-4">
+                            <div class="font-semibold text-slate-300 group-hover:text-white transition-colors line-clamp-1">${s.name}</div>
+                            <div class="text-xs text-slate-500">${s.nim}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-mono font-bold text-slate-400 group-hover:text-accent-400 transition-colors">${s.totalPoints} pts</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                listContainer.innerHTML = '<div class="p-8 text-center text-slate-500">Tidak ada data lainnya.</div>';
+            }
+        }
+
+        // Debounce resize event
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                loadParticipation();
-            }, 250);
+            resizeTimeout = setTimeout(() => loadData(), 250);
         });
 
-        document.addEventListener('DOMContentLoaded', loadParticipation);
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('participation'); // Init
+        });
     </script>
 </body>
 

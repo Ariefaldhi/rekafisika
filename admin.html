@@ -165,6 +165,13 @@
                                 required>
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tugas (untuk Leaderboard
+                            Kerajinan)</label>
+                        <input type="number" id="t-points" value="10"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                            required>
+                    </div>
                     <div class="flex gap-2">
                         <button type="submit" id="btn-submit-task"
                             class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
@@ -202,255 +209,354 @@
                             class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
                             required>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Tipe</label>
-                            <select id="n-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
-                                <option value="info">Info (Biru)</option>
-                                <option value="warning">Penting (Kuning)</option>
-                                <option value="urgent">Mendesak (Merah)</option>
-                            </select>
+                    <!-- ...rest of form... -->
+                    <!-- I need to be careful not to delete too much, using logic context -->
+
+                    <!-- ... [Assignments] ... -->
+                    <script>
+                        async function handleAssignmentSubmit(e) {
+                            e.preventDefault();
+                            const id = document.getElementById('t-id').value;
+                            const title = document.getElementById('t-title').value;
+                            const desc = document.getElementById('t-desc').value;
+                            const sub = document.getElementById('t-sub').value;
+                            const deadline = document.getElementById('t-deadline').value;
+                            const points = document.getElementById('t-points').value;
+                            const linkedModule = document.getElementById('t-linked-module').value || null;
+
+                            const payload = {
+                                title,
+                                description: desc,
+                                submission_link: sub,
+                                deadline: new Date(deadline).toISOString(),
+                                is_active: true,
+                                points: parseInt(points) || 10,
+                                linked_module_id: linkedModule
+                            };
+
+                            let error;
+                            if (id) {
+                                const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id);
+                                error = err;
+                            } else {
+                                const { error: err } = await supabaseClient.from('assignments').insert([payload]);
+                                error = err;
+                            }
+
+                            if (error) alert('Error: ' + error.message);
+                            else {
+                                alert(id ? 'Tugas berhasil diupdate!' : 'Tugas berhasil dibuat!');
+                                resetTaskForm();
+                                loadAssignmentsAdmin();
+                            }
+                        }
+
+                        async function editAss(id) {
+                            const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+                            if (data) {
+                                document.getElementById('t-id').value = data.id;
+                                document.getElementById('t-title').value = data.title;
+                                document.getElementById('t-desc').value = data.description;
+                                document.getElementById('t-sub').value = data.submission_link || '';
+                                document.getElementById('t-points').value = data.points || 10;
+                                document.getElementById('t-linked-module').value = data.linked_module_id || '';
+
+                                const d = new Date(data.deadline);
+                                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+
+                                document.getElementById('form-title').innerText = 'Edit Tugas';
+                                document.getElementById('btn-submit-task').innerText = 'Simpan Perubahan';
+                                document.getElementById('btn-cancel-edit').classList.remove('hidden');
+                                document.getElementById('t-title').focus();
+                            }
+                        }
+
+                        function resetTaskForm() {
+                            document.querySelector('#section-tugas form').reset();
+                            document.getElementById('t-id').value = '';
+                            document.getElementById('t-points').value = '10';
+                            document.getElementById('t-linked-module').value = '';
+                            document.getElementById('form-title').innerText = 'Buat Tugas Baru';
+                            document.getElementById('btn-submit-task').innerText = 'Publish Tugas';
+                            document.getElementById('btn-cancel-edit').classList.add('hidden');
+                        }
+                    </script>
+
+                    <!-- Section: Manajemen Berita (News) -->
+                    <section id="section-berita" class="space-y-6 hidden">
+                        <h1 class="text-2xl font-bold mb-6">Manajemen Berita</h1>
+
+                        <!-- Form Buat Berita -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                            <h2 class="font-semibold mb-4 text-accent-400" id="news-form-title">Buat Berita / Pengumuman
+                            </h2>
+                            <form onsubmit="handleAnnouncementSubmit(event)" class="space-y-4">
+                                <input type="hidden" id="n-id"> <!-- Hidden ID -->
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Judul Berita</label>
+                                    <input type="text" id="n-title"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                                        required>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs uppercase text-slate-500 mb-1">Tipe</label>
+                                        <select id="n-type"
+                                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                                            <option value="info">Info (Biru)</option>
+                                            <option value="warning">Penting (Kuning)</option>
+                                            <option value="urgent">Mendesak (Merah)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs uppercase text-slate-500 mb-1">Penulis</label>
+                                        <input type="text" id="n-author"
+                                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                                            value="Tim Dosen" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Konten Berita</label>
+                                    <textarea id="n-content"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
+                                        required></textarea>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" id="btn-submit-news"
+                                        class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
+                                        Posting Berita
+                                    </button>
+                                    <button type="button" onclick="resetNewsForm()" id="btn-cancel-news"
+                                        class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
+                                        Batal Edit
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Penulis</label>
-                            <input type="text" id="n-author"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="Tim Dosen"
-                                required>
+
+                        <!-- List Berita -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                            <h2 class="font-semibold mb-4 text-slate-300">Daftar Berita Aktif</h2>
+                            <div id="admin-news-list" class="space-y-3">
+                                <!-- Injected -->
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Konten Berita</label>
-                        <textarea id="n-content"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
-                            required></textarea>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="btn-submit-news"
-                            class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
-                            Posting Berita
-                        </button>
-                        <button type="button" onclick="resetNewsForm()" id="btn-cancel-news"
-                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
-                            Batal Edit
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    </section>
 
-            <!-- List Berita -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h2 class="font-semibold mb-4 text-slate-300">Daftar Berita Aktif</h2>
-                <div id="admin-news-list" class="space-y-3">
-                    <!-- Injected -->
-                </div>
-            </div>
-        </section>
+                    <!-- Section: Manajemen Mahasiswa -->
+                    <section id="section-mahasiswa" class="space-y-6 hidden">
+                        <h1 class="text-2xl font-bold mb-6">Manajemen Mahasiswa</h1>
 
-        <!-- Section: Manajemen Mahasiswa -->
-        <section id="section-mahasiswa" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Mahasiswa</h1>
-
-            <!-- Add Student Form -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
-                <h2 class="font-semibold mb-4 text-emerald-400">Tambah Mahasiswa</h2>
-                <form onsubmit="addStudent(event)" class="flex gap-4 items-end">
-                    <div class="flex-1">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">NIM</label>
-                        <input type="text" id="s-nim"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <div class="flex-[2]">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Nama Lengkap</label>
-                        <input type="text" id="s-name"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Kode Akses</label>
-                        <input type="text" id="s-code"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <button type="submit"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded mb-px">Tambah</button>
-                </form>
-            </div>
-
-            <!-- Student List -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
-                            <tr>
-                                <th class="px-4 py-3">NIM</th>
-                                <th class="px-4 py-3">Nama</th>
-                                <th class="px-4 py-3">Kode Akses</th>
-                                <th class="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-table-body" class="divide-y divide-slate-700">
-                            <!-- Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Manajemen Modul -->
-        <section id="section-modul" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Modul</h1>
-
-            <!-- Form Buat/Edit Modul -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
-                <h2 class="font-semibold mb-4 text-blue-400" id="modul-form-title">Tambah Modul Baru</h2>
-                <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="m-id">
-                    <div class="grid grid-cols-6 gap-4">
-                        <div class="col-span-1">
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Minggu Ke-</label>
-                            <input type="number" id="m-week"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                        <!-- Add Student Form -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                            <h2 class="font-semibold mb-4 text-emerald-400">Tambah Mahasiswa</h2>
+                            <form onsubmit="addStudent(event)" class="flex gap-4 items-end">
+                                <div class="flex-1">
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">NIM</label>
+                                    <input type="text" id="s-nim"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                                </div>
+                                <div class="flex-[2]">
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Nama Lengkap</label>
+                                    <input type="text" id="s-name"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Kode Akses</label>
+                                    <input type="text" id="s-code"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+                                </div>
+                                <button type="submit"
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded mb-px">Tambah</button>
+                            </form>
                         </div>
-                        <div class="col-span-5">
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Topik / Judul</label>
-                            <input type="text" id="m-topic"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
+
+                        <!-- Student List -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-slate-400">
+                                    <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-4 py-3">NIM</th>
+                                            <th class="px-4 py-3">Nama</th>
+                                            <th class="px-4 py-3">Kode Akses</th>
+                                            <th class="px-4 py-3 text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="student-table-body" class="divide-y divide-slate-700">
+                                        <!-- Injected -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi Singkat</label>
-                        <textarea id="m-desc"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-20"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Rumus Penting (LaTeX)</label>
-                        <input type="text" id="m-formula"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
-                            placeholder="e.g. $$E=mc^2$$">
-                    </div>
+                    </section>
 
-                    <!-- Learning Path Builder -->
-                    <div class="border-t border-slate-700 pt-4 mt-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <label class="block text-sm font-bold text-accent-400 uppercase">Alur Pembelajaran
-                                (v2.1) <span id="step-count-badge"
-                                    class="ml-2 bg-slate-700 text-white px-2 py-0.5 rounded text-xs">0
-                                    Langkah</span></label>
-                            <button type="button" onclick="addStep()"
-                                class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
-                                <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
-                            </button>
+                    <!-- Section: Manajemen Modul -->
+                    <section id="section-modul" class="space-y-6 hidden">
+                        <h1 class="text-2xl font-bold mb-6">Manajemen Modul</h1>
+
+                        <!-- Form Buat/Edit Modul -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                            <h2 class="font-semibold mb-4 text-blue-400" id="modul-form-title">Tambah Modul Baru</h2>
+                            <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
+                                <input type="hidden" id="m-id">
+                                <div class="grid grid-cols-6 gap-4">
+                                    <div class="col-span-1">
+                                        <label class="block text-xs uppercase text-slate-500 mb-1">Minggu Ke-</label>
+                                        <input type="number" id="m-week"
+                                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                                            required>
+                                    </div>
+                                    <div class="col-span-5">
+                                        <label class="block text-xs uppercase text-slate-500 mb-1">Topik / Judul</label>
+                                        <input type="text" id="m-topic"
+                                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                                            required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi Singkat</label>
+                                    <textarea id="m-desc"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-20"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Rumus Penting
+                                        (LaTeX)</label>
+                                    <input type="text" id="m-formula"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                                        placeholder="e.g. $$E=mc^2$$">
+                                </div>
+
+                                <!-- Learning Path Builder -->
+                                <div class="border-t border-slate-700 pt-4 mt-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <label class="block text-sm font-bold text-accent-400 uppercase">Alur
+                                            Pembelajaran
+                                            (v2.1) <span id="step-count-badge"
+                                                class="ml-2 bg-slate-700 text-white px-2 py-0.5 rounded text-xs">0
+                                                Langkah</span></label>
+                                        <button type="button" onclick="addStep()"
+                                            class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
+                                            <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
+                                        </button>
+                                    </div>
+                                    <div id="steps-container"
+                                        class="space-y-3 p-4 bg-slate-900/50 rounded-lg border border-slate-800"
+                                        style="max-height: 400px; overflow-y: auto;">
+                                        <!-- Steps Injected Here -->
+                                    </div>
+                                    <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">
+                                        Belum ada
+                                        langkah pembelajaran.</div>
+                                </div>
+
+                                <div class="flex gap-2 pt-4">
+                                    <button type="submit" id="btn-submit-modul"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Simpan
+                                        Modul</button>
+                                    <button type="button" onclick="resetModulForm()" id="btn-cancel-modul"
+                                        class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">Batal</button>
+                                </div>
+                            </form>
                         </div>
-                        <div id="steps-container"
-                            class="space-y-3 p-4 bg-slate-900/50 rounded-lg border border-slate-800"
-                            style="max-height: 400px; overflow-y: auto;">
-                            <!-- Steps Injected Here -->
+
+                        <!-- Module List -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                            <div class="space-y-3" id="admin-modul-list">
+                                <!-- Injected -->
+                            </div>
                         </div>
-                        <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">Belum ada
-                            langkah pembelajaran.</div>
-                    </div>
+                    </section>
 
-                    <div class="flex gap-2 pt-4">
-                        <button type="submit" id="btn-submit-modul"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Simpan
-                            Modul</button>
-                        <button type="button" onclick="resetModulForm()" id="btn-cancel-modul"
-                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">Batal</button>
-                    </div>
-                </form>
-            </div>
+                    <!-- Section: Manajemen Presensi -->
+                    <section id="section-presensi" class="space-y-6 hidden">
+                        <h1 class="text-2xl font-bold mb-6">Manajemen Presensi</h1>
 
-            <!-- Module List -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="space-y-3" id="admin-modul-list">
-                    <!-- Injected -->
-                </div>
-            </div>
-        </section>
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Pertemuan Ke-</label>
+                                    <select id="a-meet-code"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                                        <!-- JS will populate 1-1 to 16-2 -->
+                                    </select>
+                                </div>
+                            </div>
 
-        <!-- Section: Manajemen Presensi -->
-        <section id="section-presensi" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Presensi</h1>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead class="text-left text-slate-500 bg-slate-900">
+                                        <tr>
+                                            <th class="p-3">Nama Mahasiswa</th>
+                                            <th class="p-3 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="absen-table-body" class="divide-y divide-slate-700">
+                                        <!-- JS populates students -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button onclick="saveAttendanceBatch()"
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded font-medium">Simpan
+                                    Perubahan</button>
+                            </div>
+                        </div>
+                    </section>
 
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Pertemuan Ke-</label>
-                        <select id="a-meet-code" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
-                            <!-- JS will populate 1-1 to 16-2 -->
-                        </select>
-                    </div>
-                </div>
+                    <!-- Section: Input Keaktifan -->
+                    <section id="section-keaktifan" class="space-y-6 hidden">
+                        <h1 class="text-2xl font-bold mb-6">Input Poin Keaktifan</h1>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="text-left text-slate-500 bg-slate-900">
-                            <tr>
-                                <th class="p-3">Nama Mahasiswa</th>
-                                <th class="p-3 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="absen-table-body" class="divide-y divide-slate-700">
-                            <!-- JS populates students -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button onclick="saveAttendanceBatch()"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded font-medium">Simpan
-                        Perubahan</button>
-                </div>
-            </div>
-        </section>
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 max-w-xl">
+                            <form onsubmit="addPoints(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Pilih Mahasiswa</label>
+                                    <select id="k-student"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                                        <option value="">-- Cari Nama --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tambahan</label>
+                                    <input type="number" id="k-points"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="10"
+                                        required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase text-slate-500 mb-1">Keterangan /
+                                        Pertanyaan</label>
+                                    <input type="text" id="k-note"
+                                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
+                                        placeholder="e.g. Bertanya tentang tensor" required>
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded font-medium">Berikan
+                                    Poin</button>
+                            </form>
+                        </div>
 
-        <!-- Section: Input Keaktifan -->
-        <section id="section-keaktifan" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Input Poin Keaktifan</h1>
-
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 max-w-xl">
-                <form onsubmit="addPoints(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Pilih Mahasiswa</label>
-                        <select id="k-student"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                            <option value="">-- Cari Nama --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tambahan</label>
-                        <input type="number" id="k-points"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="10" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Keterangan / Pertanyaan</label>
-                        <input type="text" id="k-note"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
-                            placeholder="e.g. Bertanya tentang tensor" required>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded font-medium">Berikan
-                        Poin</button>
-                </form>
-            </div>
-
-            <!-- List Poin Log (New Feature: Edit/Delete) -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mt-6">
-                <h2 class="font-semibold mb-4 text-slate-300">Riwayat Poin Terakhir</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
-                            <tr>
-                                <th class="px-4 py-3">Nama</th>
-                                <th class="px-4 py-3">Poin</th>
-                                <th class="px-4 py-3">Catatan</th>
-                                <th class="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="poin-log-body" class="divide-y divide-slate-700">
-                            <!-- Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+                        <!-- List Poin Log (New Feature: Edit/Delete) -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mt-6">
+                            <h2 class="font-semibold mb-4 text-slate-300">Riwayat Poin Terakhir</h2>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-slate-400">
+                                    <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-4 py-3">Nama</th>
+                                            <th class="px-4 py-3">Poin</th>
+                                            <th class="px-4 py-3">Catatan</th>
+                                            <th class="px-4 py-3 text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="poin-log-body" class="divide-y divide-slate-700">
+                                        <!-- Injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
 
     </main>
 

@@ -207,6 +207,32 @@
                 </div>
                 <p class="mt-4 text-xs text-slate-500">Semakin aktif bertanya dan menjawab, semakin tinggi poinmu!</p>
             </div>
+
+            <!-- Tasks Stat -->
+            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-list-check text-6xl text-purple-400"></i>
+                </div>
+                <h3 class="text-slate-400 font-medium mb-1">Tugas Selesai</h3>
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-bold text-purple-400" id="stat-tugas">0</span>
+                    <span class="text-sm text-slate-500 mb-1">Tugas</span>
+                </div>
+                <p class="mt-4 text-xs text-slate-500">Rajin pangkal pandai!</p>
+            </div>
+
+            <!-- Diligence Points Stat -->
+            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-bolt text-6xl text-pink-400"></i>
+                </div>
+                <h3 class="text-slate-400 font-medium mb-1">Poin Kerajinan</h3>
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-bold text-pink-400" id="stat-rajin">0</span>
+                    <span class="text-sm text-slate-500 mb-1">Poin</span>
+                </div>
+                <p class="mt-4 text-xs text-slate-500">Poin dari mengerjakan tugas.</p>
+            </div>
         </div>
 
     </main>
@@ -275,6 +301,37 @@
             if (points) {
                 const total = points.reduce((sum, item) => sum + (item.points || 0), 0);
                 document.getElementById('stat-poin').innerText = total;
+            }
+
+            // 3. Tasks & Diligence Points
+            // Fetch All Active Assignments (Id, Points)
+            const { data: assignments } = await supabaseClient
+                .from('assignments')
+                .select('id, points')
+                .eq('is_active', true);
+
+            // Fetch User's Completed Status
+            const { data: completedStats } = await supabaseClient
+                .from('student_task_status')
+                .select('assignment_id')
+                .eq('student_id', user.nim)
+                .eq('is_completed', true);
+
+            if (assignments && completedStats) {
+                const completedCount = completedStats.length;
+                document.getElementById('stat-tugas').innerText = completedCount;
+
+                // Calc Diligence Points
+                let diligenceTotal = 0;
+                // Create map for O(1) lookup
+                const assignmentPoints = {};
+                assignments.forEach(a => assignmentPoints[a.id] = (a.points || 10));
+
+                completedStats.forEach(stat => {
+                    diligenceTotal += (assignmentPoints[stat.assignment_id] || 0);
+                });
+
+                document.getElementById('stat-rajin').innerText = diligenceTotal;
             }
         }
 

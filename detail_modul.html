@@ -311,6 +311,11 @@
                 // Check overall completion to enable button
                 checkCompletionStatus(steps.length, completedStepIds.size);
 
+                // Self-Healing: If module is 100% complete, ensure linked assignment is also complete
+                if (steps.length > 0 && steps.length === completedStepIds.size) {
+                    checkAndCompleteAssignment();
+                }
+
                 // MathJax
                 if (window.MathJax && window.MathJax.typesetPromise) MathJax.typesetPromise();
 
