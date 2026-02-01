@@ -741,9 +741,11 @@
             const container = document.getElementById('steps-container');
             const emptyMsg = document.getElementById('empty-steps-msg');
 
+            // Safety check
+            if (!container || !emptyMsg) return;
+
             if (currentSteps.length === 0) {
                 container.innerHTML = '';
-                container.appendChild(emptyMsg);
                 emptyMsg.style.display = 'block';
                 return;
             }
