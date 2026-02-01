@@ -321,7 +321,9 @@
                     <div class="border-t border-slate-700 pt-4 mt-4">
                         <div class="flex justify-between items-center mb-4">
                             <label class="block text-sm font-bold text-accent-400 uppercase">Alur Pembelajaran
-                                (v2.1)</label>
+                                (v2.1) <span id="step-count-badge"
+                                    class="ml-2 bg-slate-700 text-white px-2 py-0.5 rounded text-xs">0
+                                    Langkah</span></label>
                             <button type="button" onclick="addStep()"
                                 class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
                                 <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
@@ -331,9 +333,9 @@
                             class="space-y-3 p-4 bg-slate-900/50 rounded-lg border border-slate-800"
                             style="max-height: 400px; overflow-y: auto;">
                             <!-- Steps Injected Here -->
-                            <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">Belum ada
-                                langkah pembelajaran.</div>
                         </div>
+                        <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">Belum ada
+                            langkah pembelajaran.</div>
                     </div>
 
                     <div class="flex gap-2 pt-4">
