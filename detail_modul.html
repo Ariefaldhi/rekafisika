@@ -235,6 +235,36 @@
             loadModuleDetail();
         }
 
+        async function checkAndCompleteAssignment() {
+            try {
+                // Find active assignment linked to this module
+                const { data: assignments } = await supabaseClient
+                    .from('assignments')
+                    .select('id')
+                    .eq('linked_module_id', moduleId)
+                    .eq('is_active', true);
+
+                if (assignments && assignments.length > 0) {
+                    const updates = assignments.map(a => ({
+                        student_id: userNim,
+                        assignment_id: a.id,
+                        is_completed: true,
+                        updated_at: new Date()
+                    }));
+
+                    // Upsert status
+                    const { error } = await supabaseClient
+                        .from('student_task_status')
+                        .upsert(updates, { onConflict: 'student_id, assignment_id' });
+
+                    if (error) console.error("Auto-complete task failed:", error);
+                    else console.log("Auto-completed linked tasks");
+                }
+            } catch (e) {
+                console.error("Error checking linked assignments", e);
+            }
+        }
+
         async function loadModuleDetail() {
             try {
                 // 1. Fetch Module Data
