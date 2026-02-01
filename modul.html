@@ -251,87 +251,92 @@
                 }
 
             } catch (err) {
-                async function submitQuizAnswer(moduleId, stepId, answer) {
-                    const userSession = localStorage.getItem('user_session');
-                    if (!userSession) return alert('Silakan login terlebih dahulu.');
+                console.error(err);
+                container.innerHTML = '<p class="text-red-400 text-center">Gagal memuat modul.</p>';
+            }
+        }
 
-                    const user = JSON.parse(userSession);
-                    // In a real app, you'd want to use student ID. Assuming user object has nim or matching ID.
-                    // For now, we will query students table to match user name or Code. 
-                    // Or simpler, just assume user object has {nim: ...}
+        async function submitQuizAnswer(moduleId, stepId, answer) {
+            const userSession = localStorage.getItem('user_session');
+            if (!userSession) return alert('Silakan login terlebih dahulu.');
 
-                    if (!user.nim) {
-                        // Try to find student by name if no NIM in session (fallback)
-                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                        if (data) user.nim = data.nim;
-                        else return alert('Data mahasiswa tidak ditemukan.');
-                    }
+            const user = JSON.parse(userSession);
+            // In a real app, you'd want to use student ID. Assuming user object has nim or matching ID.
+            // For now, we will query students table to match user name or Code. 
+            // Or simpler, just assume user object has {nim: ...}
 
-                    const { error } = await supabaseClient.from('student_answers').insert([{
-                        student_nim: user.nim,
-                        module_id: moduleId,
-                        step_id: stepId,
-                        answer: answer
-                    }]);
+            if (!user.nim) {
+                // Try to find student by name if no NIM in session (fallback)
+                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
+                if (data) user.nim = data.nim;
+                else return alert('Data mahasiswa tidak ditemukan.');
+            }
 
-                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-                    else alert('Jawaban berhasil disimpan!');
-                }
+            const { error } = await supabaseClient.from('student_answers').insert([{
+                student_nim: user.nim,
+                module_id: moduleId,
+                step_id: stepId,
+                answer: answer
+            }]);
 
-                async function submitStepAnswers(moduleId, stepId) {
-                    const userSession = localStorage.getItem('user_session');
-                    if (!userSession) return alert('Silakan login terlebih dahulu.');
+            if (error) alert('Gagal menyimpan jawaban: ' + error.message);
+            else alert('Jawaban berhasil disimpan!');
+        }
 
-                    const user = JSON.parse(userSession);
-                    if (!user.nim) {
-                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                        if (data) user.nim = data.nim;
-                        else return alert('Data mahasiswa tidak ditemukan.');
-                    }
+        async function submitStepAnswers(moduleId, stepId) {
+            const userSession = localStorage.getItem('user_session');
+            if (!userSession) return alert('Silakan login terlebih dahulu.');
 
-                    // Collect answers
-                    const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
-                    const answers = {};
-                    let hasAnswer = false;
-                    inputs.forEach(input => {
-                        const qId = input.dataset.questionId;
-                        answers[qId] = input.value;
-                        if (input.value.trim()) hasAnswer = true;
-                    });
+            const user = JSON.parse(userSession);
+            if (!user.nim) {
+                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
+                if (data) user.nim = data.nim;
+                else return alert('Data mahasiswa tidak ditemukan.');
+            }
 
-                    if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
+            // Collect answers
+            const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
+            const answers = {};
+            let hasAnswer = false;
+            inputs.forEach(input => {
+                const qId = input.dataset.questionId;
+                answers[qId] = input.value;
+                if (input.value.trim()) hasAnswer = true;
+            });
 
-                    // Upsert answer as JSON
-                    const { error } = await supabaseClient.from('student_answers').upsert({
-                        student_nim: user.nim,
-                        module_id: moduleId,
-                        step_id: stepId,
-                        answer: JSON.stringify(answers), // Store all answers as JSON string
-                        score: 0 // Default score, needs grading
-                    }, { onConflict: 'student_nim, step_id' }); // Assuming composite key/unique constraint exists, or we just insert. 
-                    // Note: If no unique constraint on (student_nim, step_id), upsert might duplicate. 
-                    // Ideally we should check if exists or rely on the table setup. For now, assuming similar logic to previous submit.
+            if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
 
-                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-                    else alert('Jawaban berhasil disimpan!');
-                }
+            // Upsert answer as JSON
+            const { error } = await supabaseClient.from('student_answers').upsert({
+                student_nim: user.nim,
+                module_id: moduleId,
+                step_id: stepId,
+                answer: JSON.stringify(answers), // Store all answers as JSON string
+                score: 0 // Default score, needs grading
+            }, { onConflict: 'student_nim, step_id' }); // Assuming composite key/unique constraint exists, or we just insert. 
+            // Note: If no unique constraint on (student_nim, step_id), upsert might duplicate. 
+            // Ideally we should check if exists or rely on the table setup. For now, assuming similar logic to previous submit.
 
-                function renderStepCard(step, index, moduleId) {
-                    let icon = 'fa-circle';
-                    let color = 'bg-slate-500';
-                    let mediaContent = '';
-                    let extensionHtml = '';
+            if (error) alert('Gagal menyimpan jawaban: ' + error.message);
+            else alert('Jawaban berhasil disimpan!');
+        }
 
-                    // Questions Rendering Logic
-                    if (step.questions && step.questions.length > 0) {
-                        const questionsHtml = step.questions.map((q, qIdx) => `
+        function renderStepCard(step, index, moduleId) {
+            let icon = 'fa-circle';
+            let color = 'bg-slate-500';
+            let mediaContent = '';
+            let extensionHtml = '';
+
+            // Questions Rendering Logic
+            if (step.questions && step.questions.length > 0) {
+                const questionsHtml = step.questions.map((q, qIdx) => `
                     <div class="mb-4">
                         <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
                         <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
                     </div>
                 `).join('');
 
-                        extensionHtml = `
+                extensionHtml = `
                     <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
                         <div class="flex items-center gap-2 mb-4">
                             <i class="fa-solid fa-pen-to-square text-purple-400"></i>
@@ -343,62 +348,62 @@
                         </button>
                     </div>
                 `;
-                    }
+            }
 
-                    // Determine Icon & Color
-                    switch (step.type) {
-                        case 'youtube':
-                            icon = 'fa-play';
-                            color = 'bg-red-500';
-                            const videoId = getYoutubeId(step.content);
-                            if (videoId) {
-                                mediaContent = `
+            // Determine Icon & Color
+            switch (step.type) {
+                case 'youtube':
+                    icon = 'fa-play';
+                    color = 'bg-red-500';
+                    const videoId = getYoutubeId(step.content);
+                    if (videoId) {
+                        mediaContent = `
                             <div class="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden border border-slate-700 mt-3 shadow-lg">
                                 <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
                             </div>`;
-                            } else {
-                                mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i> Buka Link Video</a>`;
-                            }
-                            break;
-                        case 'pdf':
-                            icon = 'fa-file-pdf';
-                            color = 'bg-red-400';
-                            let pdfUrl = step.content;
-                            if (step.start_page) pdfUrl += `#page=${step.start_page}`;
+                    } else {
+                        mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i> Buka Link Video</a>`;
+                    }
+                    break;
+                case 'pdf':
+                    icon = 'fa-file-pdf';
+                    color = 'bg-red-400';
+                    let pdfUrl = step.content;
+                    if (step.start_page) pdfUrl += `#page=${step.start_page}`;
 
-                            mediaContent = `
+                    mediaContent = `
                         <div class="mt-3 flex flex-col gap-2">
                             <!-- Clean Preview ONLY -->
                             <iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
                             ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Menampilkan halaman ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
                         </div>`;
-                            break;
-                        case 'ppt':
-                            icon = 'fa-file-powerpoint';
-                            color = 'bg-orange-500';
-                            mediaContent = `
+                    break;
+                case 'ppt':
+                    icon = 'fa-file-powerpoint';
+                    color = 'bg-orange-500';
+                    mediaContent = `
                         <div class="mt-3 flex flex-col gap-2">
                              <!-- Clean Preview ONLY -->
                             <iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
                            ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Slide fokus: ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
                         </div>`;
-                            break;
-                        case 'task':
-                            icon = 'fa-clipboard-list';
-                            color = 'bg-emerald-500';
-                            mediaContent = `
+                    break;
+                case 'task':
+                    icon = 'fa-clipboard-list';
+                    color = 'bg-emerald-500';
+                    mediaContent = `
                         <div class="mt-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg text-sm text-slate-300">
                            ${step.content.replace(/\n/g, '<br>')}
                         </div>`;
-                            break;
-                        case 'quiz':
-                            icon = 'fa-question-circle';
-                            color = 'bg-purple-500';
-                            // If quiz has specific image content, show it.
-                            // Questions are handled by extensionHtml above if they exist.
-                            // But legacy quiz might just have one question? 
-                            // Let's support both. new questions array overrides or supplements.
-                            mediaContent = `
+                    break;
+                case 'quiz':
+                    icon = 'fa-question-circle';
+                    color = 'bg-purple-500';
+                    // If quiz has specific image content, show it.
+                    // Questions are handled by extensionHtml above if they exist.
+                    // But legacy quiz might just have one question? 
+                    // Let's support both. new questions array overrides or supplements.
+                    mediaContent = `
                         <div class="mt-3 space-y-3">
                             ${step.content ? `
                             <div class="rounded overflow-hidden border border-slate-700">
@@ -417,10 +422,10 @@
                                 </div>
                             ` : ''}
                         </div>`;
-                            break;
-                    }
+                    break;
+            }
 
-                    return `
+            return `
                 <div class="timeline-item">
                     <div class="timeline-dot ${color} flex items-center justify-center text-[10px] text-white shadow-[0_0_10px_rgba(0,0,0,0.5)]">
                         <i class="fa-solid ${icon}"></i>
@@ -433,29 +438,29 @@
                     </div>
                 </div>
             `;
-                }
+        }
 
-                function getYoutubeId(url) {
-                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                    const match = url.match(regExp);
-                    return (match && match[2].length === 11) ? match[2] : null;
-                }
+        function getYoutubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
 
-                function toggleAccordion(index) {
-                    const content = document.getElementById(`content-${index}`);
-                    const icon = document.getElementById(`icon-${index}`);
-                    const isActive = content.classList.contains('active');
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const isActive = content.classList.contains('active');
 
-                    document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
+            document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
 
-                    if (!isActive) {
-                        content.classList.add('active');
-                        icon.style.transform = 'rotate(180deg)';
-                    }
-                }
+            if (!isActive) {
+                content.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
 
-                document.addEventListener('DOMContentLoaded', loadModules);
+        document.addEventListener('DOMContentLoaded', loadModules);
     </script>
 </body>
 
