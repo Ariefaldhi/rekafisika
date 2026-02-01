@@ -711,6 +711,414 @@
             else {
                 alert('Poin berhasil ditambahkan!');
                 e.target.reset();
+                loadPointLogs();
+            }
+        }
+
+        async function loadAssignmentsAdmin() {
+            const { data } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
+            const list = document.getElementById('admin-tugas-list');
+            if (data && list) {
+                list.innerHTML = data.map(t => `
+                    <div class="flex justify-between items-center bg-slate-900 border border-slate-700 p-3 rounded">
+                        <div>
+                            <div class="font-bold flex items-center gap-2">
+                                ${t.title}
+                                <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
+                            </div>
+                            <div class="text-xs text-slate-500">${new Date(t.deadline).toLocaleDateString()}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editAss('${t.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteAss('${t.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function loadAnnouncementsAdmin() {
+            const list = document.getElementById('admin-news-list');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('announcements')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (data && list) {
+                    list.innerHTML = data.map(n => `
+                        <div class="flex justify-between items-start bg-slate-900 border border-slate-700 p-4 rounded group">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-sm font-bold text-white">${n.title}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded uppercase font-bold 
+                                        ${n.type === 'urgent' ? 'bg-red-500/20 text-red-400' : n.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/20 text-blue-400'}">
+                                        ${n.type}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 line-clamp-1">${n.content}</p>
+                                <span class="text-[10px] text-slate-600">${new Date(n.created_at).toLocaleDateString()} oleh ${n.author}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editAnnouncement('${n.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteAnnouncement('${n.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function handleAnnouncementSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('n-id').value;
+            const title = document.getElementById('n-title').value;
+            const content = document.getElementById('n-content').value;
+            const type = document.getElementById('n-type').value;
+            const author = document.getElementById('n-author').value;
+
+            const payload = { title, content, type, author, is_active: true };
+
+            let error;
+            if (id) {
+                const { error: err } = await supabaseClient.from('announcements').update(payload).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('announcements').insert([payload]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Berita berhasil diupdate!' : 'Berita berhasil diposting!');
+                resetNewsForm();
+                loadAnnouncementsAdmin();
+            }
+        }
+
+        async function editAnnouncement(id) {
+            const { data } = await supabaseClient.from('announcements').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('n-id').value = data.id;
+                document.getElementById('n-title').value = data.title;
+                document.getElementById('n-content').value = data.content;
+                document.getElementById('n-type').value = data.type;
+                document.getElementById('n-author').value = data.author;
+
+                document.getElementById('news-form-title').innerText = 'Edit Berita';
+                document.getElementById('btn-submit-news').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-news').classList.remove('hidden');
+                document.getElementById('n-title').focus();
+            }
+        }
+
+        function resetNewsForm() {
+            document.querySelector('#section-berita form').reset();
+            document.getElementById('n-id').value = '';
+            document.getElementById('news-form-title').innerText = 'Buat Berita / Pengumuman';
+            document.getElementById('btn-submit-news').innerText = 'Posting Berita';
+            document.getElementById('btn-cancel-news').classList.add('hidden');
+        }
+
+        async function deleteAnnouncement(id) {
+            if (confirm('Hapus berita ini?')) {
+                await supabaseClient.from('announcements').delete().eq('id', id);
+                loadAnnouncementsAdmin();
+            }
+        }
+
+        // --- Module Management ---
+        let currentSteps = [];
+
+        function uID() { return 'step-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9); }
+
+        async function loadModulesAdmin() {
+            const list = document.getElementById('admin-modul-list');
+            try {
+                const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+                if (data && list) {
+                    list.innerHTML = data.map(m => `
+                        <div class="bg-slate-900 border border-slate-700 p-4 rounded flex justify-between items-center group">
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center justify-center w-8 h-8 rounded bg-slate-800 text-slate-400 font-bold border border-slate-700">${m.week}</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-200">${m.topic}</h3>
+                                    <div class="text-xs text-slate-500 mt-1 flex gap-2">
+                                        <span>${Array.isArray(m.content_steps) ? m.content_steps.length : 0} Langkah</span>
+                                        ${m.formula ? '<span class="text-accent-400">Formula LaTeX</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editModul('${m.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteModul('${m.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function handleModuleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('m-id').value;
+            const week = document.getElementById('m-week').value;
+            const topic = document.getElementById('m-topic').value;
+            const desc = document.getElementById('m-desc').value;
+            const formula = document.getElementById('m-formula').value;
+
+            const payload = {
+                week: parseInt(week),
+                topic,
+                description: desc,
+                formula,
+                content_steps: currentSteps,
+                is_visible: true
+            };
+
+            let error;
+            if (id) {
+                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('modules').insert([payload]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Modul berhasil diupdate!' : 'Modul berhasil dibuat!');
+                resetModulForm();
+                loadModulesAdmin();
+            }
+        }
+
+        async function editModul(id) {
+            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('m-id').value = data.id;
+                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-topic').value = data.topic;
+                document.getElementById('m-desc').value = data.description;
+                document.getElementById('m-formula').value = data.formula || '';
+
+                currentSteps = [];
+                if (data.content_steps && Array.isArray(data.content_steps)) {
+                    data.content_steps.forEach(s => addStep(s));
+                }
+                renderSteps();
+
+                document.getElementById('modul-form-title').innerText = 'Edit Modul (v2)';
+                document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-modul').classList.remove('hidden');
+                document.getElementById('m-week').focus();
+            }
+        }
+
+        function resetModulForm() {
+            document.querySelector('#section-modul form').reset();
+            currentSteps = [];
+            renderSteps();
+            document.getElementById('m-id').value = '';
+            document.getElementById('modul-form-title').innerText = 'Tambah Modul Baru';
+            document.getElementById('btn-submit-modul').innerText = 'Simpan Modul';
+            document.getElementById('btn-cancel-modul').classList.add('hidden');
+        }
+
+        function addStep(existingData = null) {
+            const id = existingData ? existingData.id : uID();
+            const step = existingData || {
+                id: id,
+                type: 'youtube',
+                title: '',
+                content: '',
+                questions: []
+            };
+            if (!step.questions) step.questions = [];
+            currentSteps.push(step);
+            renderSteps();
+            if (!existingData) {
+                setTimeout(() => {
+                    const container = document.getElementById('steps-container');
+                    if (container) container.scrollTop = container.scrollHeight;
+                }, 100);
+            }
+        }
+
+        function removeStep(id) {
+            currentSteps = currentSteps.filter(s => s.id !== id);
+            renderSteps();
+        }
+
+        function updateStep(id, field, value) {
+            const step = currentSteps.find(s => s.id === id);
+            if (step) {
+                step[field] = value;
+                if (field === 'type') renderSteps();
+            }
+        }
+
+        // Question Helpers
+        function addQuestion(stepId) {
+            const step = currentSteps.find(s => s.id === stepId);
+            if (step) {
+                if (!step.questions) step.questions = [];
+                step.questions.push({ id: uID(), text: '' });
+                renderSteps();
+            }
+        }
+
+        function removeQuestion(stepId, questionId) {
+            const step = currentSteps.find(s => s.id === stepId);
+            if (step && step.questions) {
+                step.questions = step.questions.filter(q => q.id !== questionId);
+                renderSteps();
+            }
+        }
+
+        function updateQuestion(stepId, questionId, text) {
+            const step = currentSteps.find(s => s.id === stepId);
+            if (step && step.questions) {
+                const q = step.questions.find(q => q.id === questionId);
+                if (q) q.text = text;
+            }
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            const emptyMsg = document.getElementById('empty-steps-msg');
+            const badge = document.getElementById('step-count-badge');
+
+            if (badge) badge.innerText = currentSteps.length + ' Langkah';
+
+            if (currentSteps.length === 0) {
+                if (container) container.innerHTML = '';
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                return;
+            }
+
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            if (container) {
+                container.innerHTML = '';
+                currentSteps.forEach((step, index) => {
+                    let placeholder = 'Konten...';
+                    if (step.type === 'youtube') placeholder = 'Link YouTube (e.g. https://youtu.be/...)';
+                    else if (step.type === 'pdf') placeholder = 'Link PDF (GDrive/Direct Link)';
+                    else if (step.type === 'ppt') placeholder = 'Link Presentasi (PPT/Slides)';
+                    else if (step.type === 'quiz') placeholder = 'Link Gambar/Slide Kuis';
+
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-800 p-3 rounded border border-slate-700 flex flex-col gap-2 relative group';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Langkah ${index + 1}</span>
+                            <button type="button" onclick="removeStep('${step.id}')" class="text-red-400 hover:text-red-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <div class="md:col-span-1">
+                                <select onchange="updateStep('${step.id}', 'type', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
+                                    <option value="youtube" ${step.type === 'youtube' ? 'selected' : ''}>Video YouTube</option>
+                                    <option value="pdf" ${step.type === 'pdf' ? 'selected' : ''}>Dokumen PDF</option>
+                                    <option value="ppt" ${step.type === 'ppt' ? 'selected' : ''}>Presentasi (PPT/Slides)</option>
+                                    <option value="task" ${step.type === 'task' ? 'selected' : ''}>Instruksi/Tugas</option>
+                                    <option value="quiz" ${step.type === 'quiz' ? 'selected' : ''}>Slide Kuis / Soal</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <input type="text" value="${step.title}" oninput="updateStep('${step.id}', 'title', this.value)" placeholder="Judul Materi / Langkah" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            ${step.type === 'task'
+                            ? `<textarea oninput="updateStep('${step.id}', 'content', this.value)" placeholder="Tulis instruksi lengkap di sini..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 h-20">${step.content}</textarea>`
+                            : `
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" id="content-${step.id}" value="${step.content}" oninput="updateStep('${step.id}', 'content', this.value)" placeholder="${placeholder}" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 font-mono">
+                                    ${(step.type === 'pdf' || step.type === 'ppt' || step.type === 'quiz') ? `
+                                        <label class="cursor-pointer bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white" title="Upload File">
+                                            <i class="fa-solid fa-upload"></i>
+                                            <input type="file" class="hidden" data-step-id="${step.id}" onchange="handleFileUpload(this, 'content-${step.id}')" accept=".pdf,.ppt,.pptx,image/*">
+                                        </label>
+                                    ` : ''}
+                                </div>
+                            `
+                        }
+                        </div>
+
+                        ${(step.type === 'ppt' || step.type === 'pdf' || step.type === 'quiz') ? `
+                            <div class="mt-2 bg-slate-900/50 p-3 rounded border border-slate-700/50">
+                                ${step.type !== 'quiz' ? `
+                                    <div class="grid grid-cols-2 gap-4 mb-3">
+                                        <div>
+                                            <label class="text-[10px] uppercase text-slate-500">Mulai Slide/Halaman</label>
+                                            <input type="number" value="${step.start_page || ''}" oninput="updateStep('${step.id}', 'start_page', this.value)" placeholder="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] uppercase text-slate-500">Sampai Slide/Halaman</label>
+                                            <input type="number" value="${step.end_page || ''}" oninput="updateStep('${step.id}', 'end_page', this.value)" placeholder="Akhir" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <label class="text-[10px] uppercase text-slate-500 font-bold">Daftar Pertanyaan / Soal</label>
+                                        <button type="button" onclick="addQuestion('${step.id}')" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded hover:bg-emerald-500/30">
+                                            <i class="fa-solid fa-plus mr-1"></i> Tambah Soal
+                                        </button>
+                                    </div>
+                                    <div class="space-y-2" id="questions-${step.id}">
+                                        ${(step.questions || []).map((q, qIndex) => `
+                                            <div class="flex gap-2">
+                                                <input type="text" value="${q.text}" oninput="updateQuestion('${step.id}', '${q.id}', this.value)" placeholder="Tulis pertanyaan nomor ${qIndex + 1}..." class="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                                <button type="button" onclick="removeQuestion('${step.id}', '${q.id}')" class="text-red-400 hover:text-red-300 w-6 flex items-center justify-center bg-slate-900 border border-slate-700 rounded">
+                                                    <i class="fa-solid fa-times"></i>
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                        ${(!step.questions || step.questions.length === 0) ? '<div class="text-[10px] text-slate-600 italic">Belum ada pertanyaan.</div>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        async function deleteModul(id) {
+            if (confirm('Hapus modul ini?')) {
+                await supabaseClient.from('modules').delete().eq('id', id);
+                loadModulesAdmin();
+            }
+        }
+
+        // Helper: Upload File to Supabase Storage
+        async function uploadFile(file) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+            const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
+            if (error) {
+                console.error('Upload Error:', error);
+                alert('Gagal upload: ' + error.message);
+                return null;
+            }
+            const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
+            return publicUrl;
+        }
+
+        async function handleFileUpload(input, targetId) {
+            if (input.files && input.files[0]) {
+                const url = await uploadFile(input.files[0]);
+                if (url) {
+                    const stepId = input.getAttribute('data-step-id');
+                    if (stepId) updateStep(stepId, 'content', url);
+                    // Force input update
+                    document.getElementById(targetId).value = url;
+                }
             }
         }
 

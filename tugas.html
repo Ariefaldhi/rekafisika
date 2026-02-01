@@ -206,6 +206,7 @@
             const deadline = new Date(task.deadline);
             const now = new Date();
             const diffTime = deadline - now;
+            const isLinked = !!task.linked_module_id;
 
             // Countdown Calc
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -214,10 +215,25 @@
 
             // Colors
             const borderClass = isDone ? 'border-emerald-500' : 'border-yellow-500';
-            const btnClass = isDone
+            let btnClass = isDone
                 ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
                 : 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/20';
-            const btnText = isDone ? '<i class="fa-solid fa-rotate-left mr-2"></i>Batal Selesai' : '<i class="fa-solid fa-check mr-2"></i>Tandai Selesai';
+
+            let btnText = isDone ? '<i class="fa-solid fa-rotate-left mr-2"></i>Batal Selesai' : '<i class="fa-solid fa-check mr-2"></i>Tandai Selesai';
+            let btnAction = `toggleStatus('${task.id}', ${!isDone})`;
+
+            // Linked Task Logic
+            if (isLinked) {
+                if (!isDone) {
+                    btnClass = 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600';
+                    btnText = '<i class="fa-solid fa-lock mr-2"></i>Selesaikan di Modul';
+                    btnAction = "alert('Tugas ini terhubung dengan modul. Silakan selesaikan modul terkait untuk menyelesaikannya.')";
+                } else {
+                    btnClass = 'bg-emerald-900/30 text-emerald-500 border border-emerald-500/30 cursor-default';
+                    btnText = '<i class="fa-solid fa-link mr-2"></i>Selesai via Modul';
+                    btnAction = "";
+                }
+            }
 
             // Box Countdown UI (Only show for Active tasks roughly)
             let countdownUI = '';
@@ -251,6 +267,22 @@
                     <i class="fa-solid fa-link-slash"></i> No Link
                    </span>`;
 
+            let actionButtons = '';
+            if (isLinked && !isDone) {
+                actionButtons = `
+                    <a href="detail_modul.html?id=${task.linked_module_id}" class="px-5 py-2.5 bg-accent-600 hover:bg-accent-500 text-white rounded-lg transition-all font-medium flex items-center justify-center shadow-lg shadow-accent-500/20">
+                        <i class="fa-solid fa-rocket mr-2"></i> Buka Modul
+                    </a>
+                `;
+            } else {
+                actionButtons = `
+                    ${linkBtn}
+                    <button onclick="${btnAction}" class="px-5 py-2.5 rounded-lg transition-all font-medium flex items-center justify-center ${btnClass}">
+                        ${btnText}
+                    </button>
+                `;
+            }
+
             return `
                 <div class="glass-card rounded-xl p-6 border-l-4 ${borderClass} relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
                     <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -259,15 +291,13 @@
                                 <span class="text-slate-400 text-xs flex items-center bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
                                     <i class="fa-regular fa-clock mr-2"></i> ${new Date(task.deadline).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                                 </span>
+                                ${isLinked ? '<span class="text-accent-400 text-xs px-2 py-1 rounded bg-accent-500/10 border border-accent-500/20 font-bold"><i class="fa-solid fa-link mr-1"></i>Linked</span>' : ''}
                             </div>
                             <h3 class="text-2xl font-bold text-white mb-2">${task.title}</h3>
                             <p class="text-slate-300 text-sm leading-relaxed mb-6 max-w-2xl">${task.description}</p>
                             
                             <div class="flex flex-col sm:flex-row gap-4">
-                                ${linkBtn}
-                                <button onclick="toggleStatus('${task.id}', ${!isDone})" class="px-5 py-2.5 rounded-lg transition-all font-medium flex items-center justify-center ${btnClass}">
-                                    ${btnText}
-                                </button>
+                                ${actionButtons}
                             </div>
                         </div>
                         
