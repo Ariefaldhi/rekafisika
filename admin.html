@@ -744,6 +744,10 @@
             // Safety check
             if (!container || !emptyMsg) return;
 
+            // Update Badge
+            const badge = document.getElementById('step-count-badge');
+            if (badge) badge.innerText = currentSteps.length + ' Langkah';
+
             if (currentSteps.length === 0) {
                 container.innerHTML = '';
                 emptyMsg.style.display = 'block';
