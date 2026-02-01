@@ -316,19 +316,26 @@
                             class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
                             placeholder="e.g. $$E=mc^2$$">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Slide (PDF)</label>
-                            <input type="text" id="m-slide"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+
+                    <!-- Learning Path Builder -->
+                    <div class="border-t border-slate-700 pt-4 mt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="block text-sm font-bold text-accent-400 uppercase">Alur Pembelajaran (Learning
+                                Path)</label>
+                            <button type="button" onclick="addStep()"
+                                class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
+                                <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Rekaman</label>
-                            <input type="text" id="m-rec"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                        <div id="steps-container"
+                            class="space-y-3 min-h-[100px] p-4 bg-slate-900/50 rounded-lg border border-slate-800">
+                            <!-- Steps Injected Here -->
+                            <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">Belum ada
+                                langkah pembelajaran.</div>
                         </div>
                     </div>
-                    <div class="flex gap-2">
+
+                    <div class="flex gap-2 pt-4">
                         <button type="submit" id="btn-submit-modul"
                             class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Simpan
                             Modul</button>
@@ -608,7 +615,205 @@
         // ... [Assignments] ...
 
         // ... [Students] ...
-        // ... [Modules] ...
+        // ... [MODULES LOGIC] ...
+        let currentSteps = [];
+
+        function addStep(existingData = null) {
+            const id = existingData ? existingData.id : crypto.randomUUID();
+            const step = existingData || {
+                id: id,
+                type: 'youtube',
+                title: '',
+                content: ''
+            };
+
+            if (!existingData) currentSteps.push(step);
+
+            renderSteps();
+        }
+
+        function removeStep(id) {
+            currentSteps = currentSteps.filter(s => s.id !== id);
+            renderSteps();
+        }
+
+        function updateStep(id, field, value) {
+            const step = currentSteps.find(s => s.id === id);
+            if (step) {
+                step[field] = value;
+                // Re-render only if type changes to update inputs
+                if (field === 'type') renderSteps();
+            }
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            const emptyMsg = document.getElementById('empty-steps-msg');
+
+            if (currentSteps.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(emptyMsg);
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            emptyMsg.style.display = 'none';
+            container.innerHTML = '';
+
+            currentSteps.forEach((step, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-slate-800 p-3 rounded border border-slate-700 flex flex-col gap-2 relative group';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Langkah ${index + 1}</span>
+                        <button type="button" onclick="removeStep('${step.id}')" class="text-red-400 hover:text-red-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div>
+                            <select onchange="updateStep('${step.id}', 'type', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
+                                <option value="youtube" ${step.type === 'youtube' ? 'selected' : ''}>Video YouTube</option>
+                                <option value="pdf" ${step.type === 'pdf' ? 'selected' : ''}>Dokumen PDF</option>
+                                <option value="ppt" ${step.type === 'ppt' ? 'selected' : ''}>Presentasi (PPT/Google Slides)</option>
+                                <option value="task" ${step.type === 'task' ? 'selected' : ''}>Instruksi/Tugas</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <input type="text" value="${step.title}" oninput="updateStep('${step.id}', 'title', this.value)" placeholder="Judul Materi / Langkah" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
+                        </div>
+                    </div>
+                    <div>
+                        ${step.type === 'task'
+                        ? `<textarea oninput="updateStep('${step.id}', 'content', this.value)" placeholder="Tulis instruksi lengkap di sini..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 h-20">${step.content}</textarea>`
+                        : `<input type="text" value="${step.content}" oninput="updateStep('${step.id}', 'content', this.value)" placeholder="${getPlaceholder(step.type)}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 font-mono">`
+                    }
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function getPlaceholder(type) {
+            switch (type) {
+                case 'youtube': return 'Link YouTube (e.g. https://youtu.be/...)';
+                case 'pdf': return 'Link PDF (GDrive/Direct Link)';
+                case 'ppt': return 'Link Slide (Google Slides/Canva)';
+                default: return 'Konten...';
+            }
+        }
+
+        async function handleModuleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('m-id').value;
+            const week = document.getElementById('m-week').value;
+            const topic = document.getElementById('m-topic').value;
+            const desc = document.getElementById('m-desc').value;
+            const formula = document.getElementById('m-formula').value;
+
+            // Serialize steps
+            const content_steps = JSON.stringify(currentSteps);
+
+            const payload = {
+                week: parseInt(week),
+                topic,
+                description: desc,
+                formula,
+                content_steps: currentSteps, // Send as JSON object (Supabase handles JSONB)
+                is_visible: true
+            };
+
+            // Remove legacy fields if they exist in DB types, but here purely relying on content_steps
+            // Ideally we should nullify link_slide and link_recording if we want to clean up, but keeping them safe is fine.
+
+            let error;
+            if (id) {
+                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('modules').insert([payload]);
+                error = err;
+            }
+
+            if (error) alert('Error: ' + error.message);
+            else {
+                alert(id ? 'Modul berhasil diupdate!' : 'Modul berhasil dibuat!');
+                resetModulForm();
+                loadModulesAdmin();
+            }
+        }
+
+        async function editModul(id) {
+            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('m-id').value = data.id;
+                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-topic').value = data.topic;
+                document.getElementById('m-desc').value = data.description;
+                document.getElementById('m-formula').value = data.formula || '';
+
+                // Handle Steps
+                currentSteps = [];
+                if (data.content_steps && Array.isArray(data.content_steps)) {
+                    data.content_steps.forEach(s => addStep(s));
+                } else {
+                    // Backwards compatibility: Try to convert legacy fields to steps
+                    if (data.link_slide) {
+                        addStep({ id: crypto.randomUUID(), type: 'pdf', title: 'Materi Slide', content: data.link_slide });
+                    }
+                    if (data.link_recording) {
+                        addStep({ id: crypto.randomUUID(), type: 'youtube', title: 'Rekaman Kelas', content: data.link_recording });
+                    }
+                }
+                renderSteps();
+
+                document.getElementById('modul-form-title').innerText = 'Edit Modul';
+                document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
+                document.getElementById('btn-cancel-modul').classList.remove('hidden');
+                document.getElementById('m-week').focus();
+            }
+        }
+
+        function resetModulForm() {
+            document.querySelector('#section-modul form').reset();
+            currentSteps = [];
+            renderSteps();
+            document.getElementById('m-id').value = '';
+            document.getElementById('modul-form-title').innerText = 'Tambah Modul Baru';
+            document.getElementById('btn-submit-modul').innerText = 'Simpan Modul';
+            document.getElementById('btn-cancel-modul').classList.add('hidden');
+        }
+
+        async function loadModulesAdmin() {
+            const list = document.getElementById('admin-modul-list');
+            const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+
+            if (data) {
+                list.innerHTML = data.map(m => `
+                    <div class="bg-slate-900 border border-slate-700 p-4 rounded flex justify-between items-center group">
+                        <div class="flex items-center gap-4">
+                            <span class="flex items-center justify-center w-8 h-8 rounded bg-slate-800 text-slate-400 font-bold border border-slate-700">${m.week}</span>
+                            <div>
+                                <h3 class="font-bold text-slate-200">${m.topic}</h3>
+                                <div class="text-xs text-slate-500 mt-1 flex gap-2">
+                                    <span>${Array.isArray(m.content_steps) ? m.content_steps.length : 0} Langkah</span>
+                                    ${m.formula ? '<span class="text-accent-400">Formula LaTeX</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editModul('${m.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteModul('${m.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function deleteModul(id) {
+            if (confirm('Hapus modul ini?')) {
+                await supabaseClient.from('modules').delete().eq('id', id);
+                loadModulesAdmin();
+            }
+        }
 
         // 3. Participation Logic
         async function loadPointLogs() {
