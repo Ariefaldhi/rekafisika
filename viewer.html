@@ -286,20 +286,35 @@
         const urlParams = new URLSearchParams(window.location.search);
         // Default to nothing if no file param
         const url = urlParams.get('file');
+        const startPage = parseInt(urlParams.get('start')) || 1;
+        const endPage = parseInt(urlParams.get('end')) || null;
+        const isEmbed = urlParams.get('embed') === 'true';
 
         if (!url) {
             alert("File tidak ditentukan!");
-            window.location.href = 'bank_soal.html';
+            // window.location.href = 'bank_soal.html'; // Don't redirect if embed
         }
 
-        // Update Title and Download Link based on file
-        const fileName = url.split('/').pop().replace('.pdf', '').replace(/_/g, ' ');
-        document.title = `${fileName} | Viewer`;
-        document.querySelector('h1').innerText = fileName;
+        // --- EMBED MODE ---
+        if (isEmbed) {
+            document.querySelector('nav').classList.add('hidden');
+            document.querySelector('footer').classList.add('hidden');
+            document.body.classList.remove('pt-24'); // remove padding top
+            document.body.classList.add('bg-transparent'); // simpler bg
+            // Hide title header in main content
+            document.querySelector('main > div:first-child').classList.add('hidden');
+            document.querySelector('main').classList.remove('pt-24', 'px-4', 'sm:px-6');
+            document.querySelector('main').classList.add('p-0');
+        } else {
+            const fileName = url.split('/').pop().replace('.pdf', '').replace(/_/g, ' ');
+            document.title = `${fileName} | Viewer`;
+            document.querySelector('h1').innerText = fileName;
+        }
 
         const downloadBtn = document.querySelector('a[download]');
         if (downloadBtn) {
             downloadBtn.href = url;
+            if (isEmbed) downloadBtn.parentElement.classList.add('hidden'); // Hide download button container if embed
         }
 
         // --- CONFIGURATION ---
@@ -307,10 +322,10 @@
         // ---------------------
 
         let pdfDoc = null,
-            pageNum = 1,
+            pageNum = startPage,
             pageRendering = false,
             pageNumPending = null,
-            scale = 1.25,
+            scale = isEmbed ? 1.0 : 1.25, // Smaller scale for embed
             canvas = document.getElementById('pdf-render'),
             ctx = canvas.getContext('2d'),
             loadingSpinner = document.getElementById('loading-spinner'),
@@ -328,14 +343,23 @@
             loadingSpinner.classList.remove('hidden');
 
             pdfDoc.getPage(num).then(function (page) {
-                const containerWidth = document.getElementById('canvas-container').clientWidth - 40;
+                const containerWidth = document.getElementById('canvas-container').clientWidth - (isEmbed ? 20 : 40);
                 const viewportRaw = page.getViewport({ scale: 1 });
-                let renderScale = scale;
+                // Auto fit width
+                let renderScale = containerWidth / viewportRaw.width;
+                if (renderScale > 1.5) renderScale = 1.5; // limit max
 
-                const viewport = page.getViewport({ scale: renderScale });
+                // If user manually zoomed, use that relative to fit
+                // But simplified: just use the calculated scale or manual override? 
+                // Let's stick to the manual 'scale' variable but init it smarter.
+                // Actually, let's ignore the global 'scale' for a moment and just fit width for embed.
+                // But zoom buttons need to work. 
+                // Let's sets global 'scale' to the fit width scale on first load?
+
+                const viewport = page.getViewport({ scale: scale });
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-                zoomLevelEl.innerText = Math.round(renderScale * 100) + "%";
+                zoomLevelEl.innerText = Math.round(scale * 100) + "%";
 
                 const renderContext = {
                     canvasContext: ctx,
@@ -355,6 +379,11 @@
                 console.error("Page render error:", err);
                 loadingSpinner.classList.add('hidden');
             });
+
+            // Update UI
+            document.getElementById('prev-page').disabled = num <= startPage;
+            document.getElementById('next-page').disabled = (endPage && num >= endPage) || num >= pdfDoc.numPages;
+
             document.getElementById('page-num').textContent = num;
         }
 
@@ -367,10 +396,14 @@
         }
 
         function onPrevPage() {
-            if (pageNum <= 1) return; pageNum--; queueRenderPage(pageNum);
+            if (pageNum <= startPage) return;
+            pageNum--;
+            queueRenderPage(pageNum);
         }
-        document.getElementById('prev-page').addEventListener('click', onPrevPage); function onNextPage() {
-            if (pageNum >= pdfDoc.numPages) return;
+        document.getElementById('prev-page').addEventListener('click', onPrevPage);
+
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages || (endPage && pageNum >= endPage)) return;
             pageNum++;
             queueRenderPage(pageNum);
         }
@@ -384,14 +417,23 @@
         document.getElementById('zoom-out').addEventListener('click', () => {
             if (scale <= 0.5) return; scale -= 0.25; queueRenderPage(pageNum);
         });
+
         document.getElementById('goto-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const inputVal = parseInt(document.getElementById('goto-page').value);
-            if (inputVal >= 1 && inputVal <= pdfDoc.numPages) { pageNum = inputVal; queueRenderPage(pageNum); }
+            // Check limits
+            let isValid = inputVal >= 1 && inputVal <= pdfDoc.numPages;
+            if (endPage && inputVal > endPage) isValid = false;
+            if (startPage && inputVal < startPage) isValid = false;
+
+            if (isValid) { pageNum = inputVal; queueRenderPage(pageNum); }
+            else alert(`Halaman harus antara ${startPage} dan ${endPage || pdfDoc.numPages}`);
         });
+
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
             pdfDoc = pdfDoc_;
-            document.getElementById('page-count').textContent = pdfDoc.numPages; renderPage(pageNum);
+            document.getElementById('page-count').textContent = endPage || pdfDoc.numPages;
+            renderPage(pageNum);
         }).catch(err => {
             console.error("Error loading PDF:", err);
             loadingSpinner.classList.add('hidden');
