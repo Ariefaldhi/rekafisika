@@ -320,15 +320,15 @@
                     <!-- Learning Path Builder -->
                     <div class="border-t border-slate-700 pt-4 mt-4">
                         <div class="flex justify-between items-center mb-4">
-                            <label class="block text-sm font-bold text-accent-400 uppercase">Alur Pembelajaran (Learning
-                                Path)</label>
+                            <label class="block text-sm font-bold text-accent-400 uppercase">Alur Pembelajaran
+                                (v2.1)</label>
                             <button type="button" onclick="addStep()"
                                 class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
                                 <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
                             </button>
                         </div>
                         <div id="steps-container"
-                            class="space-y-3 min-h-[100px] p-4 bg-slate-900/50 rounded-lg border border-slate-800">
+                            class="space-y-3 min-h-[100px] max-h-[400px] overflow-y-auto p-4 bg-slate-900/50 rounded-lg border border-slate-800 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                             <!-- Steps Injected Here -->
                             <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">Belum ada
                                 langkah pembelajaran.</div>
@@ -618,22 +618,68 @@
         // ... [MODULES LOGIC] ...
         let currentSteps = [];
 
+        // Helper: Upload File to Supabase Storage
+        async function uploadFile(file) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+
+            // Ensure bucket 'modules' exists or use a public one
+            // Assuming bucket 'materials' or 'public'
+            const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
+
+            if (error) {
+                console.error('Upload Error:', error);
+                alert('Gagal upload: ' + error.message);
+                return null;
+            }
+
+            // Get Public URL
+            const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
+            return publicUrl;
+        }
+
+        async function handleFileUpload(input, targetId) {
+            if (input.files && input.files[0]) {
+                const url = await uploadFile(input.files[0]);
+                if (url) {
+                    document.getElementById(targetId).value = url;
+                    // Trigger update event manually if needed
+                    const id = targetId.split('-')[1]; // Extract step ID if format is input-{stepID}
+                    const field = targetId.split('-')[0]; // type
+                    // Actually, the main ID is inside the oninput, so let's just let the user edit the link if they want
+                    // Or we can find the step and update it directly
+                    const stepId = input.getAttribute('data-step-id');
+                    if (stepId) updateStep(stepId, 'content', url);
+                }
+            }
+        }
+
         function uID() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            return 'step-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
         }
 
         function addStep(existingData = null) {
             const id = existingData ? existingData.id : uID();
             const step = existingData || {
                 id: id,
-                type: 'youtube',
+                type: 'youtube', // default
                 title: '',
                 content: ''
             };
 
-            if (!existingData) currentSteps.push(step);
+            // FIX: Always push to array, even if loading existing data
+            currentSteps.push(step);
 
             renderSteps();
+
+            // Auto scroll to bottom when adding new step manually
+            if (!existingData) {
+                setTimeout(() => {
+                    const container = document.getElementById('steps-container');
+                    if (container) container.scrollTop = container.scrollHeight;
+                }, 100);
+            }
         }
 
         async function toggleModulVisibility(id, status) {
@@ -705,6 +751,15 @@
             container.innerHTML = '';
 
             currentSteps.forEach((step, index) => {
+                console.log('Rendering step:', step.id, step.type); // Debug
+
+                // Determine placeholder inside loop to be sure
+                let placeholder = 'Konten...';
+                if (step.type === 'youtube') placeholder = 'Link YouTube (e.g. https://youtu.be/...)';
+                else if (step.type === 'pdf') placeholder = 'Link PDF (GDrive/Direct Link)';
+                else if (step.type === 'ppt') placeholder = 'Link Presentasi (PPT/Slides)';
+                else if (step.type === 'quiz') placeholder = 'Link Gambar/Slide Kuis';
+
                 const div = document.createElement('div');
                 div.className = 'bg-slate-800 p-3 rounded border border-slate-700 flex flex-col gap-2 relative group';
                 div.innerHTML = `
@@ -712,37 +767,71 @@
                         <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Langkah ${index + 1}</span>
                         <button type="button" onclick="removeStep('${step.id}')" class="text-red-400 hover:text-red-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                        <div class="md:col-span-1">
                             <select onchange="updateStep('${step.id}', 'type', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
                                 <option value="youtube" ${step.type === 'youtube' ? 'selected' : ''}>Video YouTube</option>
                                 <option value="pdf" ${step.type === 'pdf' ? 'selected' : ''}>Dokumen PDF</option>
-                                <option value="ppt" ${step.type === 'ppt' ? 'selected' : ''}>Presentasi (PPT/Google Slides)</option>
+                                <option value="ppt" ${step.type === 'ppt' ? 'selected' : ''}>Presentasi (PPT/Slides)</option>
                                 <option value="task" ${step.type === 'task' ? 'selected' : ''}>Instruksi/Tugas</option>
+                                <option value="quiz" ${step.type === 'quiz' ? 'selected' : ''}>Slide Kuis / Soal</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="md:col-span-3">
                             <input type="text" value="${step.title}" oninput="updateStep('${step.id}', 'title', this.value)" placeholder="Judul Materi / Langkah" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
                         </div>
                     </div>
+                    
+                    <!-- Content Input Area -->
                     <div>
                         ${step.type === 'task'
                         ? `<textarea oninput="updateStep('${step.id}', 'content', this.value)" placeholder="Tulis instruksi lengkap di sini..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 h-20">${step.content}</textarea>`
-                        : `<input type="text" value="${step.content}" oninput="updateStep('${step.id}', 'content', this.value)" placeholder="${getPlaceholder(step.type)}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 font-mono">`
+                        : `
+                            <div class="flex gap-2 items-center">
+                                <input type="text" id="content-${step.id}" value="${step.content}" oninput="updateStep('${step.id}', 'content', this.value)" placeholder="${placeholder}" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 font-mono">
+                                ${(step.type === 'pdf' || step.type === 'ppt' || step.type === 'quiz') ? `
+                                    <label class="cursor-pointer bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white" title="Upload File">
+                                        <i class="fa-solid fa-upload"></i>
+                                        <input type="file" class="hidden" data-step-id="${step.id}" onchange="handleFileUpload(this, 'content-${step.id}')" accept=".pdf,.ppt,.pptx,image/*">
+                                    </label>
+                                ` : ''}
+                            </div>
+                        `
                     }
                     </div>
+
+                    <!-- Extra Fields for PPT/PDF/Quiz -->
+                    ${(step.type === 'ppt' || step.type === 'pdf' || step.type === 'quiz') ? `
+                        <div class="grid grid-cols-2 gap-4 mt-1 bg-slate-900/50 p-2 rounded">
+                            ${step.type === 'quiz' ? `
+                                <div class="col-span-2">
+                                    <label class="text-[10px] uppercase text-slate-500">Pertanyaan (Opsional - Bisa ditaruh di gambar)</label>
+                                    <input type="text" value="${step.question || ''}" oninput="updateStep('${step.id}', 'question', this.value)" placeholder="Teks Pertanyaan..." class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                </div>
+                            ` : `
+                                <div>
+                                    <label class="text-[10px] uppercase text-slate-500">Mulai Slide/Halaman</label>
+                                    <input type="number" value="${step.start_page || ''}" oninput="updateStep('${step.id}', 'start_page', this.value)" placeholder="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] uppercase text-slate-500">Sampai Slide/Halaman</label>
+                                    <input type="number" value="${step.end_page || ''}" oninput="updateStep('${step.id}', 'end_page', this.value)" placeholder="Akhir" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                                </div>
+                            `}
+                        </div>
+                    ` : ''}
                 `;
                 container.appendChild(div);
             });
         }
 
+        // define getPlaceholder again just in case but we use local var now
         function getPlaceholder(type) {
-            switch (type) {
-                case 'youtube': return 'Link YouTube (e.g. https://youtu.be/...)';
-                case 'pdf': return 'Link PDF (GDrive/Direct Link)';
-                case 'ppt': return 'Link Slide (Google Slides/Canva)';
-                default: return 'Konten...';
-            }
+            if (type === 'youtube') return 'Link YouTube (e.g. https://youtu.be/...)';
+            if (type === 'pdf') return 'Link PDF (GDrive/Direct Link)';
+            if (type === 'ppt') return 'Link Presentasi (PPT/Slides)';
+            if (type === 'quiz') return 'Link Gambar/Slide Kuis';
+            return 'Konten...';
         }
 
         async function handleModuleSubmit(e) {
@@ -801,15 +890,15 @@
                 } else {
                     // Backwards compatibility: Try to convert legacy fields to steps
                     if (data.link_slide) {
-                        addStep({ id: crypto.randomUUID(), type: 'pdf', title: 'Materi Slide', content: data.link_slide });
+                        addStep({ id: uID(), type: 'pdf', title: 'Materi Slide', content: data.link_slide });
                     }
                     if (data.link_recording) {
-                        addStep({ id: crypto.randomUUID(), type: 'youtube', title: 'Rekaman Kelas', content: data.link_recording });
+                        addStep({ id: uID(), type: 'youtube', title: 'Rekaman Kelas', content: data.link_recording });
                     }
                 }
                 renderSteps();
 
-                document.getElementById('modul-form-title').innerText = 'Edit Modul';
+                document.getElementById('modul-form-title').innerText = 'Edit Modul (v2)';
                 document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
                 document.getElementById('btn-cancel-modul').classList.remove('hidden');
                 document.getElementById('m-week').focus();
