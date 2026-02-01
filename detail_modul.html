@@ -169,8 +169,16 @@
             <!-- Steps Injected Here -->
         </div>
 
-        <!-- Finish Section -->
-        <div id="finish-section" class="mt-12 text-center hidden">
+        <!-- Finish Module Button -->
+        <div class="mt-12 text-center">
+            <button id="finish-module-btn" onclick="finishModule()" disabled
+                class="bg-accent-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg opacity-50 cursor-not-allowed transition-all transform active:scale-95">
+                <i class="fa-solid fa-flag-checkered mr-2"></i> Selesaikan Modul
+            </button>
+        </div>
+
+        <!-- Finish Section (Success Message) -->
+        <div id="finish-section" class="mt-8 text-center hidden">
             <div class="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                 <div
                     class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-[0_0_20px_rgba(16,185,129,0.5)]">
@@ -279,7 +287,7 @@
                     container.insertAdjacentHTML('beforeend', stepHtml);
                 });
 
-                // Check overall completion
+                // Check overall completion to enable button
                 checkCompletionStatus(steps.length, completedStepIds.size);
 
                 // MathJax
@@ -317,12 +325,41 @@
 
         function checkCompletionStatus(total, completed) {
             const finishSection = document.getElementById('finish-section');
-            if (total > 0 && total === completed) {
-                finishSection.classList.remove('hidden');
-                // Optional: Update module level status if you had a table for that
-            } else {
-                finishSection.classList.add('hidden');
+            const finishBtn = document.getElementById('finish-module-btn');
+
+            // Only update button state if it exists (it should)
+            if (finishBtn) {
+                if (total > 0 && total === completed) {
+                    finishBtn.disabled = false;
+                    finishBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    finishBtn.classList.add('hover:bg-accent-500', 'hover:shadow-lg');
+                } else {
+                    finishBtn.disabled = true;
+                    finishBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    finishBtn.classList.remove('hover:bg-accent-500', 'hover:shadow-lg');
+                    // Hide success message if we unchecked something
+                    finishSection.classList.add('hidden');
+                }
             }
+        }
+
+        function finishModule() {
+            // Check again for safety
+            const totalSteps = currentSteps.length;
+            const checkedCount = document.querySelectorAll('.step-checkbox:checked').length;
+
+            if (checkedCount < totalSteps) {
+                alert("Mohon selesaikan semua langkah terlebih dahulu.");
+                return;
+            }
+
+            // Show Success UI
+            const finishSection = document.getElementById('finish-section');
+            finishSection.classList.remove('hidden');
+            finishSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Celebration Confetti or simple alert? 
+            // Stick to UI reveal for now as requested.
         }
 
         // Reuse render logic but add Checkbox
@@ -365,12 +402,37 @@
                     break;
                 case 'pdf':
                     icon = 'fa-file-pdf'; color = 'bg-red-400';
-                    let pdfUrl = step.content + (step.start_page ? `#page=${step.start_page}` : '');
-                    mediaContent = `<div class="mt-3"><iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe></div>`;
+                    // USE NEW VIEWER
+                    let pdfUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true`;
+                    if (step.start_page) pdfUrl += `&start=${step.start_page}`;
+                    if (step.end_page) pdfUrl += `&end=${step.end_page}`;
+
+                    mediaContent = `<div class="mt-3"><iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
                     break;
                 case 'ppt':
+                    // PPT usually converted to PDF for viewer, or if actual PPT file standard viewer might not work well unless PDF.js handles it?
+                    // PDF.js only handles PDF. If it's a PPT file link, we can't use PDF.js.
+                    // Assuming 'ppt' type in this system currently implies PDF-exported slides mostly, or the user knows to upload PDFs.
+                    // If it is actual .ppt, standard iframe download/view might be needed.
+                    // For now, treat same as PDF if we assume slides are PDFs. 
+                    // If it's Google Slides link, it's different. 
+                    // Let's stick to generic iframe if not PDF?
+                    // Actually, let's try the viewer for consistency if it's a file.
+                    // But if it's .pptx, PDF.js fails.
+                    // Let's check extension?
+
+                    const isPdf = step.content.toLowerCase().includes('.pdf');
                     icon = 'fa-file-powerpoint'; color = 'bg-orange-500';
-                    mediaContent = `<div class="mt-3"><iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe></div>`;
+
+                    if (isPdf) {
+                        let pptUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true`;
+                        if (step.start_page) pptUrl += `&start=${step.start_page}`;
+                        if (step.end_page) pptUrl += `&end=${step.end_page}`;
+                        mediaContent = `<div class="mt-3"><iframe src="${pptUrl}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
+                    } else {
+                        // Fallback for real PPT/other
+                        mediaContent = `<div class="mt-3"><iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe></div>`;
+                    }
                     break;
                 case 'task':
                     icon = 'fa-clipboard-list'; color = 'bg-emerald-500';
