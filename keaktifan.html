@@ -104,6 +104,16 @@
                     <span class="font-bold text-xl tracking-wide">KawanFismat</span>
                 </a>
 
+                <div
+                    class="bg-slate-200/50 dark:bg-slate-800/50 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <div
+                        class="w-20 h-20 bg-slate-300 dark:bg-slate-700/50 rounded-full flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-user text-3xl text-slate-500 dark:text-slate-400"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Pilih mahasiswa dari leaderboard untuk melihat
+                        detail.</p>
+                </div>
+
                 <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
@@ -114,7 +124,7 @@
                         <a href="presensi.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
                         <a href="keaktifan.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Keaktifan</a>
+                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Keaktifan</a>
                         <a href="modul.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
                         <a href="profil.html"
@@ -201,175 +211,179 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <p class="text-slate-400 text-sm">&copy; 2026 KawanFismat.</p>
-    </footer>
+    <footer
+        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
+                dilindungi.</p>
+            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+                <!-- Bottom Navigation (Mobile Only) -->
+            <nav
+                class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
+                <a href="index.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </a>
+                <a href="tugas.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Tugas</span>
+                </a>
+                <a href="presensi.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Presensi</span>
+                </a>
+                <a href="keaktifan.html" class="flex flex-col items-center text-accent-400 group relative">
+                    <div
+                        class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+                    </div>
+                    <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-bold">Keaktifan</span>
+                </a>
+                <a href="modul.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Modul</span>
+                </a>
+                <a href="profil.html"
+                    class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Profil</span>
+                </a>
+            </nav>
 
-    <!-- Bottom Navigation (Mobile Only) -->
-    <nav
-        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-        <a href="index.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Home</span>
-        </a>
-        <a href="tugas.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Tugas</span>
-        </a>
-        <a href="presensi.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Presensi</span>
-        </a>
-        <a href="keaktifan.html" class="flex flex-col items-center text-accent-400 group relative">
-            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
-            <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-bold">Keaktifan</span>
-        </a>
-        <a href="modul.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Modul</span>
-        </a>
-        <a href="profil.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Profil</span>
-        </a>
-    </nav>
+            <!-- Scripts -->
+            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+            <script src="config.js"></script>
+            <script>
+                let currentTab = 'participation'; // 'participation' or 'diligence'
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <script>
-        let currentTab = 'participation'; // 'participation' or 'diligence'
+                function switchTab(tab) {
+                    currentTab = tab;
 
-        function switchTab(tab) {
-            currentTab = tab;
+                    // Update UI
+                    document.getElementById('tab-participation').className = tab === 'participation'
+                        ? 'px-6 py-2 rounded-full font-bold text-white bg-accent-500 shadow-lg shadow-accent-500/20 transition-all'
+                        : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
 
-            // Update UI
-            document.getElementById('tab-participation').className = tab === 'participation'
-                ? 'px-6 py-2 rounded-full font-bold text-white bg-accent-500 shadow-lg shadow-accent-500/20 transition-all'
-                : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
+                    document.getElementById('tab-diligence').className = tab === 'diligence'
+                        ? 'px-6 py-2 rounded-full font-bold text-white bg-pink-500 shadow-lg shadow-pink-500/20 transition-all'
+                        : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
 
-            document.getElementById('tab-diligence').className = tab === 'diligence'
-                ? 'px-6 py-2 rounded-full font-bold text-white bg-pink-500 shadow-lg shadow-pink-500/20 transition-all'
-                : 'px-6 py-2 rounded-full font-bold text-slate-400 hover:text-white transition-all';
+                    // Change Title & Color Theme based on tab
+                    const titleEl = document.getElementById('page-title');
+                    const descEl = document.getElementById('page-desc');
 
-            // Change Title & Color Theme based on tab
-            const titleEl = document.getElementById('page-title');
-            const descEl = document.getElementById('page-desc');
-
-            if (tab === 'participation') {
-                titleEl.innerHTML = 'Papan Keaktifan';
-                titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400';
-                descEl.innerText = 'Apresiasi untuk mahasiswa yang aktif berdiskusi, bertanya, dan menjawab di kelas.';
-            } else {
-                titleEl.innerHTML = 'Papan Kerajinan';
-                titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-400';
-                descEl.innerText = 'Ranking mahasiswa paling rajin mengerjakan tugas tepat waktu.';
-            }
-
-            loadData();
-        }
-
-        async function loadData() {
-            if (!supabaseClient) return;
-            const podiumContainer = document.getElementById('podium-container');
-            const listContainer = document.getElementById('leaderboard-list');
-
-            podiumContainer.innerHTML = '<div class="w-full text-center text-slate-500 animate-pulse">Memuat Data...</div>';
-            listContainer.innerHTML = '';
-
-            try {
-                // Fetch Students
-                const { data: students, error: errStudents } = await supabaseClient.from('students').select('*');
-
-                if (errStudents || !students) throw new Error('Gagal memuat mahasiswa');
-
-                let leaderboard = [];
-
-                if (currentTab === 'participation') {
-                    // --- LOGIC KEAKTIFAN ---
-                    const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
-                    if (logs) {
-                        leaderboard = students.map(student => {
-                            const totalPoints = logs
-                                .filter(log => log.student_nim === student.nim)
-                                .reduce((sum, log) => sum + (log.points || 0), 0);
-                            return { ...student, totalPoints };
-                        });
+                    if (tab === 'participation') {
+                        titleEl.innerHTML = 'Papan Keaktifan';
+                        titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400';
+                        descEl.innerText = 'Apresiasi untuk mahasiswa yang aktif berdiskusi, bertanya, dan menjawab di kelas.';
+                    } else {
+                        titleEl.innerHTML = 'Papan Kerajinan';
+                        titleEl.className = 'text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-400';
+                        descEl.innerText = 'Ranking mahasiswa paling rajin mengerjakan tugas tepat waktu.';
                     }
-                } else {
-                    // --- LOGIC KERAJINAN (Diligence) ---
-                    // 1. Fetch Assignments (Id, Points)
-                    const { data: assignments } = await supabaseClient.from('assignments').select('id, points').eq('is_active', true);
 
-                    // 2. Fetch Completion Status
-                    const { data: taskStatus } = await supabaseClient.from('student_task_status').select('student_id, assignment_id').eq('is_completed', true);
+                    loadData();
+                }
 
-                    if (assignments && taskStatus) {
-                        // Create Map of Assignment Points
-                        const assignmentPoints = {};
-                        assignments.forEach(a => assignmentPoints[a.id] = (a.points || 10)); // Default 10 if null
+                async function loadData() {
+                    if (!supabaseClient) return;
+                    const podiumContainer = document.getElementById('podium-container');
+                    const listContainer = document.getElementById('leaderboard-list');
 
-                        leaderboard = students.map(student => {
-                            // Find all completed tasks for this student
-                            const completedTasks = taskStatus.filter(t => t.student_id === student.nim);
+                    podiumContainer.innerHTML = '<div class="w-full text-center text-slate-500 animate-pulse">Memuat Data...</div>';
+                    listContainer.innerHTML = '';
 
-                            // Sum points
-                            const totalPoints = completedTasks.reduce((sum, t) => {
-                                return sum + (assignmentPoints[t.assignment_id] || 0);
-                            }, 0);
+                    try {
+                        // Fetch Students
+                        const { data: students, error: errStudents } = await supabaseClient.from('students').select('*');
 
-                            return { ...student, totalPoints };
+                        if (errStudents || !students) throw new Error('Gagal memuat mahasiswa');
+
+                        let leaderboard = [];
+
+                        if (currentTab === 'participation') {
+                            // --- LOGIC KEAKTIFAN ---
+                            const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+                            if (logs) {
+                                leaderboard = students.map(student => {
+                                    const totalPoints = logs
+                                        .filter(log => log.student_nim === student.nim)
+                                        .reduce((sum, log) => sum + (log.points || 0), 0);
+                                    return { ...student, totalPoints };
+                                });
+                            }
+                        } else {
+                            // --- LOGIC KERAJINAN (Diligence) ---
+                            // 1. Fetch Assignments (Id, Points)
+                            const { data: assignments } = await supabaseClient.from('assignments').select('id, points').eq('is_active', true);
+
+                            // 2. Fetch Completion Status
+                            const { data: taskStatus } = await supabaseClient.from('student_task_status').select('student_id, assignment_id').eq('is_completed', true);
+
+                            if (assignments && taskStatus) {
+                                // Create Map of Assignment Points
+                                const assignmentPoints = {};
+                                assignments.forEach(a => assignmentPoints[a.id] = (a.points || 10)); // Default 10 if null
+
+                                leaderboard = students.map(student => {
+                                    // Find all completed tasks for this student
+                                    const completedTasks = taskStatus.filter(t => t.student_id === student.nim);
+
+                                    // Sum points
+                                    const totalPoints = completedTasks.reduce((sum, t) => {
+                                        return sum + (assignmentPoints[t.assignment_id] || 0);
+                                    }, 0);
+
+                                    return { ...student, totalPoints };
+                                });
+                            }
+                        }
+
+                        // Sort: Points DESC, then Name ASC
+                        leaderboard.sort((a, b) => {
+                            if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+                            return a.name.localeCompare(b.name);
                         });
+
+                        renderLeaderboard(leaderboard, podiumContainer, listContainer);
+
+                    } catch (err) {
+                        console.error(err);
+                        podiumContainer.innerHTML = '<p class="text-red-400 text-center">Terjadi kesalahan memuat data.</p>';
                     }
                 }
 
-                // Sort: Points DESC, then Name ASC
-                leaderboard.sort((a, b) => {
-                    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-                    return a.name.localeCompare(b.name);
-                });
+                function renderLeaderboard(data, podiumContainer, listContainer) {
+                    // Filter > 0 points? Optional. Let's show everyone or maybe > 0
+                    // const activeStudents = data.filter(s => s.totalPoints > 0);
+                    const activeStudents = data;
 
-                renderLeaderboard(leaderboard, podiumContainer, listContainer);
+                    const top3 = activeStudents.slice(0, 3);
+                    const rest = activeStudents.slice(3);
 
-            } catch (err) {
-                console.error(err);
-                podiumContainer.innerHTML = '<p class="text-red-400 text-center">Terjadi kesalahan memuat data.</p>';
-            }
-        }
+                    // --- Render Podium ---
+                    const isMobile = window.innerWidth < 768;
 
-        function renderLeaderboard(data, podiumContainer, listContainer) {
-            // Filter > 0 points? Optional. Let's show everyone or maybe > 0
-            // const activeStudents = data.filter(s => s.totalPoints > 0);
-            const activeStudents = data;
+                    // Helper podium Item
+                    const createPodium = (student, rank) => {
+                        if (!student) return `<div class="w-full md:w-1/3 h-40"></div>`;
 
-            const top3 = activeStudents.slice(0, 3);
-            const rest = activeStudents.slice(3);
+                        let heightClass = rank === 1 ? 'h-64 md:h-80 order-1 md:order-2' : rank === 2 ? 'h-56 md:h-64 order-2 md:order-1' : 'h-48 md:h-56 order-3 md:order-3';
 
-            // --- Render Podium ---
-            const isMobile = window.innerWidth < 768;
+                        // Color Themes
+                        let colorBase = currentTab === 'participation'
+                            ? (rank === 1 ? 'yellow' : rank === 2 ? 'slate' : 'orange')
+                            : (rank === 1 ? 'pink' : rank === 2 ? 'slate' : 'purple'); // Pink/Purple theme for Diligence
 
-            // Helper podium Item
-            const createPodium = (student, rank) => {
-                if (!student) return `<div class="w-full md:w-1/3 h-40"></div>`;
+                        let colorClass = `from-${colorBase}-400/20 to-${colorBase}-600/10 border-${colorBase}-500/50 shadow-${colorBase}-500/10`;
+                        let iconColor = `text-${colorBase}-400`;
+                        let animate = rank === 1 ? 'animate-float' : '';
 
-                let heightClass = rank === 1 ? 'h-64 md:h-80 order-1 md:order-2' : rank === 2 ? 'h-56 md:h-64 order-2 md:order-1' : 'h-48 md:h-56 order-3 md:order-3';
-
-                // Color Themes
-                let colorBase = currentTab === 'participation'
-                    ? (rank === 1 ? 'yellow' : rank === 2 ? 'slate' : 'orange')
-                    : (rank === 1 ? 'pink' : rank === 2 ? 'slate' : 'purple'); // Pink/Purple theme for Diligence
-
-                let colorClass = `from-${colorBase}-400/20 to-${colorBase}-600/10 border-${colorBase}-500/50 shadow-${colorBase}-500/10`;
-                let iconColor = `text-${colorBase}-400`;
-                let animate = rank === 1 ? 'animate-float' : '';
-
-                return `
+                        return `
                     <div class="relative w-full md:w-1/3 flex flex-col items-center justify-end ${heightClass} mb-8 sm:mb-0">
                         ${rank === 1 ? `<div class="absolute -top-12 text-5xl ${iconColor} animate-bounce"><i class="fa-solid fa-crown"></i></div>` : ''}
                         <div class="w-full h-full bg-gradient-to-b ${colorClass} rounded-t-xl border-t border-x p-6 flex flex-col items-center justify-end relative backdrop-blur-sm transition-all hover:bg-white/5 group">
@@ -377,11 +391,60 @@
                             <div class="text-center mb-4 z-10 ${animate} w-full flex flex-col items-center">
                                 <div class="w-20 h-20 rounded-full border-4 ${iconColor.replace('text', 'border')} overflow-hidden mb-3 bg-slate-800 shadow-lg">
                                     ${student.profile_photo_url
-                        ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
-                        : `<div class="w-full h-full flex items-center justify-center text-3xl text-slate-500"><i class="fa-solid fa-user"></i></div>`
-                    }
+                                ? `<img src="${student.profile_photo_url}" class="w-full h-full object-cover">`
+                                : `<div class="w-full h-full flex items-center justify-center text-3xl text-slate-500"><i class="fa-solid fa-user text-3xl text-slate-500 dark:text-slate-400"></i></div>`
+                            }
                                 </div>
                                 <h3 class="font-bold text-white text-lg md:text-xl line-clamp-1 mb-1 w-full">${student.name}</h3>
+                <div>
+                    <h1 class="text-3xl font-bold mb-2 text-slate-900 dark:text-white">Papan Keaktifan</h1>
+                    <p class="text-slate-600 dark:text-slate-400">Pantau performa dan kontribusi belajar Anda.</p>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-200 dark:bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700">
+                    <i class="fa-solid fa-trophy text-yellow-500 dark:text-yellow-400"></i>
+                    <span class="text-slate-700 dark:text-slate-300 font-bold">Peringkat: <span class="text-white bg-yellow-500 px-2 py-0.5 rounded ml-1">#1</span></span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <!-- Card 1 -->
+                <div class="glass-card p-6 rounded-xl border-l-4 border-emerald-500 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i class="fa-solid fa-clipboard-check text-6xl text-emerald-500"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Kehadiran</p>
+                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">95%</h3>
+                    <p class="text-emerald-500 dark:text-emerald-400 text-xs font-bold"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Sangat Baik</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass-card p-6 rounded-xl border-l-4 border-blue-500 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i class="fa-solid fa-hand-point-up text-6xl text-blue-500"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Poin Partisipasi</p>
+                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">850</h3>
+                    <p class="text-blue-500 dark:text-blue-400 text-xs font-bold"><i class="fa-solid fa-plus mr-1"></i>+50 minggu ini</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass-card p-6 rounded-xl border-l-4 border-purple-500 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i class="fa-solid fa-list-check text-6xl text-purple-500"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Tugas Selesai</p>
+                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">12/15</h3>
+                    <p class="text-purple-500 dark:text-purple-400 text-xs font-bold">80% Completion</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="glass-card p-6 rounded-xl border-l-4 border-orange-500 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i class="fa-solid fa-shapes text-6xl text-orange-500"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Kuis & Interaktif</p>
+                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Gold</h3>
+                    <p class="text-orange-500 dark:text-orange-400 text-xs font-bold">Level 5 Master</p>
+                </div>
+            </div>
                                 <p class="text-xs text-slate-400 font-mono mb-2">${student.nim}</p>
                                 <div class="inline-flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700">
                                     <i class="fa-solid fa-bolt ${iconColor}"></i>
@@ -391,15 +454,15 @@
                         </div>
                     </div>
                 `;
-            };
+                    };
 
-            if (top3.length > 0) {
-                if (isMobile) {
-                    podiumContainer.innerHTML = top3.map((student, index) => {
-                        // Simplified Mobile Card Logic (reusing general style but adapting colors dynamically if needed)
-                        // For brevity, using a standard card style
-                        const rank = index + 1;
-                        return `
+                    if (top3.length > 0) {
+                        if (isMobile) {
+                            podiumContainer.innerHTML = top3.map((student, index) => {
+                                // Simplified Mobile Card Logic (reusing general style but adapting colors dynamically if needed)
+                                // For brevity, using a standard card style
+                                const rank = index + 1;
+                                return `
                             <div class="w-full mb-4 p-4 rounded-xl border border-slate-700 bg-slate-800/50 flex items-center gap-4 relative overflow-hidden">
                                 <div class="flex flex-col items-center justify-center w-8 text-center shrink-0 font-bold text-xl ${rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-slate-300' : 'text-orange-400'}">
                                     ${rank === 1 ? '<i class="fa-solid fa-crown"></i>' : `#${rank}`}
@@ -414,21 +477,21 @@
                                 <div class="font-bold text-white font-mono text-lg">${student.totalPoints} <span class="text-[10px] font-sans text-slate-500">Pts</span></div>
                             </div>
                          `;
-                    }).join('');
-                    podiumContainer.classList.remove('items-end', 'h-80');
-                    podiumContainer.classList.add('flex-col', 'h-auto');
-                } else {
-                    podiumContainer.innerHTML = [createPodium(top3[1], 2), createPodium(top3[0], 1), createPodium(top3[2], 3)].join('');
-                    podiumContainer.classList.add('items-end', 'h-80');
-                    podiumContainer.classList.remove('flex-col', 'h-auto');
-                }
-            } else {
-                podiumContainer.innerHTML = '<div class="text-slate-500 italic">Belum ada data.</div>';
-            }
+                            }).join('');
+                            podiumContainer.classList.remove('items-end', 'h-80');
+                            podiumContainer.classList.add('flex-col', 'h-auto');
+                        } else {
+                            podiumContainer.innerHTML = [createPodium(top3[1], 2), createPodium(top3[0], 1), createPodium(top3[2], 3)].join('');
+                            podiumContainer.classList.add('items-end', 'h-80');
+                            podiumContainer.classList.remove('flex-col', 'h-auto');
+                        }
+                    } else {
+                        podiumContainer.innerHTML = '<div class="text-slate-500 italic">Belum ada data.</div>';
+                    }
 
-            // --- Render Rest ---
-            if (rest.length > 0) {
-                listContainer.innerHTML = rest.map((s, idx) => `
+                    // --- Render Rest ---
+                    if (rest.length > 0) {
+                        listContainer.innerHTML = rest.map((s, idx) => `
                     <div class="flex items-center p-4 hover:bg-slate-800/30 transition-colors group">
                         <div class="w-12 text-center text-slate-500 font-bold text-lg">#${idx + 4}</div>
                         <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden shrink-0 mr-3 border border-slate-600">
@@ -443,22 +506,22 @@
                         </div>
                     </div>
                 `).join('');
-            } else {
-                listContainer.innerHTML = '<div class="p-8 text-center text-slate-500">Tidak ada data lainnya.</div>';
-            }
-        }
+                    } else {
+                        listContainer.innerHTML = '<div class="p-8 text-center text-slate-500">Tidak ada data lainnya.</div>';
+                    }
+                }
 
-        // Debounce resize event
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => loadData(), 250);
-        });
+                // Debounce resize event
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => loadData(), 250);
+                });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            switchTab('participation'); // Init
-        });
-    </script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    switchTab('participation'); // Init
+                });
+            </script>
 </body>
 
 </html>

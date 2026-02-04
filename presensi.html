@@ -69,18 +69,30 @@
         th,
         td {
             padding: 8px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             white-space: nowrap;
             text-align: center;
         }
 
+        .dark th,
+        .dark td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
         th {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(241, 245, 249, 0.95);
+            /* Light: Slate-100 */
             position: sticky;
             top: 0;
             z-index: 10;
-            color: #94a3b8;
+            color: #475569;
+            /* Light: Slate-600 */
             font-weight: 600;
+        }
+
+        .dark th {
+            background: rgba(15, 23, 42, 0.9);
+            color: #94a3b8;
         }
 
         th:first-child,
@@ -93,8 +105,19 @@
         }
 
         td:first-child {
+            background: rgba(255, 255, 255, 0.95);
+            /* Light: White */
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            color: #1e293b;
+            /* Slate-800 */
+            font-weight: 500;
+        }
+
+        .dark td:first-child {
             background: rgba(30, 41, 59, 0.95);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            /* Slate-200 */
         }
 
         .status-hadir {

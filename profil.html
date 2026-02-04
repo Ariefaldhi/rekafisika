@@ -84,7 +84,7 @@
                         <a href="modul.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
                         <a href="profil.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Profil</a>
+                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Profil</a>
                     </div>
                 </div>
                 <!-- Theme Toggle -->
@@ -182,9 +182,9 @@
                         </div>
                         <div class="flex gap-2">
                             <button type="button" onclick="resetModal()"
-                                class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
+                                class="px-4 py-2 text-slate-400 dark:hover:text-white">Batal</button>
                             <button type="button" onclick="saveCroppedImage()" id="btn-save-crop"
-                                class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded font-bold shadow-lg shadow-accent-500/20">
+                                class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white dark:text-white rounded font-bold shadow-lg shadow-accent-500/20">
                                 <i class="fa-solid fa-check mr-2"></i>Simpan
                             </button>
                         </div>
@@ -263,13 +263,23 @@
 
     </main>
 
-    <footer class="py-8 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <p class="text-slate-500 text-xs">&copy; 2026 KawanFismat.</p>
+    <!-- Footer -->
+    <footer
+        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
+                dilindungi.</p>
+            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+                <a href="#" class="hover:text-accent-500 transition-colors">Kebijakan Privasi</a>
+                <span>|</span>
+                <a href="#" class="hover:text-accent-500 transition-colors">Ketentuan Layanan</a>
+            </p>
+        </div>
     </footer>
 
     <!-- Bottom Navigation (Mobile Only) -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
         <a href="index.html"
             class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
@@ -295,8 +305,10 @@
             <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-medium">Modul</span>
         </a>
-        <a href="profil.html" class="flex flex-col items-center text-accent-400 group relative">
-            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
+        <a href="profil.html" class="flex flex-col items-center text-accent-500 dark:text-accent-400 group">
+            <div
+                class="absolute -top-3 w-8 h-1 bg-accent-500 dark:bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+            </div>
             <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-bold">Profil</span>
         </a>

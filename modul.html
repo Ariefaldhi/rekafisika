@@ -129,7 +129,7 @@
                         <a href="keaktifan.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
                         <a href="modul.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Modul</a>
+                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Modul</a>
                         <a href="profil.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
@@ -175,7 +175,11 @@
             <p class="text-slate-400">Ikuti alur pembelajaran mingguan langkah demi langkah.</p>
         </div>
 
-        <div class="space-y-4" id="accordion-container">
+        <h1 class="text-3xl font-bold mb-4 text-slate-900 dark:text-white">Modul & Silabus</h1>
+        <p class="text-slate-600 dark:text-slate-400">Akses materi pembelajaran Fisika Matematika I.</p>
+        </div>
+
+        <div id="accordion-container" class="space-y-4">
             <!-- Injected by JS -->
             <div class="text-center py-12 text-slate-500 animate-pulse">
                 Memuat modul...
@@ -183,103 +187,110 @@
         </div>
     </main>
 
-    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <p class="text-slate-400 text-sm">&copy; 2026 KawanFismat</p>
-    </footer>
+    <!-- Footer -->
+    <footer
+        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
+                dilindungi.</p>
+            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+                </nav>
 
-    <!-- Bottom Navigation (Mobile Only) -->
-    <nav
-        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-        <a href="index.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Home</span>
-        </a>
-        <a href="tugas.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Tugas</span>
-        </a>
-        <a href="presensi.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Presensi</span>
-        </a>
-        <a href="keaktifan.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Keaktifan</span>
-        </a>
-        <a href="modul.html" class="flex flex-col items-center text-accent-400 group relative">
-            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
-            <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-bold">Modul</span>
-        </a>
-        <a href="profil.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Profil</span>
-        </a>
-    </nav>
+                <!-- Bottom Navigation (Mobile Only) -->
+            <nav
+                class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
+                <a href="index.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </a>
+                <a href="tugas.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Tugas</span>
+                </a>
+                <a href="presensi.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Presensi</span>
+                </a>
+                <a href="keaktifan.html"
+                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Keaktifan</span>
+                </a>
+                <a href="modul.html" class="flex flex-col items-center text-accent-400 group relative">
+                    <div
+                        class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+                    </div>
+                    <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-bold">Modul</span>
+                </a>
+                <a href="profil.html"
+                    class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 transition-colors group">
+                    <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-medium">Profil</span>
+                </a>
+            </nav>
 
-    <!-- Theme JS -->
-    <script src="js/theme.js"></script>
+            <!-- Theme JS -->
+            <script src="js/theme.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <script>
-        const container = document.getElementById('accordion-container');
+            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+            <script src="config.js"></script>
+            <script>
+                const container = document.getElementById('accordion-container');
 
-        async function loadModules() {
-            if (!supabaseClient) {
-                setTimeout(loadModules, 500);
-                return;
-            }
-
-            try {
-                // Get User for Progress Check
-                const userSession = localStorage.getItem('user_session');
-                let userNim = null;
-                if (userSession) {
-                    const user = JSON.parse(userSession);
-                    if (user.nim) userNim = user.nim;
-                    else {
-                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                        if (data) userNim = data.nim;
+                async function loadModules() {
+                    if (!supabaseClient) {
+                        setTimeout(loadModules, 500);
+                        return;
                     }
-                }
 
-                const { data, error } = await supabaseClient
-                    .from('modules')
-                    .select('*')
-                    .eq('is_visible', true)
-                    .order('week', { ascending: true });
+                    try {
+                        // Get User for Progress Check
+                        const userSession = localStorage.getItem('user_session');
+                        let userNim = null;
+                        if (userSession) {
+                            const user = JSON.parse(userSession);
+                            if (user.nim) userNim = user.nim;
+                            else {
+                                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
+                                if (data) userNim = data.nim;
+                            }
+                        }
 
-                if (error) throw error;
+                        const { data, error } = await supabaseClient
+                            .from('modules')
+                            .select('*')
+                            .eq('is_visible', true)
+                            .order('week', { ascending: true });
 
-                // Fetch all progress for this user to determine 'Completed' status locally
-                let progressMap = new Map(); // moduleId -> count of completed steps
-                if (userNim) {
-                    const { data: progData } = await supabaseClient.from('student_progress').select('module_id').eq('student_nim', userNim).eq('is_complete', true);
-                    if (progData) {
-                        progData.forEach(p => {
-                            progressMap.set(p.module_id, (progressMap.get(p.module_id) || 0) + 1);
-                        });
-                    }
-                }
+                        if (error) throw error;
 
-                container.innerHTML = '';
+                        // Fetch all progress for this user to determine 'Completed' status locally
+                        let progressMap = new Map(); // moduleId -> count of completed steps
+                        if (userNim) {
+                            const { data: progData } = await supabaseClient.from('student_progress').select('module_id').eq('student_nim', userNim).eq('is_complete', true);
+                            if (progData) {
+                                progData.forEach(p => {
+                                    progressMap.set(p.module_id, (progressMap.get(p.module_id) || 0) + 1);
+                                });
+                            }
+                        }
 
-                if (data && data.length > 0) {
-                    data.forEach((item, index) => {
-                        const totalSteps = item.content_steps ? item.content_steps.length : 0;
-                        const completedSteps = progressMap.get(item.id) || 0;
-                        const isComplete = totalSteps > 0 && completedSteps >= totalSteps;
+                        container.innerHTML = '';
 
-                        const div = document.createElement('div');
-                        div.className = 'glass-card rounded-xl overflow-hidden border border-slate-700/50 hover:border-accent-500/30 transition-all duration-300 group';
+                        if (data && data.length > 0) {
+                            data.forEach((item, index) => {
+                                const totalSteps = item.content_steps ? item.content_steps.length : 0;
+                                const completedSteps = progressMap.get(item.id) || 0;
+                                const isComplete = totalSteps > 0 && completedSteps >= totalSteps;
 
-                        div.innerHTML = `
+                                const div = document.createElement('div');
+                                div.className = 'glass-card rounded-xl overflow-hidden border border-slate-700/50 hover:border-accent-500/30 transition-all duration-300 group';
+
+                                div.innerHTML = `
                             <div class="p-6 relative">
                                 <div class="absolute top-4 right-4 text-6xl text-slate-800 font-bold opacity-20 group-hover:opacity-40 transition-opacity select-none -z-10">
                                     ${item.week}
@@ -292,8 +303,8 @@
                                      ${isComplete ? '<span class="text-emerald-400 text-xs font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> Selesai</span>' : ''}
                                 </div>
 
-                                <h3 class="text-xl font-bold text-slate-100 mb-2 group-hover:text-accent-400 transition-colors">${item.topic}</h3>
-                                <p class="text-slate-400 text-sm line-clamp-2 mb-6">${item.description || 'Pelajari materi minggu ini.'}</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-accent-400 transition-colors">${item.topic}</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6">${item.description || 'Pelajari materi minggu ini.'}</p>
 
                                 <div class="flex items-center justify-between border-t border-slate-700/50 pt-4">
                                     <div class="text-xs text-slate-500">
@@ -311,104 +322,104 @@
                                 </div>` : ''}
                             </div>
                         `;
-                        container.appendChild(div);
-                    });
-                } else {
-                    container.innerHTML = `
+                                container.appendChild(div);
+                            });
+                        } else {
+                            container.innerHTML = `
                         <div class="text-center py-12 text-slate-500">
                             <i class="fa-solid fa-box-open text-4xl mb-4 opacity-50"></i>
                             <p>Belum ada modul yang tersedia saat ini.</p>
                         </div>
                     `;
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        container.innerHTML = '<p class="text-red-400 text-center">Gagal memuat modul.</p>';
+                    }
                 }
 
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = '<p class="text-red-400 text-center">Gagal memuat modul.</p>';
-            }
-        }
+                async function submitQuizAnswer(moduleId, stepId, answer) {
+                    const userSession = localStorage.getItem('user_session');
+                    if (!userSession) return alert('Silakan login terlebih dahulu.');
 
-        async function submitQuizAnswer(moduleId, stepId, answer) {
-            const userSession = localStorage.getItem('user_session');
-            if (!userSession) return alert('Silakan login terlebih dahulu.');
+                    const user = JSON.parse(userSession);
+                    // In a real app, you'd want to use student ID. Assuming user object has nim or matching ID.
+                    // For now, we will query students table to match user name or Code. 
+                    // Or simpler, just assume user object has {nim: ...}
 
-            const user = JSON.parse(userSession);
-            // In a real app, you'd want to use student ID. Assuming user object has nim or matching ID.
-            // For now, we will query students table to match user name or Code. 
-            // Or simpler, just assume user object has {nim: ...}
+                    if (!user.nim) {
+                        // Try to find student by name if no NIM in session (fallback)
+                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
+                        if (data) user.nim = data.nim;
+                        else return alert('Data mahasiswa tidak ditemukan.');
+                    }
 
-            if (!user.nim) {
-                // Try to find student by name if no NIM in session (fallback)
-                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                if (data) user.nim = data.nim;
-                else return alert('Data mahasiswa tidak ditemukan.');
-            }
+                    const { error } = await supabaseClient.from('student_answers').insert([{
+                        student_nim: user.nim,
+                        module_id: moduleId,
+                        step_id: stepId,
+                        answer: answer
+                    }]);
 
-            const { error } = await supabaseClient.from('student_answers').insert([{
-                student_nim: user.nim,
-                module_id: moduleId,
-                step_id: stepId,
-                answer: answer
-            }]);
+                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
+                    else alert('Jawaban berhasil disimpan!');
+                }
 
-            if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-            else alert('Jawaban berhasil disimpan!');
-        }
+                async function submitStepAnswers(moduleId, stepId) {
+                    const userSession = localStorage.getItem('user_session');
+                    if (!userSession) return alert('Silakan login terlebih dahulu.');
 
-        async function submitStepAnswers(moduleId, stepId) {
-            const userSession = localStorage.getItem('user_session');
-            if (!userSession) return alert('Silakan login terlebih dahulu.');
+                    const user = JSON.parse(userSession);
+                    if (!user.nim) {
+                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
+                        if (data) user.nim = data.nim;
+                        else return alert('Data mahasiswa tidak ditemukan.');
+                    }
 
-            const user = JSON.parse(userSession);
-            if (!user.nim) {
-                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                if (data) user.nim = data.nim;
-                else return alert('Data mahasiswa tidak ditemukan.');
-            }
+                    // Collect answers
+                    const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
+                    const answers = {};
+                    let hasAnswer = false;
+                    inputs.forEach(input => {
+                        const qId = input.dataset.questionId;
+                        answers[qId] = input.value;
+                        if (input.value.trim()) hasAnswer = true;
+                    });
 
-            // Collect answers
-            const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
-            const answers = {};
-            let hasAnswer = false;
-            inputs.forEach(input => {
-                const qId = input.dataset.questionId;
-                answers[qId] = input.value;
-                if (input.value.trim()) hasAnswer = true;
-            });
+                    if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
 
-            if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
+                    // Upsert answer as JSON
+                    const { error } = await supabaseClient.from('student_answers').upsert({
+                        student_nim: user.nim,
+                        module_id: moduleId,
+                        step_id: stepId,
+                        answer: JSON.stringify(answers), // Store all answers as JSON string
+                        score: 0 // Default score, needs grading
+                    }, { onConflict: 'student_nim, step_id' }); // Assuming composite key/unique constraint exists, or we just insert. 
+                    // Note: If no unique constraint on (student_nim, step_id), upsert might duplicate. 
+                    // Ideally we should check if exists or rely on the table setup. For now, assuming similar logic to previous submit.
 
-            // Upsert answer as JSON
-            const { error } = await supabaseClient.from('student_answers').upsert({
-                student_nim: user.nim,
-                module_id: moduleId,
-                step_id: stepId,
-                answer: JSON.stringify(answers), // Store all answers as JSON string
-                score: 0 // Default score, needs grading
-            }, { onConflict: 'student_nim, step_id' }); // Assuming composite key/unique constraint exists, or we just insert. 
-            // Note: If no unique constraint on (student_nim, step_id), upsert might duplicate. 
-            // Ideally we should check if exists or rely on the table setup. For now, assuming similar logic to previous submit.
+                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
+                    else alert('Jawaban berhasil disimpan!');
+                }
 
-            if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-            else alert('Jawaban berhasil disimpan!');
-        }
+                function renderStepCard(step, index, moduleId) {
+                    let icon = 'fa-circle';
+                    let color = 'bg-slate-500';
+                    let mediaContent = '';
+                    let extensionHtml = '';
 
-        function renderStepCard(step, index, moduleId) {
-            let icon = 'fa-circle';
-            let color = 'bg-slate-500';
-            let mediaContent = '';
-            let extensionHtml = '';
-
-            // Questions Rendering Logic
-            if (step.questions && step.questions.length > 0) {
-                const questionsHtml = step.questions.map((q, qIdx) => `
+                    // Questions Rendering Logic
+                    if (step.questions && step.questions.length > 0) {
+                        const questionsHtml = step.questions.map((q, qIdx) => `
                     <div class="mb-4">
                         <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
                         <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
                     </div>
                 `).join('');
 
-                extensionHtml = `
+                        extensionHtml = `
                     <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
                         <div class="flex items-center gap-2 mb-4">
                             <i class="fa-solid fa-pen-to-square text-purple-400"></i>
@@ -420,62 +431,62 @@
                         </button>
                     </div>
                 `;
-            }
+                    }
 
-            // Determine Icon & Color
-            switch (step.type) {
-                case 'youtube':
-                    icon = 'fa-play';
-                    color = 'bg-red-500';
-                    const videoId = getYoutubeId(step.content);
-                    if (videoId) {
-                        mediaContent = `
+                    // Determine Icon & Color
+                    switch (step.type) {
+                        case 'youtube':
+                            icon = 'fa-play';
+                            color = 'bg-red-500';
+                            const videoId = getYoutubeId(step.content);
+                            if (videoId) {
+                                mediaContent = `
                             <div class="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden border border-slate-700 mt-3 shadow-lg">
                                 <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
                             </div>`;
-                    } else {
-                        mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i> Buka Link Video</a>`;
-                    }
-                    break;
-                case 'pdf':
-                    icon = 'fa-file-pdf';
-                    color = 'bg-red-400';
-                    let pdfUrl = step.content;
-                    if (step.start_page) pdfUrl += `#page=${step.start_page}`;
+                            } else {
+                                mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i> Buka Link Video</a>`;
+                            }
+                            break;
+                        case 'pdf':
+                            icon = 'fa-file-pdf';
+                            color = 'bg-red-400';
+                            let pdfUrl = step.content;
+                            if (step.start_page) pdfUrl += `#page=${step.start_page}`;
 
-                    mediaContent = `
+                            mediaContent = `
                         <div class="mt-3 flex flex-col gap-2">
                             <!-- Clean Preview ONLY -->
                             <iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
                             ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Menampilkan halaman ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
                         </div>`;
-                    break;
-                case 'ppt':
-                    icon = 'fa-file-powerpoint';
-                    color = 'bg-orange-500';
-                    mediaContent = `
+                            break;
+                        case 'ppt':
+                            icon = 'fa-file-powerpoint';
+                            color = 'bg-orange-500';
+                            mediaContent = `
                         <div class="mt-3 flex flex-col gap-2">
                              <!-- Clean Preview ONLY -->
                             <iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
                            ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Slide fokus: ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
                         </div>`;
-                    break;
-                case 'task':
-                    icon = 'fa-clipboard-list';
-                    color = 'bg-emerald-500';
-                    mediaContent = `
+                            break;
+                        case 'task':
+                            icon = 'fa-clipboard-list';
+                            color = 'bg-emerald-500';
+                            mediaContent = `
                         <div class="mt-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg text-sm text-slate-300">
                            ${step.content.replace(/\n/g, '<br>')}
                         </div>`;
-                    break;
-                case 'quiz':
-                    icon = 'fa-question-circle';
-                    color = 'bg-purple-500';
-                    // If quiz has specific image content, show it.
-                    // Questions are handled by extensionHtml above if they exist.
-                    // But legacy quiz might just have one question? 
-                    // Let's support both. new questions array overrides or supplements.
-                    mediaContent = `
+                            break;
+                        case 'quiz':
+                            icon = 'fa-question-circle';
+                            color = 'bg-purple-500';
+                            // If quiz has specific image content, show it.
+                            // Questions are handled by extensionHtml above if they exist.
+                            // But legacy quiz might just have one question? 
+                            // Let's support both. new questions array overrides or supplements.
+                            mediaContent = `
                         <div class="mt-3 space-y-3">
                             ${step.content ? `
                             <div class="rounded overflow-hidden border border-slate-700">
@@ -494,10 +505,10 @@
                                 </div>
                             ` : ''}
                         </div>`;
-                    break;
-            }
+                            break;
+                    }
 
-            return `
+                    return `
                 <div class="timeline-item">
                     <div class="timeline-dot ${color} flex items-center justify-center text-[10px] text-white shadow-[0_0_10px_rgba(0,0,0,0.5)]">
                         <i class="fa-solid ${icon}"></i>
@@ -510,30 +521,30 @@
                     </div>
                 </div>
             `;
-        }
+                }
 
-        function getYoutubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
+                function getYoutubeId(url) {
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                    const match = url.match(regExp);
+                    return (match && match[2].length === 11) ? match[2] : null;
+                }
 
-        function toggleAccordion(index) {
-            const content = document.getElementById(`content-${index}`);
-            const icon = document.getElementById(`icon-${index}`);
-            const isActive = content.classList.contains('active');
+                function toggleAccordion(index) {
+                    const content = document.getElementById(`content-${index}`);
+                    const icon = document.getElementById(`icon-${index}`);
+                    const isActive = content.classList.contains('active');
 
-            document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
+                    document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
+                    document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
 
-            if (!isActive) {
-                content.classList.add('active');
-                icon.style.transform = 'rotate(180deg)';
-            }
-        }
+                    if (!isActive) {
+                        content.classList.add('active');
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                }
 
-        document.addEventListener('DOMContentLoaded', loadModules);
-    </script>
+                document.addEventListener('DOMContentLoaded', loadModules);
+            </script>
 </body>
 
 </html>

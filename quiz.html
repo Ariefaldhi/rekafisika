@@ -114,43 +114,24 @@
     <main class="flex-grow flex items-center justify-center p-4 relative z-0">
 
         <!-- Start Screen -->
-        <div id="start-screen"
-            class="glass-card max-w-md w-full p-8 rounded-2xl text-center space-y-6 relative overflow-hidden">
-            <!-- Decor -->
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
-
+        <div id="start-screen" <div id="start-screen" class="text-center py-12">
             <div
-                class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow border border-white/10 shadow-[0_0_30px_rgba(236,72,153,0.3)]">
-                <i class="fa-solid fa-gamepad text-5xl text-pink-500"></i>
+                class="w-32 h-32 bg-slate-200/50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow">
+                <i class="fa-solid fa-play text-5xl text-accent-500 dark:text-accent-400 ml-2"></i>
             </div>
-            <h1
-                class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">
-                Fismat Arcade
-            </h1>
-            <p class="text-slate-400 leading-relaxed">
-                Mode Seru! Jawab cepat, jaga <b>Streak</b>, dan kumpulkan skor tertinggi! <br>
-                <span class="text-xs font-mono text-slate-500 mt-2 block bg-slate-900/50 p-2 rounded">Topik: Konsep
-                    Fisika & Matematika Teknik</span>
-            </p>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Siap untuk Memulai?</h2>
+            <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">Tantang dirimu dengan soal-soal acak
+                dari Bab 1 - 2. Dapatkan poin untuk setiap jawaban benar!</p>
             <button onclick="startQuiz()"
-                class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-[0_10px_20px_rgba(219,39,119,0.3)] transition-all hover:scale-105 active:scale-95 group">
-                Mulai Challenge <i class="fa-solid fa-bolt ml-2 group-hover:animate-ping"></i>
+                class="px-8 py-3 bg-accent-500 hover:bg-accent-600 dark:bg-accent-600 dark:hover:bg-accent-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-accent-500/25 transition-all hover:-translate-y-1">
+                Mulai Kuis
             </button>
         </div>
 
         <!-- Loading Screen -->
-        <div id="loading-screen" class="hidden text-center space-y-6">
-            <div class="relative w-24 h-24 mx-auto">
-                <div class="absolute inset-0 border-4 border-slate-700/50 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-t-pink-500 rounded-full animate-spin"></div>
-                <i
-                    class="fa-solid fa-robot absolute inset-0 flex items-center justify-center text-3xl text-slate-500"></i>
-            </div>
-            <div class="space-y-2">
-                <h3 class="text-xl font-bold font-mono text-white">GENERATING LEVEL...</h3>
-                <p class="text-slate-400 text-sm animate-pulse" id="loading-text">Menghubungi Professor AI...</p>
-            </div>
+        <div id="loading-screen" class="hidden text-center py-20">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-accent-500 dark:text-accent-400 mb-4"></i>
+            <p class="text-slate-600 dark:text-slate-300 animate-pulse">AI sedang membuat soal...</p>
         </div>
 
         <!-- Quiz Screen -->

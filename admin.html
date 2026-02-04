@@ -88,51 +88,61 @@
     </div>
 
     <!-- Sidebar -->
-    <aside id="admin-sidebar"
-        class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="h-16 flex items-center px-6 border-b border-slate-800">
-            <span class="font-bold text-xl tracking-wide text-red-400">Admin Panel</span>
+    <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform            <!-- Logo -->
+            <div class=" flex items-center gap-3 mb-10 px-2">
+        <i class="fa-solid fa-atom text-accent-500 dark:text-accent-400 text-2xl"></i>
+        <span class="font-bold text-xl tracking-wide text-slate-800 dark:text-white">AdminPanel</span>
         </div>
-        <nav class="p-4 space-y-2">
-            <button onclick="showSection('tugas')" id="nav-tugas"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors tab-active">
-                <i class="fa-solid fa-clipboard-list w-6"></i> Manajemen Tugas
+
+        <!-- Sidebar Menu -->
+        <nav class="space-y-2">
+            <a href="#dashboard"
+                class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl transition-all group">
+                <i class="fa-solid fa-chart-line w-6 text-center"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="#users"
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                <i class="fa-solid fa-users w-6 text-center"></i>
+                <span class="font-medium">Mahasiswa</span>
+            </a>
+            <a href="#attendance"
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                <i class="fa-solid fa-clipboard-check w-6 text-center"></i>
+                <span class="font-medium">Presensi</span>
+            </a>
+            <!-- Divider -->
+            <div class="h-px bg-slate-200 dark:bg-slate-700 my-4 mx-2"></div>
+
+            <a href="index.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">
+                <i class="fa-solid fa-arrow-left w-6 text-center"></i>
+                <span class="font-medium">Kembali ke Web</span>
+            </a>
+        </nav>
+        button onclick="showSection('mahasiswa')" id="nav-mahasiswa"
+        class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+        <i class="fa-solid fa-users-gear w-6"></i> Kelola Mahasiswa
+        </button>
+        <button onclick="showSection('modul')" id="nav-modul"
+            class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
+            <i class="fa-solid fa-book-open w-6"></i> Manajemen Modul
+        </button>
+        <div class="pt-8 border-t border-slate-800 mt-4 space-y-2">
+            <button id="theme-toggle-desktop" onclick="toggleTheme()"
+                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-between group">
+                <span><i class="fa-solid fa-circle-half-stroke w-6"></i> Tema</span>
+                <i id="theme-icon-desktop" class="fa-solid fa-moon text-yellow-300"></i>
             </button>
-            <button onclick="showSection('berita')" id="nav-berita"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
-                <i class="fa-solid fa-newspaper w-6"></i> Manajemen Berita
+            <a href="index.html"
+                class="block w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-house w-6"></i> Website Utama
+            </a>
+            <button onclick="logout()"
+                class="w-full text-left px-4 py-3 rounded hover:bg-red-900/20 text-red-400 transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-6"></i> Logout
             </button>
-            <button onclick="showSection('presensi')" id="nav-presensi"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
-                <i class="fa-solid fa-user-check w-6"></i> Manajemen Presensi
-            </button>
-            <button onclick="showSection('keaktifan')" id="nav-keaktifan"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
-                <i class="fa-solid fa-star w-6"></i> Input Keaktifan
-            </button>
-            <button onclick="showSection('mahasiswa')" id="nav-mahasiswa"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
-                <i class="fa-solid fa-users-gear w-6"></i> Kelola Mahasiswa
-            </button>
-            <button onclick="showSection('modul')" id="nav-modul"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 transition-colors text-slate-400">
-                <i class="fa-solid fa-book-open w-6"></i> Manajemen Modul
-            </button>
-            <div class="pt-8 border-t border-slate-800 mt-4 space-y-2">
-                <button id="theme-toggle-desktop" onclick="toggleTheme()"
-                    class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-between group">
-                    <span><i class="fa-solid fa-circle-half-stroke w-6"></i> Tema</span>
-                    <i id="theme-icon-desktop" class="fa-solid fa-moon text-yellow-300"></i>
-                </button>
-                <a href="index.html"
-                    class="block w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-house w-6"></i> Website Utama
-                </a>
-                <button onclick="logout()"
-                    class="w-full text-left px-4 py-3 rounded hover:bg-red-900/20 text-red-400 transition-colors">
-                    <i class="fa-solid fa-right-from-bracket w-6"></i> Logout
-                </button>
-            </div>
+        </div>
         </nav>
     </aside>
 
@@ -319,23 +329,31 @@
                 </form>
             </div>
 
-            <!-- Student List -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
-                            <tr>
-                                <th class="px-4 py-3">NIM</th>
-                                <th class="px-4 py-3">Nama</th>
-                                <th class="px-4 py-3">Kode Akses</th>
-                                <th class="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-table-body" class="divide-y divide-slate-700">
-                            <!-- Injected -->
-                        </tbody>
-                    </table>
+            <!-- Card 1 -->
+            <div class="glass-card p-6 rounded-xl border-l-4 border-accent-500">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-accent-500/10 rounded-lg text-accent-500">
+                        <i class="fa-solid fa-users text-2xl"></i>
+                    </div>
+                    <span
+                        class="text-xs font-bold bg-accent-500/20 text-accent-600 dark:text-accent-300 px-2 py-1 rounded">TOTAL</span>
                 </div>
+                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1" id="total-students">0</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">Mahasiswa Terdaftar</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="glass-card p-6 rounded-xl border-l-4 border-emerald-500">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
+                        <i class="fa-solid fa-clipboard-user text-2xl"></i>
+                    </div>
+                    <span
+                        class="text-xs font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 px-2 py-1 rounded">HARI
+                        INI</span>
+                </div>
+                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1" id="attendance-count">0</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">Hadir Kuliah</p>
             </div>
         </section>
 
@@ -773,11 +791,12 @@
             const list = document.getElementById('admin-tugas-list');
             if (data && list) {
                 list.innerHTML = data.map(t => `
-                    <div class="flex justify-between items-center bg-slate-900 border border-slate-700 p-3 rounded">
-                        <div>
-                            <div class="font-bold flex items-center gap-2">
-                                ${t.title}
-                                <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
+                    <header class="flex justify-between items-center mb-8 bg-white/50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 backdrop-blur-md sticky top-4 z-40">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Selamat Datang, Admin</h1>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">Kelola data mahasiswa dan aktivitas perkuliahan.</p>
+            </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
                             </div>
                             <div class="text-xs text-slate-500">${new Date(t.deadline).toLocaleDateString()}</div>
                         </div>
