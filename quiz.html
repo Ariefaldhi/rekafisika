@@ -31,7 +31,6 @@
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -45,42 +44,26 @@
     </script>
     <style>
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
             background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
     </style>
 </head>
 
-<body
-    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Navbar -->
     <nav class="p-4 md:p-6 flex items-center justify-between relative z-10">
@@ -91,10 +74,7 @@
         </a>
 
         <div class="flex items-center gap-3">
-            <button id="theme-toggle"
-                class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors bg-slate-800 border border-slate-700 w-10 h-10 flex items-center justify-center">
-                <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
-            </button>
+            <!-- Theme Toggle Removed -->
             <button onclick="toggleMute()" id="btn-mute"
                 class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
                 <i class="fa-solid fa-volume-high"></i>
@@ -114,60 +94,68 @@
     <main class="flex-grow flex items-center justify-center p-4 relative z-0">
 
         <!-- Start Screen -->
-        <div id="start-screen" <div id="start-screen" class="text-center py-12">
-            <div
-                class="w-32 h-32 bg-slate-200/50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow">
-                <i class="fa-solid fa-play text-5xl text-accent-500 dark:text-accent-400 ml-2"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Siap untuk Memulai?</h2>
-            <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">Tantang dirimu dengan soal-soal acak
-                dari Bab 1 - 2. Dapatkan poin untuk setiap jawaban benar!</p>
-            <button onclick="startQuiz()"
-                class="px-8 py-3 bg-accent-500 hover:bg-accent-600 dark:bg-accent-600 dark:hover:bg-accent-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-accent-500/25 transition-all hover:-translate-y-1">
-                Mulai Kuis
-            </button>
-        </div>
-
-        <!-- Loading Screen -->
-        <div id="loading-screen" class="hidden text-center py-20">
-            <i class="fa-solid fa-spinner fa-spin text-4xl text-accent-500 dark:text-accent-400 mb-4"></i>
-            <p class="text-slate-600 dark:text-slate-300 animate-pulse">AI sedang membuat soal...</p>
-        </div>
-
-        <!-- Quiz Screen -->
-        <div id="quiz-screen" class="hidden w-full max-w-2xl relative">
-
-            <!-- Turn Timer -->
-            <div class="absolute -top-12 left-0 w-full flex items-center justify-between px-2">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Time Left</div>
-                <div class="text-xl font-mono font-bold text-white flex items-center gap-2">
-                    <i class="fa-regular fa-clock"></i> <span id="timer-display">30</span>s
+        <div id="start-screen" class="max-w-2xl mx-auto text-center">
+            <div class="glass-card p-8 rounded-2xl mb-8">
+                <div class="w-24 h-24 bg-accent-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-brain text-5xl text-accent-500"></i>
                 </div>
+                <h1
+                    class="text-4xl font-bold mb-4 bg-gradient-to-r from-accent-400 to-blue-500 bg-clip-text text-transparent">
+                    AI Random Quiz</h1>
+                <p class="text-slate-400 mb-8 max-w-lg mx-auto">
+                    Uji pemahamanmu tentang Fisika Matematika I. Soal dibuat secara otomatis oleh AI berdasarkan materi
+                    perkuliahan.
+                </p>
+                <button onclick="startQuiz()"
+                    class="px-8 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-accent-500/25 transition-all hover:-translate-y-1">
+                    Mulai Kuis
+                </button>
             </div>
 
-            <!-- Timer Bar -->
-            <div
-                class="relative w-full bg-slate-800 h-3 rounded-full mb-6 overflow-hidden border border-slate-700 shadow-inner">
-                <div id="timer-bar"
-                    class="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-1000 w-full ease-linear">
-                </div>
+            <!-- Loading Screen -->
+            <div id="loading-screen" class="hidden text-center py-20">
+                <i class="fa-solid fa-spinner fa-spin text-4xl text-accent-500 mb-4"></i>
+                <p id="loading-text" class="text-slate-300 animate-pulse">AI sedang membuat soal...</p>
             </div>
 
-            <!-- Question Card -->
-            <div class="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden ring-1 ring-white/10 shadow-2xl">
-                <span
-                    class="absolute top-4 right-4 text-xs font-bold text-slate-500 border border-slate-700 px-2 py-1 rounded">
-                    Soal <span id="q-number">1</span>/5
-                </span>
-
-                <h2 id="q-text" class="text-xl md:text-2xl font-bold mb-8 mt-2 leading-relaxed">
-                    <!-- Question Text Here -->
-                </h2>
-
-                <div id="options-container" class="space-y-3">
-                    <!-- Options buttons will be injected here -->
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" class="hidden max-w-3xl mx-auto">
+                <!-- Progress & Stats -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-orange-500"></i>
+                            <span id="streak-counter" class="font-bold font-mono text-orange-400">0</span>
+                        </div>
+                    </div>
+                    <div
+                        class="px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 flex items-center gap-2 text-slate-300">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="timer" class="font-mono font-bold">00:00</span>
+                    </div>
                 </div>
 
+                <!-- Question Card -->
+                <div class="glass-card p-6 md:p-10 rounded-2xl relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-6">
+                        <span
+                            class="px-3 py-1 bg-accent-500/10 text-accent-400 text-xs font-bold rounded-full border border-accent-500/20">
+                            SOAL AI GENERATED
+                        </span>
+                        <button class="text-slate-400 hover:text-white transition-colors" title="Laporkan soal">
+                            <i class="fa-regular fa-flag"></i>
+                        </button>
+                    </div>
+
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold leading-relaxed mb-8 text-white">
+                        Memuat soal...
+                    </h2>
+
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
                 <!-- Feedback Area -->
                 <div id="feedback-area"
                     class="hidden mt-6 p-4 rounded-xl bg-slate-800/50 border border-slate-700 animate-fade-in">
@@ -213,11 +201,27 @@
 
     </main>
 
-    <!-- Theme JS -->
-    <script src="js/theme.js"></script>
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav
+        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        <a href="index.html" class="flex flex-col items-center text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-home text-xl"></i>
+            <span class="text-xs mt-1">Home</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-accent-400">
+            <i class="fa-solid fa-brain text-xl"></i>
+            <span class="text-xs mt-1">Quiz</span>
+        </a>
+        <a href="buku.html" class="flex flex-col items-center text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-book text-xl"></i>
+            <span class="text-xs mt-1">Materi</span>
+        </a>
+    </nav>
 
-    <!-- Quiz Logic -->
-    <script src="config.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
     <script>
         // --- CONFIG & STATE ---
         const QUIZ_TOPIC = "Konsep Dasar Fisika Matematika, Kalkulus, dan Fisika Modern (Level Kuliah)";
@@ -431,7 +435,7 @@
 
             // UI Updates
             document.getElementById('q-number').innerText = currentQIndex + 1;
-            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('question-text').innerText = q.q; // Changed from q-text to question-text
             document.getElementById('feedback-area').classList.add('hidden');
 
             // Render Options
@@ -470,18 +474,20 @@
         }
 
         function updateTimerUI() {
-            document.getElementById('timer-display').innerText = timeLeft;
+            document.getElementById('timer').innerText = `${String(Math.floor(timeLeft / 60)).padStart(2, '0')}:${String(timeLeft % 60).padStart(2, '0')}`; // Changed from timer-display to timer
             const percent = (timeLeft / 30) * 100;
             const bar = document.getElementById('timer-bar');
-            bar.style.width = `${percent}%`;
+            if (bar) { // Check if bar exists, as the new quiz-screen doesn't have it
+                bar.style.width = `${percent}%`;
 
-            // Color shift logic
-            if (percent < 30) {
-                bar.className = "h-full bg-red-500 transition-all duration-1000 w-full ease-linear animate-pulse";
-            } else if (percent < 60) {
-                bar.className = "h-full bg-yellow-500 transition-all duration-1000 w-full ease-linear";
-            } else {
-                bar.className = "h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-1000 w-full ease-linear";
+                // Color shift logic
+                if (percent < 30) {
+                    bar.className = "h-full bg-red-500 transition-all duration-1000 w-full ease-linear animate-pulse";
+                } else if (percent < 60) {
+                    bar.className = "h-full bg-yellow-500 transition-all duration-1000 w-full ease-linear";
+                } else {
+                    bar.className = "h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-1000 w-full ease-linear";
+                }
             }
         }
 
@@ -536,7 +542,7 @@
 
             area.classList.remove('hidden');
             if (isCorrect) {
-                area.className = "mt-6 p-4 rounded-xl bg-emulator-green border border-emerald-500/30 relative overflow-hidden";
+                area.className = "mt-6 p-4 rounded-xl bg-emerald-900/40 border border-emerald-500/30 relative overflow-hidden"; // Changed from bg-emulator-green
                 icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 text-3xl animate-bounce"></i>';
                 title.innerHTML = `BENAR! <span class="text-sm font-normal text-emerald-300 ml-2">+${gainedPoints} pts</span>`;
                 title.className = "font-black text-xl text-emerald-400 italic";
@@ -551,11 +557,11 @@
 
         function updateStats() {
             document.getElementById('score').innerText = score;
-            const streakEl = document.getElementById('streak-display');
+            const streakEl = document.getElementById('streak-counter'); // Changed from streak-display to streak-counter
             streakEl.innerText = streak;
             streakEl.parentElement.className = streak > 2
                 ? "px-4 py-2 rounded-full bg-orange-500/20 border border-orange-500 font-mono text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(249,115,22,0.4)] transition-all scale-110"
-                : "px-4 py-2 rounded-full bg-slate-800 border border-slate-700 font-mono text-sm flex items-center gap-2";
+                : "px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 font-mono text-sm flex items-center gap-2"; // Adjusted class for consistency
         }
 
         function nextQuestion() {

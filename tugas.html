@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -22,42 +21,26 @@
     </script>
     <style>
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
             background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
             background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
     </style>
 </head>
 
-<body
-    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300 dark">
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass">
@@ -75,7 +58,7 @@
                         <a href="index.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
                         <a href="tugas.html"
-                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Tugas</a>
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Tugas</a>
                         <a href="presensi.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
                         <a href="keaktifan.html"
@@ -88,12 +71,7 @@
                 </div>
 
                 <!-- Theme Toggle -->
-                <div class="flex items-center">
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-                        <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
-                    </button>
-                </div>
+                <!-- Theme Toggle Removed -->
 
                 <!-- Mobile Menu Button (HIDDEN) -->
                 <div class="-mr-2 flex md:hidden hidden">
@@ -120,9 +98,19 @@
 
     <!-- Main Content -->
     <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full flex-grow">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-3xl font-bold">Daftar Tugas</h1>
-            <div class="text-sm text-slate-400">Semester Genap 2026</div>
+        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold mb-4">Daftar Tugas</h1>
+                <p class="text-slate-400">Kelola dan kumpulkan tugas perkuliahan Anda.</p>
+            </div>
+            <div class="text-xs flex gap-3 bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-accent-400 text-[8px]"></i>
+                    Aktif</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-emerald-400 text-[8px]"></i>
+                    Selesai</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-red-400 text-[8px]"></i>
+                    Terlewat</span>
+            </div>
         </div>
 
         <!-- Task Categories -->
@@ -156,12 +144,10 @@
     </main>
 
     <!-- Footer -->
-    <footer
-        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
         <div class="max-w-7xl mx-auto px-4">
-            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
-                dilindungi.</p>
-            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta dilindungi.</p>
+            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
                 Dibuat dengan <i class="fa-solid fa-heart text-red-500"></i> oleh <a href="https://github.com/faldhima"
                     target="_blank" class="text-accent-500 hover:underline">Faldhi Muhammad Ariefaldhi</a>
             </p>
@@ -170,7 +156,7 @@
 
     <!-- Bottom Navigation (Mobile Only) -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
+        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
         <a href="index.html"
             class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
@@ -197,16 +183,13 @@
             <span class="text-[10px] font-medium">Modul</span>
         </a>
         <a href="profil.html"
-            class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 transition-colors group">
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-medium">Profil</span>
         </a>
     </nav>
 
-    <!-- Theme JS -->
-    <script src="js/theme.js"></script>
-
-    <!-- Scripts -->
+    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>

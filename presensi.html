@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -21,36 +20,21 @@
     </script>
     <style>
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
             background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
-            background-image: radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
 
         /* Table Styles */
@@ -69,30 +53,18 @@
         th,
         td {
             padding: 8px 12px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
             text-align: center;
         }
 
-        .dark th,
-        .dark td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
         th {
-            background: rgba(241, 245, 249, 0.95);
-            /* Light: Slate-100 */
+            background: rgba(15, 23, 42, 0.9);
             position: sticky;
             top: 0;
             z-index: 10;
-            color: #475569;
-            /* Light: Slate-600 */
-            font-weight: 600;
-        }
-
-        .dark th {
-            background: rgba(15, 23, 42, 0.9);
             color: #94a3b8;
+            font-weight: 600;
         }
 
         th:first-child,
@@ -105,19 +77,8 @@
         }
 
         td:first-child {
-            background: rgba(255, 255, 255, 0.95);
-            /* Light: White */
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
-            color: #1e293b;
-            /* Slate-800 */
-            font-weight: 500;
-        }
-
-        .dark td:first-child {
             background: rgba(30, 41, 59, 0.95);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            color: #e2e8f0;
-            /* Slate-200 */
         }
 
         .status-hadir {
@@ -143,8 +104,7 @@
     </style>
 </head>
 
-<body
-    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass">
@@ -172,13 +132,7 @@
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
                 </div>
-                <!-- Theme Toggle -->
-                <div class="flex items-center">
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-                        <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
-                    </button>
-                </div>
+                <!-- Theme Toggle Removed -->
 
                 <!-- Mobile Menu Button (HIDDEN) -->
                 <div class="-mr-2 flex md:hidden hidden">

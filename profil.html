@@ -13,7 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -24,42 +23,26 @@
     </script>
     <style>
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
             background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.1) 0px, transparent 50%);
+            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
     </style>
 </head>
 
-<body
-    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass">
@@ -84,19 +67,13 @@
                         <a href="modul.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
                         <a href="profil.html"
-                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Profil</a>
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Profil</a>
                     </div>
                 </div>
-                <!-- Theme Toggle -->
-                <div class="flex items-center">
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-                        <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
-                    </button>
-                </div>
+                <!-- Theme Toggle Removed -->
 
                 <!-- Mobile Menu Button (HIDDEN) -->
-                <div class="-mr-2 flex md:hidden hidden">
+                <div class="-mr-2 flex md:hidden">
                     <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
                         onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
                             class="fa-solid fa-bars text-xl"></i></button>
@@ -104,7 +81,7 @@
             </div>
         </div>
         <!-- Mobile Menu (HIDDEN) -->
-        <div class="hidden md:hidden glass-card absolute w-full hidden" id="mobile-menu">
+        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
                 <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
@@ -182,9 +159,9 @@
                         </div>
                         <div class="flex gap-2">
                             <button type="button" onclick="resetModal()"
-                                class="px-4 py-2 text-slate-400 dark:hover:text-white">Batal</button>
+                                class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
                             <button type="button" onclick="saveCroppedImage()" id="btn-save-crop"
-                                class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white dark:text-white rounded font-bold shadow-lg shadow-accent-500/20">
+                                class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded font-bold shadow-lg shadow-accent-500/20">
                                 <i class="fa-solid fa-check mr-2"></i>Simpan
                             </button>
                         </div>
@@ -200,76 +177,72 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Attendance Stat -->
-            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-user-check text-6xl"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="glass-card p-6 rounded-xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
+                        <i class="fa-solid fa-clipboard-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Kehadiran</p>
+                        <h3 class="text-2xl font-bold text-white" id="stat-hadir-percent">0%</h3>
+                    </div>
                 </div>
-                <h3 class="text-slate-400 font-medium mb-1">Statistik Presensi</h3>
-                <div class="flex items-end gap-2">
-                    <span class="text-4xl font-bold text-white" id="stat-hadir">0</span>
-                    <span class="text-sm text-slate-500 mb-1">Pertemuan Hadir</span>
-                </div>
-                <div class="mt-4 flex gap-2 text-xs">
-                    <span class="px-2 py-1 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Sakit:
-                        <span id="stat-sakit">0</span></span>
-                    <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">Izin: <span
-                            id="stat-izin">0</span></span>
-                    <span class="px-2 py-1 rounded bg-red-500/10 text-red-500 border border-red-500/20">Alfa: <span
-                            id="stat-alfa">0</span></span>
+                <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%" id="stat-hadir-bar"></div>
                 </div>
             </div>
 
-            <!-- Participation Stat -->
-            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-star text-6xl text-yellow-400"></i>
+            <div class="glass-card p-6 rounded-xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500">
+                        <i class="fa-solid fa-hand-point-up text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Poin Partisipasi</p>
+                        <h3 class="text-2xl font-bold text-white" id="stat-poin">0</h3>
+                    </div>
                 </div>
-                <h3 class="text-slate-400 font-medium mb-1">Total Poin Keaktifan</h3>
-                <div class="flex items-end gap-2">
-                    <span class="text-4xl font-bold text-yellow-400" id="stat-poin">0</span>
-                    <span class="text-sm text-slate-500 mb-1">Poin</span>
-                </div>
-                <p class="mt-4 text-xs text-slate-500">Semakin aktif bertanya dan menjawab, semakin tinggi poinmu!</p>
+                <p class="text-xs text-slate-500">Total poin dari keaktifan di kelas.</p>
             </div>
 
-            <!-- Tasks Stat -->
-            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-list-check text-6xl text-purple-400"></i>
+            <div class="glass-card p-6 rounded-xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-purple-500/10 rounded-lg text-purple-500">
+                        <i class="fa-solid fa-list-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Tugas Selesai</p>
+                        <h3 class="text-2xl font-bold text-white"><span id="stat-tugas">0</span>/<span
+                                id="stat-tugas-total">0</span></h3>
+                    </div>
                 </div>
-                <h3 class="text-slate-400 font-medium mb-1">Tugas Selesai</h3>
-                <div class="flex items-end gap-2">
-                    <span class="text-4xl font-bold text-purple-400" id="stat-tugas">0</span>
-                    <span class="text-sm text-slate-500 mb-1">Tugas</span>
+                <div class="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-purple-500 h-1.5 rounded-full" style="width: 0%" id="stat-tugas-bar"></div>
                 </div>
-                <p class="mt-4 text-xs text-slate-500">Rajin pangkal pandai!</p>
             </div>
 
-            <!-- Diligence Points Stat -->
-            <div class="glass-card rounded-xl p-6 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-bolt text-6xl text-pink-400"></i>
+            <div class="glass-card p-6 rounded-xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-orange-500/10 rounded-lg text-orange-500">
+                        <i class="fa-solid fa-fire text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Poin Kerajinan</p>
+                        <h3 class="text-2xl font-bold text-white" id="stat-rajin">0</h3>
+                    </div>
                 </div>
-                <h3 class="text-slate-400 font-medium mb-1">Poin Kerajinan</h3>
-                <div class="flex items-end gap-2">
-                    <span class="text-4xl font-bold text-pink-400" id="stat-rajin">0</span>
-                    <span class="text-sm text-slate-500 mb-1">Poin</span>
-                </div>
-                <p class="mt-4 text-xs text-slate-500">Poin dari mengerjakan tugas.</p>
+                <p class="text-xs text-slate-500">Poin dari mengerjakan tugas.</p>
             </div>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer
-        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
         <div class="max-w-7xl mx-auto px-4">
-            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
-                dilindungi.</p>
-            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta dilindungi.</p>
+            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
                 <a href="#" class="hover:text-accent-500 transition-colors">Kebijakan Privasi</a>
                 <span>|</span>
                 <a href="#" class="hover:text-accent-500 transition-colors">Ketentuan Layanan</a>
@@ -279,7 +252,7 @@
 
     <!-- Bottom Navigation (Mobile Only) -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
+        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
         <a href="index.html"
             class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
@@ -305,9 +278,8 @@
             <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-medium">Modul</span>
         </a>
-        <a href="profil.html" class="flex flex-col items-center text-accent-500 dark:text-accent-400 group">
-            <div
-                class="absolute -top-3 w-8 h-1 bg-accent-500 dark:bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+        <a href="profil.html" class="flex flex-col items-center text-accent-500">
+            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
             </div>
             <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-bold">Profil</span>

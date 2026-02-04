@@ -17,19 +17,8 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        navy: {
-                            800: '#1e293b',
-                            900: '#0f172a',
-                        },
-                        accent: {
-                            400: '#22d3ee', // cyan-400
-                            500: '#06b6d4', // cyan-500
-                        }
-                    }
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
                 }
             }
         }
@@ -55,40 +44,21 @@
     <style>
         /* Glassmorphism */
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            /* Light mode default */
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.7);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            /* Light mode default */
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* Abstract Background */
         .bg-abstract {
-            background-color: #f8fafc;
-            /* Slate-50 */
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
             background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
             background-attachment: fixed;
@@ -108,8 +78,7 @@
     </style>
 </head>
 
-<body
-    class="bg-abstract dark:bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass transition-all duration-300">
@@ -126,7 +95,7 @@
                     <!-- Student Menu (Default Hidden, shown by JS) -->
                     <div id="nav-student" class="hidden ml-10 flex items-baseline space-x-8">
                         <a href="index.html"
-                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Beranda</a>
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Beranda</a>
                         <a href="tugas.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
                         <a href="presensi.html"
@@ -142,20 +111,14 @@
                     <!-- Guest Menu -->
                     <div id="nav-guest" class="ml-10 flex items-baseline space-x-8">
                         <a href="index.html"
-                            class="text-accent-500 dark:text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-800/50">Beranda</a>
+                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Beranda</a>
                         <a href="profil.html"
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
                 </div>
 
                 <!-- Theme Toggle (Visible on All Devices) -->
-                <div class="flex items-center">
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-                        <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
-                    </button>
-                    <!-- Mobile Nav Button was here but hidden -->
-                </div>
+                <!-- Theme Toggle Removed -->
             </div>
         </div>
 
@@ -196,22 +159,20 @@
                     class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-blue-500">Matematika
                     I</span>
             </h1>
-            <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-2xl">
+            <p class="text-slate-400 text-lg md:text-xl max-w-2xl">
                 Mengeksplorasi fondasi matematika alam semesta fisik.
                 Platform pembelajaran terintegrasi untuk mahasiswa Fisika.
             </p>
 
             <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start pt-4 text-sm text-slate-300">
-                <div
-                    class="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <i class="fa-solid fa-chalkboard-user text-accent-500 dark:text-accent-400"></i>
-                    <span>Dosen: <strong class="text-slate-900 dark:text-white">Dr. Achmad Samsudin, S.Pd.,
+                <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-chalkboard-user text-accent-400"></i>
+                    <span>Dosen: <strong class="text-white">Dr. Achmad Samsudin, S.Pd.,
                             M.Pd.</strong></span>
                 </div>
-                <div
-                    class="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <i class="fa-solid fa-user-graduate text-accent-500 dark:text-accent-400"></i>
-                    <span>PJ: <strong class="text-slate-900 dark:text-white">Faldhi Muhammad Ariefaldhi</strong></span>
+                <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-user-graduate text-accent-400"></i>
+                    <span>PJ: <strong class="text-white">Faldhi Muhammad Ariefaldhi</strong></span>
                 </div>
             </div>
 
@@ -230,46 +191,36 @@
             <!-- Content will be handled by JS (Guest will see Generic, Student see real) -->
             <div
                 class="glass-card rounded-2xl p-6 md:p-8 max-w-sm mx-auto md:mx-0 w-full relative overflow-hidden group">
-                <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-                    <i class="fa-regular fa-clock text-accent-500 dark:text-accent-400"></i> Kelas Berikutnya:
+                <h3 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-accent-400"></i> Kelas Berikutnya:
                 </h3>
                 <div class="grid grid-cols-4 gap-2 text-center mb-6">
-                    <div
-                        class="bg-slate-200/80 dark:bg-slate-800/80 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
-                        <span id="cd-days"
-                            class="block text-2xl font-bold text-accent-600 dark:text-accent-400 font-mono">--</span>
-                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase">Hari</span>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-days" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Hari</span>
                     </div>
-                    <div
-                        class="bg-slate-200/80 dark:bg-slate-800/80 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
-                        <span id="cd-hours"
-                            class="block text-2xl font-bold text-accent-600 dark:text-accent-400 font-mono">--</span>
-                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase">Jam</span>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-hours" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Jam</span>
                     </div>
-                    <div
-                        class="bg-slate-200/80 dark:bg-slate-800/80 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
-                        <span id="cd-mins"
-                            class="block text-2xl font-bold text-accent-600 dark:text-accent-400 font-mono">--</span>
-                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase">Mnt</span>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-mins" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Mnt</span>
                     </div>
-                    <div
-                        class="bg-slate-200/80 dark:bg-slate-800/80 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
-                        <span id="cd-secs"
-                            class="block text-2xl font-bold text-accent-600 dark:text-accent-400 font-mono">--</span>
-                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase">Dtk</span>
+                    <div class="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                        <span id="cd-secs" class="block text-2xl font-bold text-accent-400 font-mono">--</span>
+                        <span class="text-xs text-slate-400 uppercase">Dtk</span>
                     </div>
                 </div>
                 <div class="space-y-3 text-sm">
-                    <div
-                        class="flex justify-between items-center py-2 border-b border-slate-300/50 dark:border-slate-700/50 gap-4">
-                        <span class="text-slate-600 dark:text-slate-400">Ruangan</span>
+                    <div class="flex justify-between items-center py-2 border-b border-slate-700/50 gap-4">
+                        <span class="text-slate-400">Ruangan</span>
                         <span id="next-room"
-                            class="font-mono bg-accent-500/10 dark:bg-accent-500/20 text-accent-600 dark:text-accent-300 px-2 py-0.5 rounded text-right">...</span>
+                            class="font-mono bg-accent-500/20 text-accent-300 px-2 py-0.5 rounded text-right">...</span>
                     </div>
                     <div class="flex justify-between items-center py-2 gap-4">
-                        <span class="text-slate-600 dark:text-slate-400 shrink-0">Hari & Waktu</span>
-                        <span id="next-time"
-                            class="text-slate-800 dark:text-slate-200 text-right font-medium">...</span>
+                        <span class="text-slate-400 shrink-0">Hari & Waktu</span>
+                        <span id="next-time" class="text-slate-200 text-right font-medium">...</span>
                     </div>
                 </div>
             </div>
@@ -279,7 +230,7 @@
     <!-- News/Announcements Section -->
     <section id="news-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 hidden">
         <div class="flex items-center gap-3 mb-6">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Berita & Pengumuman</h2>
+            <h2 class="text-2xl font-bold text-white">Berita & Pengumuman</h2>
             <span
                 class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/30">Terbaru</span>
         </div>
@@ -295,7 +246,7 @@
     <!-- Assignment Section (Active) - Hidden for Guest -->
     <section id="assignment-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 hidden">
         <div class="flex items-center gap-3 mb-6">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Tugas Perkuliahan</h2>
+            <h2 class="text-2xl font-bold text-white">Tugas Perkuliahan</h2>
             <span
                 class="px-2 py-0.5 rounded-full bg-accent-500/10 text-accent-400 text-xs font-bold border border-accent-500/20">Opsional</span>
         </div>
@@ -311,10 +262,9 @@
 
 
     <!-- Resources Section -->
-    <section id="resources"
-        class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-200/50 dark:bg-slate-800/30 w-full transition-colors duration-300">
+    <section id="resources" class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30 w-full">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold mb-12 text-center text-slate-900 dark:text-white">Sumber Belajar</h2>
+            <h2 class="text-3xl font-bold mb-12 text-center text-white">Sumber Belajar</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Card 1 -->
                 <a href="#"
@@ -323,8 +273,8 @@
                         class="h-12 w-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-colors">
                         <i class="fa-brands fa-google-drive text-2xl text-blue-400"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Google Drive Kelas</h3>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Akses slide kuliah, ujian lalu, dan materi
+                    <h3 class="text-xl font-bold mb-2 text-white">Google Drive Kelas</h3>
+                    <p class="text-slate-400 text-sm">Akses slide kuliah, ujian lalu, dan materi
                         tambahan.</p>
                 </a>
 
@@ -335,8 +285,8 @@
                         class="h-12 w-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-500/30 transition-colors">
                         <i class="fa-solid fa-book-open text-2xl text-emerald-400"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Buku Referensi</h3>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Mathematical Methods in the Physical Sciences
+                    <h3 class="text-xl font-bold mb-2 text-white">Buku Referensi</h3>
+                    <p class="text-slate-400 text-sm">Mathematical Methods in the Physical Sciences
                         oleh Mary L. Boas.
                     </p>
                 </a>
@@ -348,8 +298,8 @@
                         class="h-12 w-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-500/30 transition-colors">
                         <i class="fa-solid fa-layer-group text-2xl text-indigo-400"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Modul Pembelajaran</h3>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Akses kumpulan modul, slide presentasi, dan
+                    <h3 class="text-xl font-bold mb-2 text-white">Modul Pembelajaran</h3>
+                    <p class="text-slate-400 text-sm">Akses kumpulan modul, slide presentasi, dan
                         rekaman kuliah.</p>
                 </a>
 
@@ -364,11 +314,11 @@
                         <i class="fa-solid fa-robot text-2xl text-orange-400"></i>
                     </div>
                     <div class="flex items-center gap-2 mb-2">
-                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">AI Chatbot</h3>
+                        <h3 class="text-xl font-bold text-white">AI Chatbot</h3>
                         <span
                             class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-500 text-black uppercase tracking-wider">Baru</span>
                     </div>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Tanya jawab interaktif seputar materi buku
+                    <p class="text-slate-400 text-sm">Tanya jawab interaktif seputar materi buku
                         Boas dengan Asisten AI.
                     </p>
                 </a>
@@ -384,11 +334,11 @@
                         <i class="fa-solid fa-brain text-2xl text-pink-400"></i>
                     </div>
                     <div class="flex items-center gap-2 mb-2">
-                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">AI Random Quiz</h3>
+                        <h3 class="text-xl font-bold text-white">AI Random Quiz</h3>
                         <span
                             class="px-2 py-0.5 rounded text-[10px] font-bold bg-pink-500 text-black uppercase tracking-wider">Seru</span>
                     </div>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Tes pemahamanmu dengan soal pilihan ganda acak
+                    <p class="text-slate-400 text-sm">Tes pemahamanmu dengan soal pilihan ganda acak
                         buatan AI.</p>
                 </a>
 
@@ -403,11 +353,11 @@
                         <i class="fa-solid fa-folder-open text-2xl text-purple-400"></i>
                     </div>
                     <div class="flex items-center gap-2 mb-2">
-                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">Bank Soal</h3>
+                        <h3 class="text-xl font-bold text-white">Bank Soal</h3>
                         <span
                             class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500 text-black uppercase tracking-wider">Lengkap</span>
                     </div>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm">Arsip soal latihan, tugas unit, dan ujian
+                    <p class="text-slate-400 text-sm">Arsip soal latihan, tugas unit, dan ujian
                         tahun-tahun lalu + AI
                         Help.</p>
                 </a>
@@ -416,12 +366,11 @@
     </section>
 
     <!-- Footer -->
-    <footer
-        class="py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center transition-colors">
+    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center">
         <div class="max-w-7xl mx-auto px-4">
-            <p class="text-slate-600 dark:text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
+            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
                 dilindungi.</p>
-            <p class="text-slate-600 dark:text-slate-600 text-sm flex items-center justify-center gap-2">
+            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
                 Dibuat dengan <i class="fa-solid fa-code text-accent-500"></i> & <i
                     class="fa-solid fa-atom text-accent-500"></i>
             </p>
@@ -430,7 +379,7 @@
 
     <!-- Bottom Navigation (Mobile Only) -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.5)] transition-colors">
+        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
         <a href="index.html" class="flex flex-col items-center text-accent-400 group relative">
             <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
             <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
@@ -457,14 +406,11 @@
             <span class="text-[10px] font-medium">Modul</span>
         </a>
         <a href="profil.html"
-            class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 transition-colors group">
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-medium">Profil</span>
         </a>
     </nav>
-
-    <!-- Theme JS -->
-    <script src="js/theme.js"></script>
 
     <!-- JavaScript logic -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

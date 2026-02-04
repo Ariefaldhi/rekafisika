@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -21,36 +20,21 @@
     </script>
     <style>
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass {
             background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .dark .bg-abstract {
             background-color: #0f172a;
             background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
         }
 
         /* Tab Active State */
@@ -80,8 +64,7 @@
     </script>
 </head>
 
-<body
-    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
 
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden glass">
@@ -90,8 +73,8 @@
     <!-- Sidebar -->
     <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform            <!-- Logo -->
             <div class=" flex items-center gap-3 mb-10 px-2">
-        <i class="fa-solid fa-atom text-accent-500 dark:text-accent-400 text-2xl"></i>
-        <span class="font-bold text-xl tracking-wide text-slate-800 dark:text-white">AdminPanel</span>
+        <i class="fa-solid fa-atom text-accent-400 text-2xl"></i>
+        <span class="font-bold text-xl tracking-wide text-white">AdminPanel</span>
         </div>
 
         <!-- Sidebar Menu -->
@@ -102,20 +85,20 @@
                 <span class="font-medium">Dashboard</span>
             </a>
             <a href="#users"
-                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-accent-400 hover:bg-slate-800/50 transition-all group">
                 <i class="fa-solid fa-users w-6 text-center"></i>
                 <span class="font-medium">Mahasiswa</span>
             </a>
             <a href="#attendance"
-                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-accent-400 hover:bg-slate-800/50 transition-all group">
                 <i class="fa-solid fa-clipboard-check w-6 text-center"></i>
                 <span class="font-medium">Presensi</span>
             </a>
             <!-- Divider -->
-            <div class="h-px bg-slate-200 dark:bg-slate-700 my-4 mx-2"></div>
+            <div class="h-px bg-slate-700 my-4 mx-2"></div>
 
             <a href="index.html"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-accent-500 dark:hover:text-accent-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-accent-400 hover:bg-slate-800/50 transition-all">
                 <i class="fa-solid fa-arrow-left w-6 text-center"></i>
                 <span class="font-medium">Kembali ke Web</span>
             </a>
@@ -129,11 +112,6 @@
             <i class="fa-solid fa-book-open w-6"></i> Manajemen Modul
         </button>
         <div class="pt-8 border-t border-slate-800 mt-4 space-y-2">
-            <button id="theme-toggle-desktop" onclick="toggleTheme()"
-                class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-between group">
-                <span><i class="fa-solid fa-circle-half-stroke w-6"></i> Tema</span>
-                <i id="theme-icon-desktop" class="fa-solid fa-moon text-yellow-300"></i>
-            </button>
             <a href="index.html"
                 class="block w-full text-left px-4 py-3 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
                 <i class="fa-solid fa-house w-6"></i> Website Utama
@@ -157,10 +135,6 @@
                 <span class="font-bold text-xl text-red-400">Admin Panel</span>
             </div>
             <div class="flex items-center gap-3">
-                <button id="theme-toggle"
-                    class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors bg-slate-800 dark:bg-slate-900 border border-slate-700 w-8 h-8 flex items-center justify-center">
-                    <i id="theme-icon" class="fa-solid fa-moon text-yellow-300 text-xs"></i>
-                </button>
                 <button onclick="logout()" class="text-sm text-red-400">Logout</button>
             </div>
         </div>
@@ -332,28 +306,25 @@
             <!-- Card 1 -->
             <div class="glass-card p-6 rounded-xl border-l-4 border-accent-500">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-accent-500/10 rounded-lg text-accent-500">
+                    <div class="p-3 bg-accent-500/10 rounded-lg text-accent-400">
                         <i class="fa-solid fa-users text-2xl"></i>
                     </div>
-                    <span
-                        class="text-xs font-bold bg-accent-500/20 text-accent-600 dark:text-accent-300 px-2 py-1 rounded">TOTAL</span>
+                    <span class="text-xs font-bold bg-accent-500/20 text-accent-300 px-2 py-1 rounded">TOTAL</span>
                 </div>
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1" id="total-students">0</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Mahasiswa Terdaftar</p>
+                <h3 class="text-3xl font-bold text-white mb-1" id="total-students">0</h3>
+                <p class="text-slate-400 text-sm">Mahasiswa Terdaftar</p>
             </div>
 
             <!-- Card 2 -->
             <div class="glass-card p-6 rounded-xl border-l-4 border-emerald-500">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
                         <i class="fa-solid fa-clipboard-user text-2xl"></i>
                     </div>
-                    <span
-                        class="text-xs font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 px-2 py-1 rounded">HARI
-                        INI</span>
+                    <span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">HARI INI</span>
                 </div>
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1" id="attendance-count">0</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Hadir Kuliah</p>
+                <h3 class="text-3xl font-bold text-white mb-1" id="attendance-count">0</h3>
+                <p class="text-slate-400 text-sm">Hadir Kuliah</p>
             </div>
         </section>
 
@@ -791,10 +762,10 @@
             const list = document.getElementById('admin-tugas-list');
             if (data && list) {
                 list.innerHTML = data.map(t => `
-                    <header class="flex justify-between items-center mb-8 bg-white/50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 backdrop-blur-md sticky top-4 z-40">
+                    <header class="flex justify-between items-center mb-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700 backdrop-blur-md sticky top-4 z-40">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Selamat Datang, Admin</h1>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Kelola data mahasiswa dan aktivitas perkuliahan.</p>
+                <h1 class="text-2xl font-bold text-white">Selamat Datang, Admin</h1>
+                <p class="text-slate-400 text-sm">Kelola data mahasiswa dan aktivitas perkuliahan.</p>
             </div>
                     <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
                             </div>
