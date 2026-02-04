@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
@@ -20,21 +21,36 @@
     </script>
     <style>
         .glass {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.6);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bg-abstract {
-            background-color: #0f172a;
+            background-color: #f8fafc;
             background-image: radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
             background-attachment: fixed;
+        }
+
+        .dark .bg-abstract {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
         }
 
         /* Table Styles */
@@ -104,7 +120,8 @@
     </style>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+<body
+    class="bg-abstract text-slate-900 dark:text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass">
@@ -132,6 +149,14 @@
                             class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
                     </div>
                 </div>
+                <!-- Theme Toggle -->
+                <div class="flex items-center">
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                        <i id="theme-icon" class="fa-solid fa-moon text-yellow-300"></i>
+                    </button>
+                </div>
+
                 <!-- Mobile Menu Button (HIDDEN) -->
                 <div class="-mr-2 flex md:hidden hidden">
                     <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
@@ -215,6 +240,11 @@
             class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
             <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
             <span class="text-[10px] font-medium">Keaktifan</span>
+        </a>
+        <a href="modul.html"
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+            <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-medium">Modul</span>
         </a>
         <a href="profil.html"
             class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
