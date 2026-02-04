@@ -105,8 +105,8 @@
                     </div>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <div class="-mr-2 flex md:hidden">
+                <!-- Mobile Menu Button (HIDDEN) -->
+                <div class="-mr-2 flex md:hidden hidden">
                     <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
                         onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                         <i class="fa-solid fa-bars text-xl"></i>
@@ -115,8 +115,8 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
-        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
+        <!-- Mobile Menu (HIDDEN) -->
+        <div class="hidden md:hidden glass-card absolute w-full hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
                 <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
@@ -179,6 +179,36 @@
     <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
         <p class="text-slate-400 text-sm">&copy; 2026 KawanFismat.</p>
     </footer>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav
+        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        <a href="index.html"
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+            <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="tugas.html"
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+            <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-medium">Tugas</span>
+        </a>
+        <a href="presensi.html"
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+            <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-medium">Presensi</span>
+        </a>
+        <a href="keaktifan.html" class="flex flex-col items-center text-accent-400 group relative">
+            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
+            <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-bold">Keaktifan</span>
+        </a>
+        <a href="profil.html"
+            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
+            <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[10px] font-medium">Profil</span>
+        </a>
+    </nav>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
