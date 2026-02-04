@@ -1142,7 +1142,43 @@
 
 
 
+        async function loadPointLogs() {
+            const list = document.getElementById('poin-log-body');
+            try {
+                // Join with students table to get names
+                const { data, error } = await supabaseClient
+                    .from('participation_logs')
+                    .select('*, students(name)')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (data && list) {
+                    list.innerHTML = data.map(log => `
+                        <tr class="hover:bg-slate-800/50">
+                            <td class="px-4 py-3 font-bold text-white">${log.students?.name || log.student_nim}</td>
+                            <td class="px-4 py-3 text-accent-400 font-mono font-bold">+${log.points}</td>
+                            <td class="px-4 py-3 text-slate-400 text-xs">${log.note || '-'}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button onclick="deletePointLog('${log.id}')" class="text-red-400 hover:text-red-300 w-8 h-8 rounded hover:bg-red-900/30 transition-colors">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) { console.error("Error loading point logs:", err); }
+        }
+
+        async function deletePointLog(id) {
+            if (confirm('Hapus log poin ini? Poin mahasiswa akan berkurang.')) {
+                const { error } = await supabaseClient.from('participation_logs').delete().eq('id', id);
+                if (error) alert('Gagal menghapus: ' + error.message);
+                else loadPointLogs();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', initAdmin);
+
     </script>
 </body>
 

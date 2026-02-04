@@ -523,6 +523,11 @@
                 }
 
                 const data = await response.json();
+
+                if (!data.choices || data.choices.length === 0) {
+                    throw new Error("Respon AI tidak valid atau kosong.");
+                }
+
                 const aiText = data.choices[0].message.content;
 
                 // 3. Render Markdown
