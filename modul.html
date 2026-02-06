@@ -3,522 +3,148 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modul & Silabus | KawanFismat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jelajah Materi | FisikaLab</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- MathJax -->
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
-            svg: { fontCache: 'global' }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                    colors: {
+                        primary: {
+                            500: '#3B82F6', // Blue 500
+                            600: '#2563EB', // Blue 600
+                        },
+                        ui: {
+                            bg: '#F8FAFC', // Slate 50
+                            card: '#FFFFFF',
+                            text: '#1E293B', // Slate 800
+                            sub: '#64748B', // Slate 500
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
                 }
             }
         }
     </script>
-    <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        .accordion-content {
-            transition: max-height 0.3s ease-out, padding 0.3s ease;
-            max-height: 0;
-            overflow: hidden;
-        }
-
-        .accordion-content.active {
-            max-height: 3000px;
-            /* Increased for long timelines */
-        }
-
-        /* Learning Path Timeline CSS */
-        .timeline-container {
-            position: relative;
-            padding-left: 2rem;
-            border-left: 2px solid rgba(255, 255, 255, 0.1);
-            margin-left: 1rem;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -2.6rem;
-            top: 0.5rem;
-            width: 1.2rem;
-            height: 1.2rem;
-            border-radius: 50%;
-            border: 2px solid #0f172a;
-            z-index: 10;
-        }
-    </style>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
-                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="index.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="tugas.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
-                        <a href="presensi.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
-                        <a href="keaktifan.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
-                        <a href="modul.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Modul</a>
-                        <a href="profil.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
-                    </div>
-                </div>
-                <!-- Mobile Menu Button (HIDDEN) -->
-                <a href="profil.html"
-                    class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
-            </div>
-        </div>
-        <!-- Theme Toggle Removed -->
-        <div class="-mr-2 flex md:hidden hidden">
-            <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
-                onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
-                    class="fa-solid fa-bars text-xl"></i></button>
-        </div>
-        </div>
-        </div>
-        <!-- Mobile Menu (HIDDEN) -->
-        <div class="hidden md:hidden glass-card absolute w-full hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
-                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
-                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
-                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
-                <a href="modul.html" class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Modul</a>
-                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
-            </div>
-        </div>
-    </nav>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Jelajah Materi</h1>
+        <p class="text-sm text-slate-500 mt-1">Modul pembelajaran Fisika Matematika I</p>
+    </div>
 
     <!-- Content -->
-    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full flex-grow">
-        <div class="text-center mb-16">
-            <h1 class="text-3xl font-bold mb-4">Silabus & Learning Path</h1>
-            <p class="text-slate-400">Ikuti alur pembelajaran mingguan langkah demi langkah.</p>
-        </div>
-
-        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold mb-4">Modul & Silabus</h1>
-                <p class="text-slate-400">Akses materi pembelajaran Fisika Matematika I.</p>
-            </div>
-        </div>
-
-        <div id="accordion-container" class="space-y-4">
-            <!-- Injected by JS -->
-            <div class="text-center py-12 text-slate-500 animate-pulse">
-                Memuat modul...
-            </div>
+    <main class="px-6 py-6" id="module-container">
+        <!-- Loading State -->
+        <div class="space-y-4 animate-pulse">
+            <div class="bg-white p-5 rounded-3xl h-32"></div>
+            <div class="bg-white p-5 rounded-3xl h-32"></div>
+            <div class="bg-white p-5 rounded-3xl h-32"></div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <div class="max-w-7xl mx-auto px-4">
-            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta
-                dilindungi.</p>
-            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
-                </nav>
+    <!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <a href="index.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Beranda</span>
+        </a>
+        <a href="tugas.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-list-check text-xl"></i>
+            <span class="text-[10px] font-medium">Tugas</span>
+        </a>
+        <a href="modul.html" class="flex flex-col items-center gap-1 text-primary-500">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span class="text-[10px] font-bold">Jelajah</span>
+        </a>
+        <a href="keaktifan.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[10px] font-medium">Peringkat</span>
+        </a>
+        <a href="lainnya.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-bars text-xl"></i>
+            <span class="text-[10px] font-medium">Lainnya</span>
+        </a>
+    </nav>
 
-                <!-- Bottom Navigation (Mobile Only) -->
-            <nav
-                class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-                <a href="index.html"
-                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-                    <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-medium">Home</span>
-                </a>
-                <a href="tugas.html"
-                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-                    <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-medium">Tugas</span>
-                </a>
-                <a href="presensi.html"
-                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-                    <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-medium">Presensi</span>
-                </a>
-                <a href="keaktifan.html"
-                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-                    <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-medium">Keaktifan</span>
-                </a>
-                <a href="modul.html" class="flex flex-col items-center text-accent-400 group relative">
-                    <div
-                        class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]">
-                    </div>
-                    <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-bold">Modul</span>
-                </a>
-                <a href="profil.html"
-                    class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-                    <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-medium">Profil</span>
-                </a>
-                </a>
-            </nav>
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadModules);
 
-            <!-- Supabase Client -->
-            <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-            <script src="js/supabase-config.js"></script>
-            <script src="js/auth.js"></script>
-            <script>
-                const container = document.getElementById('accordion-container');
+        async function loadModules() {
+            if (!window.supabaseClient) return;
+            const container = document.getElementById('module-container');
 
-                async function loadModules() {
-                    if (!supabaseClient) {
-                        setTimeout(loadModules, 500);
-                        return;
-                    }
+            try {
+                const { data, error } = await supabaseClient
+                    .from('modules')
+                    .select('*')
+                    .eq('is_visible', true)
+                    .order('week', { ascending: true });
 
-                    try {
-                        // Get User for Progress Check
-                        const userSession = localStorage.getItem('user_session');
-                        let userNim = null;
-                        if (userSession) {
-                            const user = JSON.parse(userSession);
-                            if (user.nim) userNim = user.nim;
-                            else {
-                                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                                if (data) userNim = data.nim;
-                            }
-                        }
+                if (error) throw error;
 
-                        const { data, error } = await supabaseClient
-                            .from('modules')
-                            .select('*')
-                            .eq('is_visible', true)
-                            .order('week', { ascending: true });
+                // Check Progress (Mock or Real)
+                // For simplicity in this redesign step, we render the cards first.
+                // Real progress logic can be re-integrated from previous file if needed.
 
-                        if (error) throw error;
+                container.innerHTML = '';
 
-                        // Fetch all progress for this user to determine 'Completed' status locally
-                        let progressMap = new Map(); // moduleId -> count of completed steps
-                        if (userNim) {
-                            const { data: progData } = await supabaseClient.from('student_progress').select('module_id').eq('student_nim', userNim).eq('is_complete', true);
-                            if (progData) {
-                                progData.forEach(p => {
-                                    progressMap.set(p.module_id, (progressMap.get(p.module_id) || 0) + 1);
-                                });
-                            }
-                        }
-
-                        container.innerHTML = '';
-
-                        if (data && data.length > 0) {
-                            data.forEach((item, index) => {
-                                const totalSteps = item.content_steps ? item.content_steps.length : 0;
-                                const completedSteps = progressMap.get(item.id) || 0;
-                                const isComplete = totalSteps > 0 && completedSteps >= totalSteps;
-
-                                const div = document.createElement('div');
-                                div.className = 'glass-card rounded-xl overflow-hidden border border-slate-700/50 hover:border-accent-500/30 transition-all duration-300 group';
-
-                                div.innerHTML = `
-                            <div class="p-6 relative">
-                                <div class="absolute top-4 right-4 text-6xl text-slate-800 font-bold opacity-20 group-hover:opacity-40 transition-opacity select-none -z-10">
-                                    ${item.week}
+                if (data && data.length > 0) {
+                    data.forEach((item, index) => {
+                        const card = `
+                            <a href="detail_modul.html?id=${item.id}" class="block bg-white p-5 rounded-3xl shadow-soft mb-4 hover:shadow-lg transition-all hover:-translate-y-1 group relative overflow-hidden border border-slate-100">
+                                <div class="flex items-start justify-between mb-2 relative z-10">
+                                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">Minggu ${item.week}</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors"></i>
                                 </div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1 relative z-10">${item.topic}</h3>
+                                <p class="text-sm text-slate-500 line-clamp-2 relative z-10">${item.description || 'Pelajari materi minggu ini.'}</p>
                                 
-                                <div class="flex items-start justify-between mb-4">
-                                     <span class="inline-block px-3 py-1 bg-accent-500/10 text-accent-400 text-xs font-bold rounded-full border border-accent-500/20">
-                                        Minggu ${item.week}
-                                     </span>
-                                     ${isComplete ? '<span class="text-emerald-400 text-xs font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> Selesai</span>' : ''}
-                                </div>
-
-                                <h3 class="text-xl font-bold text-slate-100 mb-2 group-hover:text-accent-400 transition-colors">${item.topic}</h3>
-                                <p class="text-slate-400 text-sm line-clamp-2 mb-6">${item.description || 'Pelajari materi minggu ini.'}</p>
-
-                                <div class="flex items-center justify-between border-t border-slate-700/50 pt-4">
-                                    <div class="text-xs text-slate-500">
-                                        <i class="fa-solid fa-layer-group mr-1"></i> ${totalSteps} Langkah
-                                    </div>
-                                    <a href="detail_modul.html?id=${item.id}" class="inline-flex items-center text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors border border-slate-700">
-                                        Lihat Selengkapnya <i class="fa-solid fa-arrow-right ml-2 text-accent-400"></i>
-                                    </a>
-                                </div>
-                                
-                                <!-- Progress Bar Visual -->
-                                ${totalSteps > 0 ? `
-                                <div class="absolute bottom-0 left-0 h-1 bg-slate-800 w-full">
-                                    <div class="h-full bg-accent-500" style="width: ${(completedSteps / totalSteps) * 100}%"></div>
-                                </div>` : ''}
-                            </div>
+                                <!-- Decorative Icon Bg -->
+                                <i class="fa-solid fa-book absolute -bottom-2 -right-2 text-6xl text-slate-50 opacity-50 z-0"></i>
+                            </a>
                         `;
-                                container.appendChild(div);
-                            });
-                        } else {
-                            container.innerHTML = `
+                        container.innerHTML += card;
+                    });
+                } else {
+                    container.innerHTML = `
                         <div class="text-center py-12 text-slate-500">
-                            <i class="fa-solid fa-box-open text-4xl mb-4 opacity-50"></i>
-                            <p>Belum ada modul yang tersedia saat ini.</p>
+                            <i class="fa-solid fa-box-open text-4xl mb-4 text-slate-300"></i>
+                            <p>Belum ada materi tersedia.</p>
                         </div>
                     `;
-                        }
-
-                    } catch (err) {
-                        console.error(err);
-                        container.innerHTML = '<p class="text-red-400 text-center">Gagal memuat modul.</p>';
-                    }
                 }
 
-                async function submitQuizAnswer(moduleId, stepId, answer) {
-                    const userSession = localStorage.getItem('user_session');
-                    if (!userSession) return alert('Silakan login terlebih dahulu.');
-
-                    const user = JSON.parse(userSession);
-                    // In a real app, you'd want to use student ID. Assuming user object has nim or matching ID.
-                    // For now, we will query students table to match user name or Code. 
-                    // Or simpler, just assume user object has {nim: ...}
-
-                    if (!user.nim) {
-                        // Try to find student by name if no NIM in session (fallback)
-                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                        if (data) user.nim = data.nim;
-                        else return alert('Data mahasiswa tidak ditemukan.');
-                    }
-
-                    const { error } = await supabaseClient.from('student_answers').insert([{
-                        student_nim: user.nim,
-                        module_id: moduleId,
-                        step_id: stepId,
-                        answer: answer
-                    }]);
-
-                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-                    else alert('Jawaban berhasil disimpan!');
-                }
-
-                async function submitStepAnswers(moduleId, stepId) {
-                    const userSession = localStorage.getItem('user_session');
-                    if (!userSession) return alert('Silakan login terlebih dahulu.');
-
-                    const user = JSON.parse(userSession);
-                    if (!user.nim) {
-                        const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                        if (data) user.nim = data.nim;
-                        else return alert('Data mahasiswa tidak ditemukan.');
-                    }
-
-                    // Collect answers
-                    const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
-                    const answers = {};
-                    let hasAnswer = false;
-                    inputs.forEach(input => {
-                        const qId = input.dataset.questionId;
-                        answers[qId] = input.value;
-                        if (input.value.trim()) hasAnswer = true;
-                    });
-
-                    if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
-
-                    // Upsert answer as JSON
-                    const { error } = await supabaseClient.from('student_answers').upsert({
-                        student_nim: user.nim,
-                        module_id: moduleId,
-                        step_id: stepId,
-                        answer: JSON.stringify(answers), // Store all answers as JSON string
-                        score: 0 // Default score, needs grading
-                    }, { onConflict: 'student_nim, step_id' }); // Assuming composite key/unique constraint exists, or we just insert. 
-                    // Note: If no unique constraint on (student_nim, step_id), upsert might duplicate. 
-                    // Ideally we should check if exists or rely on the table setup. For now, assuming similar logic to previous submit.
-
-                    if (error) alert('Gagal menyimpan jawaban: ' + error.message);
-                    else alert('Jawaban berhasil disimpan!');
-                }
-
-                function renderStepCard(step, index, moduleId) {
-                    let icon = 'fa-circle';
-                    let color = 'bg-slate-500';
-                    let mediaContent = '';
-                    let extensionHtml = '';
-
-                    // Questions Rendering Logic
-                    if (step.questions && step.questions.length > 0) {
-                        const questionsHtml = step.questions.map((q, qIdx) => `
-                    <div class="mb-4">
-                        <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
-                        <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda..."></textarea>
-                    </div>
-                `).join('');
-
-                        extensionHtml = `
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
-                        <div class="flex items-center gap-2 mb-4">
-                            <i class="fa-solid fa-pen-to-square text-purple-400"></i>
-                            <h5 class="font-bold text-slate-200">Latihan / Tugas</h5>
-                        </div>
-                        ${questionsHtml}
-                        <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
-                            Simpan Semua Jawaban
-                        </button>
-                    </div>
-                `;
-                    }
-
-                    // Determine Icon & Color
-                    switch (step.type) {
-                        case 'youtube':
-                            icon = 'fa-play';
-                            color = 'bg-red-500';
-                            const videoId = getYoutubeId(step.content);
-                            if (videoId) {
-                                mediaContent = `
-                            <div class="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden border border-slate-700 mt-3 shadow-lg">
-                                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-                            </div>`;
-                            } else {
-                                mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm"><i class="fa-solid fa-up-right-from-square mr-1"></i> Buka Link Video</a>`;
-                            }
-                            break;
-                        case 'pdf':
-                            icon = 'fa-file-pdf';
-                            color = 'bg-red-400';
-                            let pdfUrl = step.content;
-                            if (step.start_page) pdfUrl += `#page=${step.start_page}`;
-
-                            mediaContent = `
-                        <div class="mt-3 flex flex-col gap-2">
-                            <!-- Clean Preview ONLY -->
-                            <iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
-                            ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Menampilkan halaman ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
-                        </div>`;
-                            break;
-                        case 'ppt':
-                            icon = 'fa-file-powerpoint';
-                            color = 'bg-orange-500';
-                            mediaContent = `
-                        <div class="mt-3 flex flex-col gap-2">
-                             <!-- Clean Preview ONLY -->
-                            <iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe>
-                           ${step.start_page ? `<div class="text-center text-xs text-slate-500 mt-1">Slide fokus: ${step.start_page}${step.end_page ? ' - ' + step.end_page : ''}</div>` : ''}
-                        </div>`;
-                            break;
-                        case 'task':
-                            icon = 'fa-clipboard-list';
-                            color = 'bg-emerald-500';
-                            mediaContent = `
-                        <div class="mt-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg text-sm text-slate-300">
-                           ${step.content.replace(/\n/g, '<br>')}
-                        </div>`;
-                            break;
-                        case 'quiz':
-                            icon = 'fa-question-circle';
-                            color = 'bg-purple-500';
-                            // If quiz has specific image content, show it.
-                            // Questions are handled by extensionHtml above if they exist.
-                            // But legacy quiz might just have one question? 
-                            // Let's support both. new questions array overrides or supplements.
-                            mediaContent = `
-                        <div class="mt-3 space-y-3">
-                            ${step.content ? `
-                            <div class="rounded overflow-hidden border border-slate-700">
-                                <img src="${step.content}" class="w-full object-contain max-h-[400px] bg-black" alt="Slide Kuis">
-                            </div>` : ''}
-                            
-                            <!-- Legacy Single Question Support -->
-                            ${(!step.questions || step.questions.length === 0) ? `
-                                <div class="bg-slate-800 p-4 rounded border border-slate-700">
-                                    ${step.question ? `<p class="font-bold text-white mb-2">${step.question}</p>` : ''}
-                                    <label class="block text-xs uppercase text-slate-500 mb-2">Jawaban Anda:</label>
-                                    <textarea id="ans-${step.id}" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-24 focus:border-purple-500 focus:outline-none" placeholder="Ketik jawaban di sini..."></textarea>
-                                    <button onclick="submitQuizAnswer('${moduleId}', '${step.id}', document.getElementById('ans-${step.id}').value)" class="mt-2 bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
-                                        Simpan Jawaban
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>`;
-                            break;
-                    }
-
-                    return `
-                <div class="timeline-item">
-                    <div class="timeline-dot ${color} flex items-center justify-center text-[10px] text-white shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                        <i class="fa-solid ${icon}"></i>
-                    </div>
-                    <div class="bg-slate-800/80 border border-slate-700/50 p-5 rounded-xl hover:border-slate-600 transition-colors shadow-lg">
-                        <h4 class="font-bold text-slate-100 text-lg mb-1">${step.title}</h4>
-                        <span class="text-xs uppercase font-bold tracking-wider text-slate-500">${step.type}</span>
-                        ${mediaContent}
-                        ${extensionHtml}
-                    </div>
-                </div>
-            `;
-                }
-
-                function getYoutubeId(url) {
-                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                    const match = url.match(regExp);
-                    return (match && match[2].length === 11) ? match[2] : null;
-                }
-
-                function toggleAccordion(index) {
-                    const content = document.getElementById(`content-${index}`);
-                    const icon = document.getElementById(`icon-${index}`);
-                    const isActive = content.classList.contains('active');
-
-                    document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.fa-chevron-down').forEach(el => el.style.transform = 'rotate(0deg)');
-
-                    if (!isActive) {
-                        content.classList.add('active');
-                        icon.style.transform = 'rotate(180deg)';
-                    }
-                }
-
-                document.addEventListener('DOMContentLoaded', loadModules);
-            </script>
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<p class="text-red-500 text-center">Gagal memuat modul.</p>';
+            }
+        }
+    </script>
 </body>
 
 </html>

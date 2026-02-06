@@ -3,311 +3,211 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presensi | KawanFismat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Presensi | FisikaLab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B' }
+                    }
                 }
             }
         }
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        /* Table Styles */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            font-size: 0.8rem;
-        }
-
-        th,
-        td {
-            padding: 8px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            white-space: nowrap;
-            text-align: center;
-        }
-
-        th {
-            background: rgba(15, 23, 42, 0.9);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
+        /* Sticky Column Styles */
         th:first-child,
         td:first-child {
             position: sticky;
             left: 0;
-            background: inherit;
             z-index: 20;
-            text-align: left;
+            background-color: white;
+            /* Match card bg */
         }
 
-        td:first-child {
-            background: rgba(30, 41, 59, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        th:first-child {
+            z-index: 30;
         }
 
-        .status-hadir {
-            color: #34d399;
+        /* Header gets higher priority */
+
+        /* Custom scrollbar for table */
+        .table-container::-webkit-scrollbar {
+            height: 6px;
         }
 
-        /* Emerald */
-        .status-sakit {
-            color: #facc15;
+        .table-container::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
         }
 
-        /* Yellow */
-        .status-izin {
-            color: #60a5fa;
+        .table-container::-webkit-scrollbar-track {
+            background: transparent;
         }
-
-        /* Blue */
-        .status-alfa {
-            color: #f87171;
-        }
-
-        /* Red */
     </style>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
-                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
-                </div>
-                <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="index.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="tugas.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
-                        <a href="presensi.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Presensi</a>
-                        <a href="keaktifan.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
-                        <a href="modul.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
-                        <a href="profil.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
-                    </div>
-                </div>
-                <!-- Theme Toggle Removed -->
-
-                <!-- Mobile Menu Button (HIDDEN) -->
-                <div class="-mr-2 flex md:hidden hidden">
-                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
-                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
-                            class="fa-solid fa-bars text-xl"></i></button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile Menu (HIDDEN) -->
-        <div class="hidden md:hidden glass-card absolute w-full hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
-                <a href="tugas.html" class="block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
-                <a href="presensi.html"
-                    class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
-                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
-                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
-                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
-            </div>
-        </div>
-    </nav>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Presensi</h1>
+        <p class="text-sm text-slate-500 mt-1">Transparansi kehadiran mahasiswa.</p>
+    </div>
 
     <!-- Content -->
-    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 w-full flex-grow">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold mb-4">Presensi Mahasiswa</h1>
-                    <p class="text-slate-400">Menampilkan transparansi presensi mahasiswa</p>
-                </div>
-                <div class="text-xs flex gap-3 bg-slate-800/50 p-2 rounded-lg border border-slate-700">
-                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-emerald-400 text-[8px]"></i>
-                        Hadir</span>
-                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-yellow-400 text-[8px]"></i>
-                        Izin/Sakit</span>
-                    <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-red-400 text-[8px]"></i>
-                        Alfa</span>
-                </div>
-            </div>
+    <main class="px-6 py-6">
 
-            <div class="glass-card rounded-xl overflow-hidden shadow-2xl">
-                <div class="table-container max-h-[70vh]">
-                    <table id="attendance-table">
-                        <thead>
-                            <tr id="table-header">
-                                <th class="min-w-[150px]">Nama Mahasiswa</th>
-                                <!-- Columns 1-1 to 16-2 injected by JS -->
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <!-- Rows injected by JS -->
-                            <tr>
-                                <td class="p-8 text-center" colspan="33">Memuat data...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Legend -->
+        <div class="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            <span
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100 whitespace-nowrap">
+                <i class="fa-solid fa-circle text-[8px]"></i> Hadir
+            </span>
+            <span
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-bold border border-yellow-100 whitespace-nowrap">
+                <i class="fa-solid fa-circle text-[8px]"></i> Izin/Sakit
+            </span>
+            <span
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100 whitespace-nowrap">
+                <i class="fa-solid fa-circle text-[8px]"></i> Alfa
+            </span>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
+            <div class="table-container max-h-[70vh]">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-20">
+                        <tr id="table-header">
+                            <th class="px-4 py-3 font-bold border-b border-slate-200">Mahasiswa</th>
+                            <!-- Columns injected via JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="10" class="p-8 text-center text-slate-400">
+                                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-primary-500"></i><br>
+                                Memuat Data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <p class="text-center text-xs text-slate-400 mt-6">Geser tabel untuk melihat riwayat mingguan.</p>
+
     </main>
 
-    <!-- Bottom Navigation (Mobile Only) -->
+    <!-- Bottom Navigation -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
         <a href="index.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Home</span>
-        </a>
-        <a href="tugas.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Tugas</span>
-        </a>
-        <a href="presensi.html" class="flex flex-col items-center text-accent-400 group relative">
-            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
-            <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-bold">Presensi</span>
-        </a>
-        <a href="keaktifan.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Keaktifan</span>
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Beranda</span>
         </a>
         <a href="modul.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Modul</span>
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span class="text-[10px] font-medium">Jelajah</span>
+        </a>
+        <a href="keaktifan.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[10px] font-medium">Peringkat</span>
         </a>
         <a href="profil.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-regular fa-user text-xl"></i>
             <span class="text-[10px] font-medium">Profil</span>
         </a>
     </nav>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
-        async function loadAttendance() {
-            if (!supabaseClient) return;
+        document.addEventListener('DOMContentLoaded', loadAttendance);
 
-            // Generate Headers (1-1 to 16-2)
+        async function loadAttendance() {
+            if (!window.supabaseClient) return;
+
             const headerRow = document.getElementById('table-header');
             const weeks = 16;
-            const sessions = 2;
-            const columns = [];
+            const sessions = 1; // Simplify mobile view: 1 session per week column for width save? or stick to 2
 
+            // Let's stick to week-session logic but make headers smaller
             for (let w = 1; w <= weeks; w++) {
-                for (let s = 1; s <= sessions; s++) {
-                    const code = `${w}-${s}`;
-                    columns.push(code);
-                    const th = document.createElement('th');
-                    th.innerText = code;
-                    headerRow.appendChild(th);
-                }
+                const th = document.createElement('th');
+                th.className = "px-3 py-3 border-b border-slate-200 text-center min-w-[60px] font-bold text-slate-400";
+                th.innerText = `M${w}`;
+                headerRow.appendChild(th);
             }
-
-            // Fetch Students & Logs
-            const { data: students } = await supabaseClient.from('students').select('*').order('name');
-            const { data: logs } = await supabaseClient.from('attendance_logs').select('*');
 
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
 
-            if (!students || students.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="33" class="text-center py-4">Belum ada data mahasiswa.</td></tr>';
-                return;
-            }
+            try {
+                // Fetch Data
+                const { data: students } = await supabaseClient.from('students').select('*').order('name');
+                const { data: logs } = await supabaseClient.from('attendance_logs').select('*');
 
-            students.forEach(student => {
-                const tr = document.createElement('tr');
+                if (!students || students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="20" class="text-center py-4 text-slate-500">Data kosong.</td></tr>';
+                    return;
+                }
 
-                // Name Cell
-                const tdName = document.createElement('td');
-                tdName.className = 'font-medium text-slate-200';
-                tdName.innerText = student.name;
-                tr.appendChild(tdName);
+                students.forEach(student => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors group";
 
-                // Attendance Cells
-                columns.forEach(code => {
-                    const td = document.createElement('td');
-                    // Find log for this student & code
-                    const log = logs.find(l => l.student_nim === student.nim && l.meeting_code === code);
+                    // Fixed Name Column
+                    const tdName = document.createElement('td');
+                    tdName.className = "px-4 py-3 font-semibold text-slate-700 border-r border-slate-100 group-hover:bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]";
+                    tdName.innerHTML = `<span class="line-clamp-1 w-32 md:w-auto text-xs md:text-sm">${student.name}</span>`;
+                    tr.appendChild(tdName);
 
-                    if (log) {
-                        const icon = document.createElement('i');
-                        icon.className = 'fa-solid';
+                    // Columns
+                    for (let w = 1; w <= weeks; w++) {
+                        const td = document.createElement('td');
+                        td.className = "px-3 py-3 text-center border-b border-slate-100";
 
-                        if (log.status === 'Hadir') {
-                            icon.classList.add('fa-check', 'status-hadir');
-                        } else if (log.status === 'Sakit') {
-                            icon.classList.add('fa-briefcase-medical', 'status-sakit');
-                            td.title = 'Sakit';
-                        } else if (log.status === 'Izin') {
-                            icon.classList.add('fa-envelope-open-text', 'status-izin');
-                            td.title = 'Izin';
-                        } else if (log.status === 'Alfa') {
-                            icon.classList.add('fa-xmark', 'status-alfa');
-                            td.title = 'Alfa';
+                        // Check for ANY log in that week (Simplifying: M1-1 or M1-2 count as attended for that week bubble)
+                        // Or we can just check M{w}-1 for simplicity in this view
+                        const code = `${w}-1`;
+                        const log = logs.find(l => l.student_nim === student.nim && l.meeting_code === code);
+
+                        if (log) {
+                            let iconClass = "text-slate-300";
+                            if (log.status === 'Hadir') iconClass = "text-emerald-500";
+                            else if (log.status === 'Sakit' || log.status === 'Izin') iconClass = "text-yellow-500";
+                            else if (log.status === 'Alfa') iconClass = "text-red-500";
+
+                            td.innerHTML = `<i class="fa-solid fa-circle text-[10px] ${iconClass}"></i>`;
+                        } else {
+                            td.innerHTML = `<span class="text-slate-200 text-[10px]">•</span>`;
                         }
-                        td.appendChild(icon);
-                    } else {
-                        td.innerHTML = '<span class="text-slate-700">-</span>';
+                        tr.appendChild(td);
                     }
-                    tr.appendChild(td);
+                    tbody.appendChild(tr);
                 });
 
-                tbody.appendChild(tr);
-            });
+            } catch (e) { console.error(e); }
         }
-
-        document.addEventListener('DOMContentLoaded', loadAttendance);
     </script>
 </body>
 

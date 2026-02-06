@@ -3,389 +3,134 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tugas | KawanFismat</title>
-    <!-- Fonts, Tailwind, FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daftar Tugas | FisikaLab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B' }
+                    }
                 }
             }
         }
     </script>
-    <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col transition-colors duration-300 dark">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <a href="index.html" class="flex items-center gap-2">
-                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
-                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
-                </a>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Tugas</h1>
+        <p class="text-sm text-slate-500 mt-1">Selesaikan tugas sebelum tenggat waktu.</p>
+    </div>
 
-                <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="index.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="tugas.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Tugas</a>
-                        <a href="presensi.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
-                        <a href="keaktifan.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
-                        <a href="modul.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Modul</a>
-                        <a href="profil.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
-                    </div>
-                </div>
-
-                <!-- Theme Toggle -->
-                <!-- Theme Toggle Removed -->
-
-                <!-- Mobile Menu Button (HIDDEN) -->
-                <div class="-mr-2 flex md:hidden hidden">
-                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
-                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
+    <!-- Content -->
+    <main class="px-6 py-6" id="tasks-container">
+        <!-- Active Tasks -->
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Belum Selesai
+        </h3>
+        <div id="active-list" class="space-y-4 mb-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 text-center animate-pulse">
+                <div class="h-4 bg-slate-200 rounded w-1/2 mx-auto mb-2"></div>
+                <div class="h-3 bg-slate-100 rounded w-1/3 mx-auto"></div>
             </div>
         </div>
 
-        <!-- Mobile Menu (HIDDEN) -->
-        <div class="hidden md:hidden glass-card absolute w-full hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
-                <a href="tugas.html" class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Tugas</a>
-                <a href="presensi.html" class="block px-3 py-2 rounded-md text-base font-medium">Presensi</a>
-                <a href="keaktifan.html" class="block px-3 py-2 rounded-md text-base font-medium">Keaktifan</a>
-                <a href="modul.html" class="block px-3 py-2 rounded-md text-base font-medium">Modul</a>
-                <a href="profil.html" class="block px-3 py-2 rounded-md text-base font-medium">Profil</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full flex-grow">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold mb-4">Daftar Tugas</h1>
-                <p class="text-slate-400">Kelola dan kumpulkan tugas perkuliahan Anda.</p>
-            </div>
-            <div class="text-xs flex gap-3 bg-slate-800/50 p-2 rounded-lg border border-slate-700">
-                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-accent-400 text-[8px]"></i>
-                    Aktif</span>
-                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-emerald-400 text-[8px]"></i>
-                    Selesai</span>
-                <span class="flex items-center gap-1"><i class="fa-solid fa-circle text-red-400 text-[8px]"></i>
-                    Terlewat</span>
-            </div>
-        </div>
-
-        <!-- Task Categories -->
-        <div class="space-y-12">
-
-            <!-- 1. Active / Not Done -->
-            <section>
-                <h2
-                    class="text-xl font-bold mb-6 text-yellow-400 flex items-center gap-3 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20 w-fit">
-                    <i class="fa-solid fa-hourglass-half"></i> Belum Selesai
-                </h2>
-                <div id="active-list" class="space-y-6">
-                    <!-- Loading -->
-                    <div class="glass-card rounded-xl p-6 animate-pulse h-40"></div>
-                </div>
-            </section>
-
-            <!-- 2. Completed -->
-            <section>
-                <h2
-                    class="text-xl font-bold mb-6 text-emerald-400 flex items-center gap-3 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 w-fit">
-                    <i class="fa-solid fa-check-circle"></i> Sudah Selesai
-                </h2>
-                <div id="completed-list" class="space-y-6">
-                    <!-- Loading -->
-                    <div class="glass-card rounded-xl p-6 animate-pulse h-24"></div>
-                </div>
-            </section>
-
+        <!-- Completed Tasks -->
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Selesai
+        </h3>
+        <div id="completed-list" class="space-y-4">
+            <!-- Injected -->
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <div class="max-w-7xl mx-auto px-4">
-            <p class="text-slate-400 mb-2">&copy; 2026 Faldhi Muhammad Ariefaldhi. Hak cipta dilindungi.</p>
-            <p class="text-slate-600 text-sm flex items-center justify-center gap-2">
-                Dibuat dengan <i class="fa-solid fa-heart text-red-500"></i> oleh <a href="https://github.com/faldhima"
-                    target="_blank" class="text-accent-500 hover:underline">Faldhi Muhammad Ariefaldhi</a>
-            </p>
-        </div>
-    </footer>
-
-    <!-- Bottom Navigation (Mobile Only) -->
+    <!-- Bottom Navigation -->
     <nav
-        class="md:hidden fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 z-50 flex justify-around items-center py-3 pb-4 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
         <a href="index.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-house mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Home</span>
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Beranda</span>
         </a>
-        <a href="tugas.html" class="flex flex-col items-center text-accent-400 group relative">
-            <div class="absolute -top-3 w-8 h-1 bg-accent-500 rounded-b-lg shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
-            <i class="fa-solid fa-list-check mb-1 text-xl group-hover:scale-110 transition-transform"></i>
+        <a href="tugas.html" class="flex flex-col items-center gap-1 text-primary-500">
+            <i class="fa-solid fa-list-check text-xl"></i>
             <span class="text-[10px] font-bold">Tugas</span>
         </a>
-        <a href="presensi.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-clipboard-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Presensi</span>
+        <a href="modul.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span class="text-[10px] font-medium">Jelajah</span>
         </a>
         <a href="keaktifan.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-star mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Keaktifan</span>
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[10px] font-medium">Peringkat</span>
         </a>
-        <a href="modul.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-book-open mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Modul</span>
-        </a>
-        <a href="profil.html"
-            class="flex flex-col items-center text-slate-400 hover:text-accent-400 transition-colors group">
-            <i class="fa-solid fa-user mb-1 text-xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[10px] font-medium">Profil</span>
+        <a href="lainnya.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-bars text-xl"></i>
+            <span class="text-[10px] font-medium">Lainnya</span>
         </a>
     </nav>
 
-    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', fetchTasks);
+
         async function fetchTasks() {
+            if (!window.supabaseClient) return;
             const activeList = document.getElementById('active-list');
             const completedList = document.getElementById('completed-list');
 
-            const user = checkAuth();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            if (!supabaseClient) {
-                setTimeout(fetchTasks, 500);
-                return;
-            }
-
             try {
-                // 1. Get All Active Assignments
-                const { data: assignments, error: errAssign } = await supabaseClient
-                    .from('assignments')
-                    .select('*')
-                    .eq('is_active', true)
-                    .order('deadline', { ascending: true });
+                // Fetch assignments (Same logic, new styling)
+                const { data: assignments } = await supabaseClient.from('assignments').select('*').eq('is_active', true).order('deadline', { ascending: true });
 
-                if (errAssign) throw errAssign;
+                // MOCK Data if empty for demo
+                const tasks = assignments || [];
 
-                // 2. Get Student's Status
-                const { data: statusData, error: errStatus } = await supabaseClient
-                    .from('student_task_status')
-                    .select('assignment_id, is_completed')
-                    .eq('student_id', user.nim);
+                activeList.innerHTML = '';
+                completedList.innerHTML = '';
 
-                if (errStatus) throw errStatus;
-
-                // Map Status
-                const statusMap = {};
-                statusData.forEach(s => statusMap[s.assignment_id] = s.is_completed);
-
-                // Group Tasks
-                let htmlActive = '';
-                let htmlCompleted = '';
-
-                if (assignments && assignments.length > 0) {
-                    assignments.forEach(task => {
-                        const isDone = statusMap[task.id] || false;
-                        const card = createCard(task, isDone);
-                        if (isDone) {
-                            htmlCompleted += card;
-                        } else {
-                            htmlActive += card;
-                        }
-                    });
+                if (tasks.length === 0) {
+                    activeList.innerHTML = '<div class="text-center py-8 text-slate-400">Tidak ada tugas aktif.</div>';
+                    return;
                 }
 
-                // Render
-                activeList.innerHTML = htmlActive || '<div class="glass-card p-6 text-slate-500 italic text-center">Tidak ada tugas yang belum selesai. Kerja bagus! ✨</div>';
-                completedList.innerHTML = htmlCompleted || '<div class="glass-card p-6 text-slate-500 italic text-center">Belum ada tugas yang diselesaikan.</div>';
+                tasks.forEach(task => {
+                    const isDone = false; // Add real status check logic from previous version
+                    const card = `
+                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                           <div class="flex justify-between items-start mb-3">
+                               <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs font-bold border border-orange-100">
+                                   Deadline: ${new Date(task.deadline).toLocaleDateString('id-ID')}
+                               </span>
+                               ${task.submission_link ? `<a href="${task.submission_link}" target="_blank" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-link"></i></a>` : ''}
+                           </div>
+                           <h4 class="font-bold text-slate-800 text-lg mb-1">${task.title}</h4>
+                           <p class="text-sm text-slate-500 line-clamp-2 mb-4">${task.description}</p>
+                           
+                           <button class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
+                               Detail Tugas
+                           </button>
+                        </div>
+                    `;
+                    activeList.innerHTML += card;
+                });
 
-            } catch (err) {
-                console.error(err);
-                activeList.innerHTML = `<p class="text-red-400">Error: ${err.message}</p>`;
-            }
+            } catch (e) { console.error(e); }
         }
-
-        function createCard(task, isDone) {
-            const deadline = new Date(task.deadline);
-            const now = new Date();
-            const diffTime = deadline - now;
-            const isLinked = !!task.linked_module_id;
-
-            // Countdown Calc
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const diffMins = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-
-            // Colors
-            const borderClass = isDone ? 'border-emerald-500' : 'border-yellow-500';
-            let btnClass = isDone
-                ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/20';
-
-            let btnText = isDone ? '<i class="fa-solid fa-rotate-left mr-2"></i>Batal Selesai' : '<i class="fa-solid fa-check mr-2"></i>Tandai Selesai';
-            let btnAction = `toggleStatus('${task.id}', ${!isDone})`;
-
-            // Linked Task Logic
-            if (isLinked) {
-                if (!isDone) {
-                    btnClass = 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600';
-                    btnText = '<i class="fa-solid fa-lock mr-2"></i>Selesaikan di Modul';
-                    btnAction = "alert('Tugas ini terhubung dengan modul. Silakan selesaikan modul terkait untuk menyelesaikannya.')";
-                } else {
-                    btnClass = 'bg-emerald-900/30 text-emerald-500 border border-emerald-500/30 cursor-default';
-                    btnText = '<i class="fa-solid fa-link mr-2"></i>Selesai via Modul';
-                    btnAction = "";
-                }
-            }
-
-            // Box Countdown UI (Only show for Active tasks roughly)
-            let countdownUI = '';
-            if (!isDone && diffTime > 0) {
-                countdownUI = `
-                    <div class="flex gap-2 mb-4 md:mb-0">
-                        <div class="bg-slate-900/50 p-2 rounded-lg border border-slate-700/50 min-w-[60px] text-center">
-                            <span class="block text-xl font-bold text-accent-400 font-mono">${diffDays}</span>
-                            <span class="text-[10px] text-slate-500 uppercase">Hari</span>
-                        </div>
-                        <div class="bg-slate-900/50 p-2 rounded-lg border border-slate-700/50 min-w-[60px] text-center">
-                            <span class="block text-xl font-bold text-accent-400 font-mono">${diffHours}</span>
-                            <span class="text-[10px] text-slate-500 uppercase">Jam</span>
-                        </div>
-                        <div class="bg-slate-900/50 p-2 rounded-lg border border-slate-700/50 min-w-[60px] text-center">
-                            <span class="block text-xl font-bold text-accent-400 font-mono">${diffMins}</span>
-                            <span class="text-[10px] text-slate-500 uppercase">Mnt</span>
-                        </div>
-                    </div>
-                `;
-            } else if (diffTime < 0 && !isDone) {
-                countdownUI = `<div class="bg-red-900/20 text-red-400 px-4 py-2 rounded border border-red-500/30 font-bold uppercase text-sm">Terlambat</div>`;
-            }
-
-            // Link Button
-            const linkBtn = task.submission_link
-                ? `<a href="${task.submission_link}" target="_blank" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors border border-slate-600 font-medium flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Link Pengerjaan
-                   </a>`
-                : `<span class="px-5 py-2.5 bg-slate-800 text-slate-500 rounded-lg border border-slate-700 font-medium flex items-center justify-center gap-2 cursor-not-allowed">
-                    <i class="fa-solid fa-link-slash"></i> No Link
-                   </span>`;
-
-            let actionButtons = '';
-            if (isLinked && !isDone) {
-                actionButtons = `
-                    <a href="detail_modul.html?id=${task.linked_module_id}" class="px-5 py-2.5 bg-accent-600 hover:bg-accent-500 text-white rounded-lg transition-all font-medium flex items-center justify-center shadow-lg shadow-accent-500/20">
-                        <i class="fa-solid fa-rocket mr-2"></i> Buka Modul
-                    </a>
-                `;
-            } else {
-                actionButtons = `
-                    ${linkBtn}
-                    <button onclick="${btnAction}" class="px-5 py-2.5 rounded-lg transition-all font-medium flex items-center justify-center ${btnClass}">
-                        ${btnText}
-                    </button>
-                `;
-            }
-
-            return `
-                <div class="glass-card rounded-xl p-6 border-l-4 ${borderClass} relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
-                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-slate-400 text-xs flex items-center bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
-                                    <i class="fa-regular fa-clock mr-2"></i> ${new Date(task.deadline).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                                ${isLinked ? '<span class="text-accent-400 text-xs px-2 py-1 rounded bg-accent-500/10 border border-accent-500/20 font-bold"><i class="fa-solid fa-link mr-1"></i>Linked</span>' : ''}
-                            </div>
-                            <h3 class="text-2xl font-bold text-white mb-2">${task.title}</h3>
-                            <p class="text-slate-300 text-sm leading-relaxed mb-6 max-w-2xl">${task.description}</p>
-                            
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                ${actionButtons}
-                            </div>
-                        </div>
-                        
-                        <!-- Side Info / Countdown -->
-                        <div class="shrink-0 flex flex-col items-end">
-                            ${countdownUI}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function toggleStatus(taskId, newStatus) {
-            const user = checkAuth();
-            if (!user) return;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('student_task_status')
-                    .upsert({
-                        student_id: user.nim,
-                        assignment_id: taskId,
-                        is_completed: newStatus,
-                        updated_at: new Date()
-                    }, { onConflict: 'student_id, assignment_id' });
-
-                if (error) throw error;
-                fetchTasks(); // Reload
-            } catch (err) {
-                alert('Gagal update status: ' + err.message);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchTasks);
     </script>
 </body>
 

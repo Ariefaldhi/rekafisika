@@ -1,81 +1,75 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Soal | KawanFismat</title>
-
-    <!-- Tailwind & Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank Soal | FisikaLab</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 500: '#06b6d4' } }
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B' }
+                    }
                 }
             }
         }
     </script>
-    <style>
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image:
-                radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-    </style>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Navbar -->
-    <nav class="p-6 flex items-center justify-between glass-card sticky top-0 z-50 rounded-b-xl mx-4 mt-2">
-        <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <i class="fa-solid fa-chevron-left text-slate-400"></i>
-            <span class="font-bold text-lg text-white">Beranda</span>
-        </a>
-        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
-            Bank Soal Fisika Matematika
-        </h1>
-        <div class="w-8"></div> <!-- Spacer -->
-    </nav>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm border-b border-slate-100">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Bank Soal</h1>
+        <p class="text-sm text-slate-500 mt-1">Kumpulan arsip soal latihan dan ujian.</p>
+    </div>
 
-    <!-- Main Grid -->
-    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
+    <!-- Content -->
+    <main class="px-4 py-6 max-w-7xl mx-auto">
 
-        <p class="text-slate-400 text-center mb-8 max-w-2xl mx-auto">
-            Kumpulan soal latihan, tugas unit, dan ujian tahun-tahun sebelumnya.
-            Klik "Buka Soal" untuk melihat PDF dan gunakan fitur
-            <span class="text-indigo-400 font-bold bg-indigo-500/10 px-1 rounded"><i
-                    class="fa-solid fa-wand-magic-sparkles"></i> Jelaskan AI</span>
-            untuk bantuan analisis.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="file-grid">
-            <!-- Files injected via JS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="file-grid">
+            <!-- Items injected via JS -->
         </div>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="py-6 text-center text-slate-500 text-sm">
-        &copy; 2026 KawanFismat
-    </footer>
+    <!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <a href="index.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Beranda</span>
+        </a>
+        <a href="modul.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span class="text-[10px] font-medium">Jelajah</span>
+        </a>
+        <a href="keaktifan.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[10px] font-medium">Peringkat</span>
+        </a>
+        <a href="profil.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-regular fa-user text-xl"></i>
+            <span class="text-[10px] font-medium">Profil</span>
+        </a>
+    </nav>
 
     <script>
-        // File List (Generated from directory listing)
         const files = [
             "Soal Latihan Diferensial Parsial & Integral Lipat - 2023.pdf",
             "Soal Latihan Kakulus Variasi - 2023.pdf",
@@ -83,73 +77,36 @@
             "Soal Latihan PDB - 2023.pdf",
             "Soal Latihan deret Tak Hingga dan Deret Fourier 2022.doc",
             "Soal Latihan deret Tak Hingga dan Deret Fourier 2023.pdf",
-            "TES UNIT  4 FISMAT 1 Ganjil 2021-2022.doc",
+            "TES UNIT 4 FISMAT 1 Ganjil 2021-2022.doc",
             "TU 1_FISIKA MATEMATIKA 1 2022_22ABC.pdf",
             "TU 1_Fismat 1 2023_23ABCD.pdf",
             "TU 2 FISMAT 1 2022 (PDB DAN KALKULUS VARIASI).pdf",
-            "TU 2 Fismat I ganjil  2021-2022.pdf",
-            "TU 2_ FISIKA MATEMATIKA 1 2022_22ABC.pdf",
-            "TU 2_Fismat 1 2023_23ABCD.pdf",
-            "TU 3 FisMat 1  Matriks & Determinan (Ganjil  2021).pdf",
-            "TU 3_ FISIKA MATEMATIKA 1 2022_22ABC.pdf",
-            "TU 3_ Fismat 1 2023_23ABCD.pdf",
-            "TU 4 FISMAT (Deret pangkat tak hingga & deret fourier.pdf",
-            "TU 4_Fismat 1 2023_23ABCD.pdf",
-            "Tes 1 Fismat 1  (genap 2021).pdf",
-            "Tes 1 Fismat I Ganjil 2021-2022.pdf",
-            "Tes 2 Fismat I genap 2020-2021.docx",
-            "Tes 3 Matfis I genap 2020-2021.doc",
-            "Tes_Unit_1_MatDas_2025. 14 OKt.pdf"
+            "Tes Unit 1 MatDas 2025.pdf"
         ];
 
         const grid = document.getElementById('file-grid');
 
-        files.forEach((file, index) => {
+        files.forEach(file => {
             const isPDF = file.toLowerCase().endsWith('.pdf');
-            const cleanName = file.replace('.pdf', '').replace('.doc', '').replace('.docx', '').replace(/_/g, ' ');
-
-            // Icon
-            let iconClass = isPDF ? "fa-solid fa-file-pdf text-red-400" : "fa-solid fa-file-word text-blue-400";
-            let bgClass = isPDF ? "bg-red-500/10 border-red-500/20" : "bg-blue-500/10 border-blue-500/20";
-
-            // Button Action
-            let buttonHtml = '';
-            if (isPDF) {
-                const encodedPath = encodeURIComponent('Bank Soal Fismat/' + file);
-                buttonHtml = `
-                    <a href="viewer.html?file=${encodedPath}" 
-                       class="flex-1 text-center py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 transition-colors">
-                       <i class="fa-regular fa-eye mr-2"></i> Buka Soal
-                    </a>
-                `;
-            } else {
-                buttonHtml = `
-                    <button disabled class="flex-1 text-center py-2 bg-slate-800/50 text-slate-500 rounded-lg border border-slate-800 cursor-not-allowed">
-                        <i class="fa-solid fa-ban mr-2"></i> Preview Unavailable
-                    </button>
-                    <a href="Bank Soal Fismat/${file}" download 
-                       class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 transition-colors" title="Download">
-                       <i class="fa-solid fa-download"></i>
-                    </a>
-                `;
-            }
+            const cleanName = file.replace('.pdf', '').replace('.doc', '').replace(/_/g, ' ');
 
             const card = document.createElement('div');
-            card.className = "glass-card p-5 rounded-xl hover:-translate-y-1 transition-transform flex flex-col";
+            card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col hover:border-blue-200 transition-all group";
+
+            const icon = isPDF
+                ? '<div class="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf"></i></div>'
+                : '<div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-word"></i></div>';
+
+            const action = isPDF
+                ? `<a href="viewer.html?file=${encodeURIComponent('Bank Soal Fismat/' + file)}" class="mt-4 w-full block text-center py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition-colors">Buka Dokumen</a>`
+                : `<button disabled class="mt-4 w-full block text-center py-2.5 bg-slate-50 text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed">Preview Unavailable</button>`;
+
             card.innerHTML = `
-                <div class="flex items-start gap-4 mb-4">
-                    <div class="w-12 h-12 rounded-lg ${bgClass} flex items-center justify-center flex-shrink-0 text-xl border">
-                        <i class="${iconClass}"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-200 line-clamp-2 leading-tight" title="${file}">${cleanName}</h3>
-                        <span class="text-xs text-slate-500 mt-1 block uppercase tracking-wider font-mono">
-                            ${isPDF ? 'PDF Document' : 'Word Document'}
-                        </span>
-                    </div>
-                </div>
-                <div class="mt-auto flex gap-2">
-                    ${buttonHtml}
+                ${icon}
+                <h3 class="font-bold text-slate-700 text-sm leading-snug line-clamp-2" title="${cleanName}">${cleanName}</h3>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono uppercase">${isPDF ? 'PDF File' : 'Word Doc'}</p>
+                <div class="mt-auto pt-2">
+                    ${action}
                 </div>
             `;
             grid.appendChild(card);

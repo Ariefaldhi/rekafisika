@@ -3,634 +3,157 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Modul | KawanFismat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Materi | FisikaLab</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- MathJax -->
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
-            svg: { fontCache: 'global' }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B' }
+                    }
                 }
             }
         }
     </script>
-    <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image: radial-gradient(at 50% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        /* Timeline CSS */
-        .timeline-container {
-            position: relative;
-            padding-left: 2rem;
-            border-left: 2px solid rgba(255, 255, 255, 0.1);
-            margin-left: 1rem;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -2.6rem;
-            top: 0.5rem;
-            width: 1.2rem;
-            height: 1.2rem;
-            border-radius: 50%;
-            border: 2px solid #0f172a;
-            z-index: 10;
-        }
-
-        /* Custom Checkbox */
-        .step-checkbox {
-            appearance: none;
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #475569;
-            border-radius: 0.375rem;
-            background-color: #1e293b;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .step-checkbox:checked {
-            background-color: #22d3ee;
-            border-color: #22d3ee;
-        }
-
-        .step-checkbox:checked::after {
-            content: '\f00c';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            color: #0f172a;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.8rem;
-        }
-    </style>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
-                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="index.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="tugas.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Tugas</a>
-                        <a href="presensi.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Presensi</a>
-                        <a href="keaktifan.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Keaktifan</a>
-                        <a href="modul.html"
-                            class="text-accent-400 px-3 py-2 rounded-md text-sm font-bold bg-slate-800/50">Modul</a>
-                        <a href="profil.html"
-                            class="hover:text-accent-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Profil</a>
-                    </div>
-                </div>
-                <!-- Mobile Menu Logic Handled in main script or simplified here -->
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" class="p-2 rounded-md text-slate-400 hover:text-white"
-                        onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"><i
-                            class="fa-solid fa-bars text-xl"></i></button>
-                </div>
-            </div>
-        </div>
-        <div class="hidden md:hidden glass-card absolute w-full" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
-                <a href="modul.html" class="text-accent-400 block px-3 py-2 rounded-md text-base font-medium">Modul</a>
-                <!-- Add others if needed -->
-            </div>
-        </div>
-    </nav>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex items-center gap-4">
+        <a href="modul.html"
+            class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1 class="text-xl font-bold text-slate-900 truncate" id="m-title">Memuat Materi...</h1>
+    </div>
 
     <!-- Content -->
-    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex-grow">
+    <main class="px-4 py-6 max-w-3xl mx-auto space-y-6">
 
-        <!-- Back Button -->
-        <a href="modul.html" class="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Daftar Modul
-        </a>
+        <!-- Hero Card -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-10 rounded-full blur-2xl -mr-10 -mt-10">
+            </div>
 
-        <!-- Header -->
-        <div id="module-header" class="mb-8">
-            <div class="animate-pulse h-8 bg-slate-800 rounded w-1/3 mb-2"></div>
-            <div class="animate-pulse h-4 bg-slate-800 rounded w-1/2"></div>
+            <span id="m-week"
+                class="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-bold mb-4">Minggu
+                --</span>
+            <h2 id="m-topic" class="text-2xl font-black text-slate-900 mb-2">--</h2>
+            <div id="m-desc" class="prose prose-slate prose-sm max-w-none text-slate-600">
+                <!-- Markdown Content -->
+            </div>
         </div>
 
-        <!-- Steps Container -->
-        <div id="steps-list" class="timeline-container">
-            <!-- Steps Injected Here -->
+        <!-- Video Section (Placeholder / If Exists) -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hidden" id="video-section">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-brands fa-youtube text-red-500"></i> Video Pembelajaran
+            </h3>
+            <div class="aspect-video bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center">
+                <i class="fa-solid fa-play-circle text-6xl text-slate-300"></i>
+            </div>
         </div>
 
-        <!-- Finish Module Button -->
-        <div class="mt-12 text-center">
-            <button id="finish-module-btn" onclick="finishModule()" disabled
-                class="bg-accent-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg opacity-50 cursor-not-allowed transition-all transform active:scale-95">
-                <i class="fa-solid fa-flag-checkered mr-2"></i> Selesaikan Modul
+        <!-- Resources -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-paperclip text-slate-400"></i> Sumber Belajar
+            </h3>
+            <div class="space-y-3">
+                <a href="buku.html"
+                    class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-md transition-all group">
+                    <div
+                        class="w-10 h-10 bg-red-100 text-red-500 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-700 text-sm">Buku Teks Utama</h4>
+                        <p class="text-xs text-slate-400">PDF Reference</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center pt-6">
+            <button id="prev-modul"
+                class="px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+            </button>
+            <button id="next-modul"
+                class="px-6 py-3 rounded-xl bg-primary-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
             </button>
         </div>
 
-        <!-- Finish Section (Success Message) -->
-        <div id="finish-section" class="mt-8 text-center hidden">
-            <div class="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <div
-                    class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-[0_0_20px_rgba(16,185,129,0.5)]">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <h3 class="text-xl font-bold text-emerald-400 mb-2">Modul Selesai!</h3>
-                <p class="text-slate-300">Selamat, Anda telah menyelesaikan semua langkah pembelajaran di modul ini.</p>
-            </div>
-        </div>
-
     </main>
-
-    <footer class="py-12 border-t border-slate-800 bg-slate-900 text-center mt-auto">
-        <p class="text-slate-400 text-sm">&copy; 2026 KawanFismat</p>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const moduleId = urlParams.get('id');
-        let currentSteps = [];
-        let userNim = null;
+        const id = urlParams.get('id');
 
-        async function init() {
-            if (!moduleId) {
-                alert('Modul tidak ditemukan!');
-                window.location.href = 'modul.html';
-                return;
-            }
+        async function loadDetail() {
+            if (!id || !window.supabaseClient) return;
 
-            // Get User Info
-            const userSession = localStorage.getItem('user_session');
-            if (!userSession) {
-                alert('Silakan login terlebih dahulu.');
-                window.location.href = 'index.html';
-                return;
-            }
-            const user = JSON.parse(userSession);
+            // Fetch Current
+            const { data: modul, error } = await supabaseClient.from('modules').select('*').eq('id', id).single();
 
-            // Resolve NIM
-            if (user.nim) {
-                userNim = user.nim;
-            } else {
-                const { data } = await supabaseClient.from('students').select('nim').eq('name', user.name).single();
-                if (data) userNim = data.nim;
-            }
-
-            if (!userNim) {
-                alert('Data mahasiswa tidak valid.');
-                return;
-            }
-
-            loadModuleDetail();
-        }
-
-        async function checkAndCompleteAssignment() {
-            try {
-                // Find active assignment linked to this module
-                const { data: assignments } = await supabaseClient
-                    .from('assignments')
-                    .select('id')
-                    .eq('linked_module_id', moduleId)
-                    .eq('is_active', true);
-
-                if (assignments && assignments.length > 0) {
-                    const updates = assignments.map(a => ({
-                        student_id: userNim,
-                        assignment_id: a.id,
-                        is_completed: true,
-                        updated_at: new Date()
-                    }));
-
-                    // Upsert status
-                    const { error } = await supabaseClient
-                        .from('student_task_status')
-                        .upsert(updates, { onConflict: 'student_id, assignment_id' });
-
-                    if (error) console.error("Auto-complete task failed:", error);
-                    else console.log("Auto-completed linked tasks");
-                }
-            } catch (e) {
-                console.error("Error checking linked assignments", e);
-            }
-        }
-
-        async function loadModuleDetail() {
-            try {
-                // 1. Fetch Module Data
-                const { data: moduleData, error } = await supabaseClient
-                    .from('modules')
-                    .select('*')
-                    .eq('id', moduleId)
-                    .single();
-
-                if (error) throw error;
-
-                // Render Header
-                document.getElementById('module-header').innerHTML = `
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="px-3 py-1 bg-accent-500/10 text-accent-400 text-xs font-bold rounded-full border border-accent-500/20">Minggu ${moduleData.week}</span>
-                    </div>
-                    <h1 class="text-3xl font-bold text-white mb-4">${moduleData.topic}</h1>
-                    <p class="text-slate-300 leading-relaxed text-lg mb-6">${moduleData.description || 'Tidak ada deskripsi.'}</p>
-                    ${moduleData.formula ? `<div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 overflow-x-auto flex justify-center">${moduleData.formula}</div>` : ''}
-                `;
-
-                // 2. Fetch Progress
-                const { data: progressData } = await supabaseClient
-                    .from('student_progress')
-                    .select('step_id')
-                    .eq('student_nim', userNim)
-                    .eq('module_id', moduleId)
-                    .eq('is_complete', true);
-
-                const completedStepIds = new Set(progressData?.map(p => p.step_id) || []);
-
-                // 3. Fetch Answers 
-                const { data: answersData } = await supabaseClient
-                    .from('student_answers')
-                    .select('step_id, answer')
-                    .eq('student_nim', userNim)
-                    .eq('module_id', moduleId);
-
-                const answersMap = new Map();
-                if (answersData) {
-                    answersData.forEach(row => {
-                        try {
-                            // Answer can be JSON string or plain text
-                            const parsed = JSON.parse(row.answer);
-                            answersMap.set(row.step_id, parsed);
-                        } catch (e) {
-                            answersMap.set(row.step_id, row.answer);
-                        }
-                    });
-                }
-
-                // 4. Render Steps
-                const container = document.getElementById('steps-list');
-                container.innerHTML = '';
-
-                // Handle legacy or new steps
-                let steps = moduleData.content_steps || [];
-                // Simple backward compact logic if needed, but assuming new format mostly
-
-                currentSteps = steps; // Store for validaton
-
-                if (steps.length === 0) {
-                    container.innerHTML = '<div class="text-center text-slate-500 py-10">Belum ada langkah pembelajaran.</div>';
-                    return;
-                }
-
-                steps.forEach((step, index) => {
-                    const isChecked = completedStepIds.has(step.id);
-                    const savedAnswer = answersMap.get(step.id);
-                    const stepHtml = renderStepCard(step, index, moduleId, isChecked, savedAnswer);
-                    container.insertAdjacentHTML('beforeend', stepHtml);
-                });
-
-                // Check overall completion to enable button
-                checkCompletionStatus(steps.length, completedStepIds.size);
-
-                // Self-Healing: If module is 100% complete, ensure linked assignment is also complete
-                if (steps.length > 0 && steps.length === completedStepIds.size) {
-                    checkAndCompleteAssignment();
-                }
+            if (modul) {
+                document.title = `${modul.topic} | FisikaLab`;
+                document.getElementById('m-title').innerText = modul.topic;
+                document.getElementById('m-topic').innerText = modul.topic;
+                document.getElementById('m-week').innerText = `Minggu ${modul.week}`;
+                document.getElementById('m-desc').innerHTML = marked.parse(modul.description || '');
 
                 // MathJax
-                if (window.MathJax && window.MathJax.typesetPromise) MathJax.typesetPromise();
+                if (window.MathJax) MathJax.typesetPromise();
 
-            } catch (err) {
-                console.error(err);
-                alert('Gagal memuat modul: ' + err.message);
-            }
-        }
-
-        async function toggleStepCompletion(stepId, isChecked, isManual = true) {
-            // Block manual uncheck/check for steps that have Questions but no answers yet
-            // Actually, the UI checkbox will be disabled, but good to have logic check.
-            // We rely on 'disabled' attribute in DOM for manual block.
-
-            const { error } = await supabaseClient
-                .from('student_progress')
-                .upsert({
-                    student_nim: userNim,
-                    module_id: moduleId,
-                    step_id: stepId,
-                    is_complete: isChecked
-                }, { onConflict: 'student_nim, step_id' });
-
-            if (error) {
-                console.error(error);
-                if (isManual) alert('Gagal menyimpan progress.');
-                // Revert checkbox visual
-                const cb = document.getElementById(`check-${stepId}`);
-                if (cb) cb.checked = !isChecked;
-                return;
-            }
-
-            // Re-calc completion
-            const totalSteps = currentSteps.length;
-            // We need to re-fetch or track local state accurately if we want perfect total.
-            // But selector query is fine for now as long as DOM is updated.
-            const checkedCount = document.querySelectorAll('.step-checkbox:checked').length;
-            checkCompletionStatus(totalSteps, checkedCount);
-        }
-
-        function checkCompletionStatus(total, completed) {
-            const finishSection = document.getElementById('finish-section');
-            const finishBtn = document.getElementById('finish-module-btn');
-
-            if (finishBtn) {
-                if (total > 0 && total === completed) {
-                    finishBtn.disabled = false;
-                    finishBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    finishBtn.classList.add('hover:bg-accent-500', 'hover:shadow-lg');
-                } else {
-                    finishBtn.disabled = true;
-                    finishBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    finishBtn.classList.remove('hover:bg-accent-500', 'hover:shadow-lg');
-                    finishSection.classList.add('hidden');
-                }
-            }
-        }
-
-        function finishModule() {
-            const totalSteps = currentSteps.length;
-            const checkedCount = document.querySelectorAll('.step-checkbox:checked').length;
-
-            if (checkedCount < totalSteps) {
-                alert("Mohon selesaikan semua langkah terlebih dahulu.");
-                return;
-            }
-
-            const finishSection = document.getElementById('finish-section');
-            const finishBtn = document.getElementById('finish-module-btn');
-
-            finishSection.classList.remove('hidden');
-            finishSection.scrollIntoView({ behavior: 'smooth' });
-
-            // Hide button after clicking?
-            finishBtn.classList.add('hidden');
-        }
-
-        // Render Step Card
-        function renderStepCard(step, index, moduleId, isComplete, savedAnswer = null) {
-            let icon = 'fa-circle';
-            let color = 'bg-slate-500';
-            let mediaContent = '';
-            let extensionHtml = '';
-            let isQuestionStep = false;
-
-            // Questions Logic
-            if (step.questions && step.questions.length > 0) {
-                isQuestionStep = true;
-
-                // Generate Form HTML (Reusable)
-                const generateFormHtml = (isHidden) => {
-                    const questionsHtml = step.questions.map((q, qIdx) => {
-                        const existingVal = savedAnswer ? (savedAnswer[q.id] || '') : '';
-                        return `
-                            <div class="mb-4">
-                                <label class="block text-sm text-slate-300 mb-2 font-bold">${qIdx + 1}. ${q.text}</label>
-                                <textarea data-question-id="${q.id}" class="ans-input-${step.id} w-full bg-slate-900 border border-slate-600 rounded p-2 text-white h-20 focus:border-purple-500 focus:outline-none" placeholder="Tulis jawaban Anda...">${existingVal}</textarea>
-                            </div>
-                         `;
-                    }).join('');
-
-                    return `
-                        <div id="form-${step.id}" class="${isHidden ? 'hidden' : ''} bg-slate-800/50 p-4 rounded-xl border border-slate-700 mt-4">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="fa-solid fa-pen-to-square text-purple-400"></i>
-                                <h5 class="font-bold text-slate-200">${savedAnswer ? 'Edit Jawaban' : 'Latihan / Tugas'}</h5>
-                            </div>
-                            ${questionsHtml}
-                            <div class="flex gap-2">
-                                <button onclick="submitStepAnswers('${moduleId}', '${step.id}')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-purple-500/20">
-                                    Simpan Jawaban
-                                </button>
-                                ${savedAnswer ? `<button onclick="toggleEditMode('${step.id}', false)" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">Batal</button>` : ''}
-                            </div>
-                        </div>
-                     `;
-                };
-
-                if (savedAnswer) {
-                    // RENDER READ-ONLY VIEW + HIDDEN FORM
-                    const qnaHtml = step.questions.map((q, qIdx) => {
-                        const userAns = savedAnswer[q.id] || '-';
-                        return `
-                            <div class="mb-4 text-sm">
-                                <p class="text-slate-300 font-bold mb-1">${qIdx + 1}. ${q.text}</p>
-                                <div class="bg-slate-900/50 p-3 rounded border border-slate-700/50 text-emerald-400 font-mono whitespace-pre-wrap">${userAns}</div>
-                            </div>
-                         `;
-                    }).join('');
-
-                    extensionHtml = `
-                        <div id="read-only-${step.id}" class="bg-slate-800/50 p-4 rounded-xl border border-emerald-500/30 mt-4">
-                            <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-check-double text-emerald-400"></i>
-                                    <h5 class="font-bold text-emerald-400">Tugas Selesai</h5>
-                                </div>
-                                <button onclick="toggleEditMode('${step.id}', true)" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded transition-colors">
-                                    <i class="fa-solid fa-pen mr-1"></i> Edit
-                                </button>
-                            </div>
-                            ${qnaHtml}
-                        </div>
-                        ${generateFormHtml(true)} 
-                    `;
-                } else {
-                    // RENDER INPUT FORM ONLY
-                    extensionHtml = generateFormHtml(false);
-                }
-            }
-
-            // Auto check override for question steps
-            const disableCheckbox = isQuestionStep ? 'disabled opacity-50 cursor-not-allowed' : '';
-
-            // Media Logic (No Changes)
-            switch (step.type) {
-                case 'youtube':
-                    icon = 'fa-play'; color = 'bg-red-500';
-                    const videoId = getYoutubeId(step.content);
-                    if (videoId) mediaContent = `<div class="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden border border-slate-700 mt-3 shadow-lg"><iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`;
-                    else mediaContent = `<a href="${step.content}" target="_blank" class="text-blue-400 hover:underline mt-2 block text-sm">Buka Link Video</a>`;
-                    break;
-                case 'pdf':
-                    icon = 'fa-file-pdf'; color = 'bg-red-400';
-                    let pdfUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
-                    if (step.start_page) pdfUrl += `&start=${step.start_page}`;
-                    if (step.end_page) pdfUrl += `&end=${step.end_page}`;
-                    mediaContent = `<div class="mt-3"><iframe src="${pdfUrl}" class="w-full h-[600px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
-                    break;
-                case 'ppt':
-                    const isPdf = step.content.toLowerCase().includes('.pdf');
-                    icon = 'fa-file-powerpoint'; color = 'bg-orange-500';
-                    if (isPdf) {
-                        let pptUrl = `viewer.html?file=${encodeURIComponent(step.content)}&embed=true&ai=false`;
-                        if (step.start_page) pptUrl += `&start=${step.start_page}`;
-                        if (step.end_page) pptUrl += `&end=${step.end_page}`;
-                        mediaContent = `<div class="mt-3"><iframe src="${pptUrl}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-slate-900" frameborder="0"></iframe></div>`;
-                    } else {
-                        mediaContent = `<div class="mt-3"><iframe src="${step.content}" class="w-full h-[500px] rounded-lg border border-slate-700 bg-white" frameborder="0"></iframe></div>`;
-                    }
-                    break;
-                case 'task':
-                    icon = 'fa-clipboard-list'; color = 'bg-emerald-500';
-                    mediaContent = `<div class="mt-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg text-sm text-slate-300">${step.content.replace(/\n/g, '<br>')}</div>`;
-                    break;
-                case 'quiz':
-                    icon = 'fa-question-circle'; color = 'bg-purple-500';
-                    mediaContent = `<div class="mt-3 space-y-3">${step.content ? `<div class="rounded overflow-hidden border border-slate-700"><img src="${step.content}" class="w-full object-contain max-h-[400px] bg-black"></div>` : ''}${(!step.questions || step.questions.length === 0) ? `<div class="bg-slate-800 p-4 rounded border border-slate-700 text-xs text-slate-400">Kuis Legacy (Tidak Support Auto-Check)</div>` : ''}</div>`;
-                    break;
-            }
-
-            return `
-                <div class="timeline-item">
-                    <div class="timeline-dot ${color} flex items-center justify-center text-[10px] text-white shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                        <i class="fa-solid ${icon}"></i>
-                    </div>
-                    <div class="bg-slate-800/80 border border-slate-700/50 p-5 rounded-xl hover:border-slate-600 transition-colors shadow-lg">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <h4 class="font-bold text-slate-100 text-lg leading-tight mb-1">${step.title}</h4>
-                                <span class="text-xs uppercase font-bold tracking-wider text-slate-500">${step.type}</span>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <input type="checkbox" id="check-${step.id}" class="step-checkbox ${disableCheckbox}" 
-                                    ${isComplete ? 'checked' : ''} 
-                                    ${disableCheckbox ? 'disabled' : ''}
-                                    onchange="toggleStepCompletion('${step.id}', this.checked)">
-                                <label for="check-${step.id}" class="text-[10px] text-slate-400 mt-1 cursor-pointer ${disableCheckbox ? 'opacity-50' : ''}">Selesai</label>
-                            </div>
-                        </div>
-                        ${mediaContent}
-                        ${extensionHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Helper: Toggle Edit Mode
-        function toggleEditMode(stepId, show) {
-            const readOnlyDiv = document.getElementById(`read-only-${stepId}`);
-            const formDiv = document.getElementById(`form-${stepId}`);
-
-            if (show) {
-                if (readOnlyDiv) readOnlyDiv.classList.add('hidden');
-                if (formDiv) formDiv.classList.remove('hidden');
+                // Check Prev/Next
+                checkSiblings(modul.week);
             } else {
-                if (readOnlyDiv) readOnlyDiv.classList.remove('hidden');
-                if (formDiv) formDiv.classList.add('hidden');
+                document.querySelector('main').innerHTML = '<div class="text-center p-10 text-red-500">Materi tidak ditemukan.</div>';
             }
         }
 
-        // Helper Functions (Copy specific logic as needed or ensure global availability if common)
-        function getYoutubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+        async function checkSiblings(currentWeek) {
+            const { data: next } = await supabaseClient.from('modules').select('id').gt('week', currentWeek).order('week').limit(1).single();
+            const { data: prev } = await supabaseClient.from('modules').select('id').lt('week', currentWeek).order('week', { ascending: false }).limit(1).single();
+
+            const nextBtn = document.getElementById('next-modul');
+            const prevBtn = document.getElementById('prev-modul');
+
+            if (next) nextBtn.onclick = () => window.location.href = `detail_modul.html?id=${next.id}`;
+            else nextBtn.disabled = true;
+
+            if (prev) prevBtn.onclick = () => window.location.href = `detail_modul.html?id=${prev.id}`;
+            else prevBtn.disabled = true;
         }
 
-        async function submitStepAnswers(moduleId, stepId) {
-            // Re-implement or ensure available 
-            // (This is duplicated from modul.html - ideally should be in a utility file but keeping self-contained for speed)
-            const inputs = document.querySelectorAll(`.ans-input-${stepId}`);
-            const answers = {};
-            let hasAnswer = false;
-            inputs.forEach(input => {
-                answers[input.dataset.questionId] = input.value;
-                if (input.value.trim()) hasAnswer = true;
-            });
-
-            if (!hasAnswer) return alert('Mohon isi minimal satu jawaban.');
-
-            // 1. Save Answers
-            const { error } = await supabaseClient.from('student_answers').upsert({
-                student_nim: userNim,
-                module_id: moduleId,
-                step_id: stepId,
-                answer: JSON.stringify(answers),
-                score: 0
-            }, { onConflict: 'student_nim, step_id' });
-
-            if (error) {
-                alert('Gagal menyimpan jawaban: ' + error.message);
-                return;
-            }
-
-            // 2. Mark as Complete (Auto-check)
-            await toggleStepCompletion(stepId, true, false);
-
-            alert('Jawaban berhasil disimpan!');
-
-            // Reload to show static view
-            loadModuleDetail();
-        }
-        async function submitQuizAnswer(moduleId, stepId, answer) {
-            const { error } = await supabaseClient.from('student_answers').insert([{
-                student_nim: userNim,
-                module_id: moduleId,
-                step_id: stepId,
-                answer: answer
-            }]);
-            if (error) alert('Gagal: ' + error.message); else alert('Tersimpan!');
-        }
-
-        // Init
-        setTimeout(init, 500); // Wait for config.js
+        document.addEventListener('DOMContentLoaded', loadDetail);
     </script>
 </body>
 

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menu Lainnya | FisikaLab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B', sub: '#64748B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24">
+
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Menu Lainnya</h1>
+        <p class="text-sm text-slate-500 mt-1">Akses semua fitur lainnya disini.</p>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="px-6 py-6 grid grid-cols-2 gap-4">
+
+        <!-- Profil (Moved here) -->
+        <a href="profil.html"
+            class="col-span-2 bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+            <div id="user-avatar"
+                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-lg">
+                U
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-slate-900" id="user-name">Pengguna</h3>
+                <p class="text-xs text-slate-400">Lihat Profil</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+        </a>
+
+        <!-- Chatbot -->
+        <a href="chatbot.html"
+            class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Chatbot AI</span>
+        </a>
+
+        <!-- Referensi -->
+        <a href="buku.html"
+            class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Referensi</span>
+        </a>
+
+        <!-- Bank Soal -->
+        <a href="bank_soal.html"
+            class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Bank Soal</span>
+        </a>
+
+        <!-- Presensi -->
+        <a href="presensi.html"
+            class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Presensi</span>
+        </a>
+
+        <!-- Panduan -->
+        <a href="#"
+            class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Panduan</span>
+        </a>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <a href="admin.html" id="admin-link"
+            class="hidden bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-700 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-slate-700 text-white flex items-center justify-center text-xl">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <span class="font-bold text-sm text-white">Admin Panel</span>
+        </a>
+
+    </div>
+
+    <div class="px-6 mt-4">
+        <button onclick="logout()"
+            class="w-full py-3 rounded-xl bg-red-50 text-red-500 font-bold text-sm border border-red-100 hover:bg-red-100 transition-colors">
+            <i class="fa-solid fa-right-from-bracket mr-2"></i> Keluar Aplikasi
+        </button>
+        <p class="text-center text-xs text-slate-300 mt-6">Versi 2.0.0 (Mobile First)</p>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <a href="index.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Beranda</span>
+        </a>
+        <a href="tugas.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-list-check text-xl"></i>
+            <span class="text-[10px] font-medium">Tugas</span>
+        </a>
+        <a href="modul.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span class="text-[10px] font-medium">Jelajah</span>
+        </a>
+        <a href="keaktifan.html"
+            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[10px] font-medium">Peringkat</span>
+        </a>
+        <a href="lainnya.html" class="flex flex-col items-center gap-1 text-primary-500">
+            <i class="fa-solid fa-bars text-xl"></i>
+            <span class="text-[10px] font-bold">Lainnya</span>
+        </a>
+    </nav>
+
+    <script src="config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = localStorage.getItem('user_session');
+            if (session) {
+                const user = JSON.parse(session);
+                document.getElementById('user-name').innerText = user.nama || 'Pengguna';
+
+                const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
+                document.getElementById('user-avatar').innerText = initials;
+
+                // Check Admin Access (Faldhi or Role Admin)
+                if (user.role === 'admin' || (user.nama && user.nama.toLowerCase().includes('faldhi'))) {
+                    document.getElementById('admin-link').classList.remove('hidden');
+                }
+            }
+        });
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('user_session');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

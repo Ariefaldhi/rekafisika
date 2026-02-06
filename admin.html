@@ -3,485 +3,331 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | KawanFismat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard | FisikaLab</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: { navy: { 900: '#0f172a' }, accent: { 400: '#22d3ee', 500: '#06b6d4' } }
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B' }
+                    }
                 }
             }
         }
     </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .sidebar-active {
+            background-color: #EFF6FF;
+            color: #2563EB;
+            font-weight: 600;
         }
 
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .sidebar-item {
+            color: #64748B;
+            transition: all 0.2s;
         }
 
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        /* Tab Active State */
-        .tab-active {
-            background-color: rgba(6, 182, 212, 0.1);
-            border-left: 3px solid #06b6d4;
-            color: #22d3ee;
+        .sidebar-item:hover {
+            background-color: #F1F5F9;
+            color: #1E293B;
         }
     </style>
-    <script>
-            (function () {
-                const session = localStorage.getItem('user_session');
-                if (!session) {
-                    window.location.href = 'login.html';
-                } else {
-                    try {
-                        const user = JSON.parse(session);
-                        if (user.role !== 'admin') {
-                            window.location.href = 'index.html';
-                        }
-                    } catch (e) {
-                        localStorage.removeItem('user_session');
-                        window.location.href = 'login.html';
-                    }
-                }
-            })();
-    </script>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen flex flex-col selection:bg-accent-500/30">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen flex selection:bg-primary-500/30">
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden glass">
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white z-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+        <h1 class="font-extrabold text-lg text-slate-900">AdminPanel</h1>
+        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')"
+            class="text-slate-500">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
     </div>
 
     <!-- Sidebar -->
-    <aside id="admin-sidebar"
-        class="w-64 bg-slate-900 border-r border-slate-800 fixed h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="p-6 h-full flex flex-col">
-            <!-- Logo -->
-            <div class="flex items-center gap-3 mb-10 px-2">
-                <i class="fa-solid fa-atom text-accent-400 text-2xl"></i>
-                <span class="font-bold text-xl tracking-wide text-white">AdminPanel</span>
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-100 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 shadow-xl md:shadow-none pt-20 md:pt-0">
+        <div class="h-full flex flex-col p-6">
+            <div class="hidden md:flex items-center gap-2 mb-10 px-2">
+                <i class="fa-solid fa-atom text-primary-600 text-2xl"></i>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">FisikaLab</span>
             </div>
 
-            <!-- Sidebar Menu -->
-            <nav class="space-y-2">
-                <button onclick="showSection('dashboard')"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-left group">
-                    <i class="fa-solid fa-chart-line w-6 text-center"></i>
-                    <span class="font-medium">Dashboard</span>
+            <nav class="space-y-1 overflow-y-auto max-h-[calc(100vh-150px)]">
+                <button onclick="showSection('dashboard')" id="nav-dashboard"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
                 </button>
-                <button onclick="showSection('mahasiswa')"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-left group">
-                    <i class="fa-solid fa-users w-6 text-center"></i>
-                    <span class="font-medium">Kelola Mahasiswa</span>
+                <button onclick="showSection('tasks')" id="nav-tasks"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i> Tugas
                 </button>
-                <button onclick="showSection('presensi')"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-left group">
-                    <i class="fa-solid fa-clipboard-check w-6 text-center"></i>
-                    <span class="font-medium">Presensi</span>
+                <button onclick="showSection('modules')" id="nav-modules"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-book w-5 text-center"></i> Modul
                 </button>
-                <button onclick="showSection('modul')"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-left group">
-                    <i class="fa-solid fa-book-open w-6 text-center"></i>
-                    <span class="font-medium">Manajemen Modul</span>
+                <button onclick="showSection('news')" id="nav-news"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-bullhorn w-5 text-center"></i> Berita
                 </button>
+                <button onclick="showSection('students')" id="nav-students"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Mahasiswa
+                </button>
+                <button onclick="showSection('points')" id="nav-points"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-star w-5 text-center"></i> Poin
+                </button>
+                <button onclick="showSection('presence')" id="nav-presence"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-clipboard-user w-5 text-center"></i> Presensi
+                </button>
+            </nav>
 
-                <!-- Divider -->
-                <div class="h-px bg-slate-700 my-4 mx-2"></div>
-
+            <div class="mt-auto border-t border-slate-100 pt-6">
                 <a href="index.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-accent-400 hover:bg-slate-800/50 transition-all">
-                    <i class="fa-solid fa-arrow-left w-6 text-center"></i>
-                    <span class="font-medium">Kembali ke Web</span>
+                    class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-primary-600 font-medium transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke App
                 </a>
-
-                <button onclick="logout()"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-900/20 text-red-500 hover:text-red-400 transition-all text-left group mt-auto">
-                    <i class="fa-solid fa-right-from-bracket w-6 text-center"></i>
-                    <span class="font-medium">Logout</span>
-                </button>
+            </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 md:ml-64 p-8">
-        <!-- Header Mobile -->
-        <div class="md:hidden flex justify-between items-center mb-6">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="text-slate-300 hover:text-white">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-                <span class="font-bold text-xl text-red-400">Admin Panel</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <button onclick="logout()" class="text-sm text-red-400">Logout</button>
-            </div>
-        </div>
+    <main class="flex-1 md:ml-64 p-6 pt-24 md:pt-8 bg-slate-50/50 min-h-screen">
 
-        <!-- Section: Manajemen Tugas -->
-        <section id="section-tugas" class="space-y-6">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Tugas</h1>
+        <!-- SEC: Dashboard -->
+        <section id="sec-dashboard" class="space-y-6 animate-fade-in">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
+                <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
+            </header>
 
-            <!-- Form Buat/Edit Tugas -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h2 class="font-semibold mb-4 text-accent-400" id="form-title">Buat Tugas Baru</h2>
-                <form onsubmit="handleAssignmentSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="t-id"> <!-- Hidden ID for Edit Mode -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-users"></i></div>
+                    <h3 class="text-3xl font-black text-slate-900" id="stat-students">0</h3>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Mahasiswa</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div
+                        class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-check-circle"></i></div>
+                    <h3 class="text-3xl font-black text-slate-900" id="stat-active">0</h3>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Tugas Aktif</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEC: Tasks -->
+        <section id="sec-tasks" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Tugas</h2>
+
+            <!-- Form -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-700" id="task-form-title">Buat Tugas Baru</h3>
+                    <button type="button" onclick="resetTaskForm()"
+                        class="text-xs text-slate-400 hover:text-primary-600">Reset Form</button>
+                </div>
+                <form onsubmit="handleTaskSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="t-id">
                     <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Judul Tugas</label>
-                        <input type="text" id="t-title"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                        <input id="t-title" type="text" placeholder="Judul Tugas"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             required>
                     </div>
                     <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi</label>
-                        <textarea id="t-desc"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
+                        <textarea id="t-desc" placeholder="Deskripsi Tugas"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-24 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             required></textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Link dengan Modul (Opsional)</label>
-                        <select id="t-linked-module"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500 text-slate-300">
-                            <option value="">-- Tidak Terhubung --</option>
-                            <!-- Populated by JS -->
-                        </select>
-                        <p class="text-[10px] text-slate-500 mt-1">*Jika dipilih, tugas akan otomatis selesai saat
-                            mahasiswa menyelesaikan modul ini.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Link Pengerjaan / Info</label>
-                            <input type="text" id="t-sub"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
-                                placeholder="https://..." required>
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Deadline</label>
-                            <input type="datetime-local" id="t-deadline"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500 text-slate-100"
-                                required>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tugas (untuk Leaderboard
-                            Kerajinan)</label>
-                        <input type="number" id="t-points" value="10"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="t-deadline" type="datetime-local"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             required>
+                        <input id="t-link" type="text" placeholder="Link (Opsional)"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" id="btn-submit-task"
-                            class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
-                            Publish Tugas
-                        </button>
-                        <button type="button" onclick="resetTaskForm()" id="btn-cancel-edit"
-                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
-                            Batal Edit
-                        </button>
+                        <button type="submit" id="btn-save-task"
+                            class="flex-1 bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Simpan
+                            Tugas</button>
                     </div>
                 </form>
             </div>
 
-            <!-- List Tugas -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h2 class="font-semibold mb-4 text-slate-300">Daftar Tugas Aktif</h2>
-                <div id="admin-tugas-list" class="space-y-2">
-                    <!-- Injected by JS -->
-                </div>
+            <!-- List -->
+            <div id="task-list" class="space-y-3">
+                <!-- JS Injected -->
             </div>
         </section>
 
+        <!-- SEC: Modules -->
+        <section id="sec-modules" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Modul</h2>
 
-
-        <!-- Section: Manajemen Berita (News) -->
-        <section id="section-berita" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Berita</h1>
-
-            <!-- Form Buat Berita -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
-                <h2 class="font-semibold mb-4 text-accent-400" id="news-form-title">Buat Berita / Pengumuman
-                </h2>
-                <form onsubmit="handleAnnouncementSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="n-id"> <!-- Hidden ID -->
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Judul Berita</label>
-                        <input type="text" id="n-title"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 focus:outline-none focus:border-accent-500"
-                            required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Tipe</label>
-                            <select id="n-type" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
-                                <option value="info">Info (Biru)</option>
-                                <option value="warning">Penting (Kuning)</option>
-                                <option value="urgent">Mendesak (Merah)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Penulis</label>
-                            <input type="text" id="n-author"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="Tim Dosen"
-                                required>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Konten Berita</label>
-                        <textarea id="n-content"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-24 focus:outline-none focus:border-accent-500"
-                            required></textarea>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="btn-submit-news"
-                            class="bg-accent-500 hover:bg-accent-600 text-white px-6 py-2 rounded font-medium shadow-lg shadow-accent-500/20">
-                            Posting Berita
-                        </button>
-                        <button type="button" onclick="resetNewsForm()" id="btn-cancel-news"
-                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">
-                            Batal Edit
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- List Berita -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h2 class="font-semibold mb-4 text-slate-300">Daftar Berita Aktif</h2>
-                <div id="admin-news-list" class="space-y-3">
-                    <!-- Injected -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Manajemen Mahasiswa -->
-        <section id="section-mahasiswa" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Mahasiswa</h1>
-
-            <!-- Add Student Form -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
-                <h2 class="font-semibold mb-4 text-emerald-400">Tambah Mahasiswa</h2>
-                <form onsubmit="addStudent(event)" class="flex gap-4 items-end">
-                    <div class="flex-1">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">NIM</label>
-                        <input type="text" id="s-nim"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <div class="flex-[2]">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Nama Lengkap</label>
-                        <input type="text" id="s-name"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Kode Akses</label>
-                        <input type="text" id="s-code"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                    </div>
-                    <button type="submit"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded mb-px">Tambah</button>
-                </form>
-            </div>
-
-            <!-- Card 1 -->
-            <div class="glass-card p-6 rounded-xl border-l-4 border-accent-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-accent-500/10 rounded-lg text-accent-400">
-                        <i class="fa-solid fa-users text-2xl"></i>
-                    </div>
-                    <span class="text-xs font-bold bg-accent-500/20 text-accent-300 px-2 py-1 rounded">TOTAL</span>
-                </div>
-                <h3 class="text-3xl font-bold text-white mb-1" id="total-students">0</h3>
-                <p class="text-slate-400 text-sm">Mahasiswa Terdaftar</p>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="glass-card p-6 rounded-xl border-l-4 border-emerald-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
-                        <i class="fa-solid fa-clipboard-user text-2xl"></i>
-                    </div>
-                    <span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">HARI INI</span>
-                </div>
-                <h3 class="text-3xl font-bold text-white mb-1" id="attendance-count">0</h3>
-                <p class="text-slate-400 text-sm">Hadir Kuliah</p>
-            </div>
-        </section>
-
-        <!-- Section: Manajemen Modul -->
-        <section id="section-modul" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Modul</h1>
-
-            <!-- Form Buat/Edit Modul -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
-                <h2 class="font-semibold mb-4 text-blue-400" id="modul-form-title">Tambah Modul Baru</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-700 mb-4" id="modul-form-title">Tambah Modul</h3>
                 <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
                     <input type="hidden" id="m-id">
-                    <div class="grid grid-cols-6 gap-4">
-                        <div class="col-span-1">
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Minggu Ke-</label>
-                            <input type="number" id="m-week"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                        </div>
-                        <div class="col-span-5">
-                            <label class="block text-xs uppercase text-slate-500 mb-1">Topik / Judul</label>
-                            <input type="text" id="m-topic"
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" required>
-                        </div>
+                    <div class="grid grid-cols-4 gap-4">
+                        <input id="m-week" type="number" placeholder="Minggu Ke-"
+                            class="col-span-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            required>
+                        <input id="m-topic" type="text" placeholder="Topik / Judul"
+                            class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            required>
                     </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Deskripsi Singkat</label>
-                        <textarea id="m-desc"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 h-20"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Rumus Penting
-                            (LaTeX)</label>
-                        <input type="text" id="m-formula"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
-                            placeholder="e.g. $$E=mc^2$$">
-                    </div>
+                    <textarea id="m-desc" placeholder="Deskripsi Singkat"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-20 focus:outline-none focus:ring-2 focus:ring-primary-500/20"></textarea>
 
-                    <!-- Learning Path Builder -->
-                    <div class="border-t border-slate-700 pt-4 mt-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <label class="block text-sm font-bold text-accent-400 uppercase">Alur
-                                Pembelajaran
-                                (v2.1) <span id="step-count-badge"
-                                    class="ml-2 bg-slate-700 text-white px-2 py-0.5 rounded text-xs">0
-                                    Langkah</span></label>
-                            <button type="button" onclick="addStep()"
-                                class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded hover:bg-emerald-500/30 transition-colors">
-                                <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
-                            </button>
-                        </div>
-                        <div id="steps-container"
-                            class="space-y-3 p-4 bg-slate-900/50 rounded-lg border border-slate-800"
-                            style="max-height: 400px; overflow-y: auto;">
-                            <!-- Steps Injected Here -->
-                        </div>
-                        <div class="text-center text-slate-500 text-sm italic py-4" id="empty-steps-msg">
-                            Belum ada
-                            langkah pembelajaran.</div>
-                    </div>
-
-                    <div class="flex gap-2 pt-4">
-                        <button type="submit" id="btn-submit-modul"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">Simpan
-                            Modul</button>
-                        <button type="button" onclick="resetModulForm()" id="btn-cancel-modul"
-                            class="hidden px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-300">Batal</button>
-                    </div>
+                    <button type="submit"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/20">Simpan
+                        Modul</button>
                 </form>
             </div>
 
-            <!-- Module List -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="space-y-3" id="admin-modul-list">
-                    <!-- Injected -->
-                </div>
+            <div id="module-list" class="space-y-3">
+                <!-- JS Injected -->
             </div>
         </section>
 
-        <!-- Section: Manajemen Presensi -->
-        <section id="section-presensi" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Manajemen Presensi</h1>
+        <!-- SEC: News -->
+        <section id="sec-news" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Berita</h2>
 
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Pertemuan Ke-</label>
-                        <select id="a-meet-code" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2">
-                            <!-- JS will populate 1-1 to 16-2 -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-700 mb-4">Buat Pengumuman</h3>
+                <form onsubmit="handleNewsSubmit(event)" class="space-y-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <input id="n-title" type="text" placeholder="Judul Berita"
+                            class="col-span-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                            required>
+                        <select id="n-type"
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                            <option value="info">Info (Biru)</option>
+                            <option value="warning">Penting (Kuning)</option>
+                            <option value="urgent">Mendesak (Merah)</option>
                         </select>
                     </div>
+                    <textarea id="n-content" placeholder="Isi Pengumuman..."
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-24 focus:outline-none"
+                        required></textarea>
+                    <button type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20">Posting
+                        Berita</button>
+                </form>
+            </div>
+
+            <div id="news-list" class="space-y-3">
+                <!-- JS Injected -->
+            </div>
+        </section>
+
+        <!-- SEC: Students -->
+        <section id="sec-students" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Kelola Mahasiswa</h2>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <form onsubmit="addStudent(event)" class="flex flex-col md:flex-row gap-4">
+                    <input id="new-nim" type="text" placeholder="NIM"
+                        class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                        required>
+                    <input id="new-name" type="text" placeholder="Nama Lengkap"
+                        class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                        required>
+                    <button
+                        class="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Tambah</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">NIM</th>
+                            <th class="px-6 py-4 font-bold">Nama</th>
+                            <th class="px-6 py-4 font-bold text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list" class="divide-y divide-slate-100">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEC: Points -->
+        <section id="sec-points" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Poin Keaktifan</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 max-w-lg">
+                <form onsubmit="addPoints(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label>
+                        <select id="p-student"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                            <option>-- Loading --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah Poin</label>
+                        <input id="p-amount" type="number" value="10"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Catatan</label>
+                        <input id="p-note" type="text" placeholder="e.g. Menjawab kuis"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                    </div>
+                    <button
+                        class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20">Berikan
+                        Poin</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SEC: Presence -->
+        <section id="sec-presence" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Presensi Massal</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-4 mb-6">
+                    <label class="font-bold text-slate-700">Pertemuan Ke:</label>
+                    <select id="a-meet-code" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                        <!-- 1-1 to 16-2 -->
+                    </select>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="max-h-[60vh] overflow-y-auto border border-slate-100 rounded-xl">
                     <table class="w-full text-sm">
-                        <thead class="text-left text-slate-500 bg-slate-900">
+                        <thead class="bg-slate-50 text-slate-500 sticky top-0">
                             <tr>
-                                <th class="p-3">Nama Mahasiswa</th>
-                                <th class="p-3 text-center">Status</th>
+                                <th class="p-4 text-left">Nama</th>
+                                <th class="p-4 text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="absen-table-body" class="divide-y divide-slate-700">
-                            <!-- JS populates students -->
+                        <tbody id="presence-list" class="divide-y divide-slate-100">
+                            <!-- JS filled -->
                         </tbody>
                     </table>
                 </div>
                 <div class="mt-4 flex justify-end">
                     <button onclick="saveAttendanceBatch()"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded font-medium">Simpan
-                        Perubahan</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Input Keaktifan -->
-        <section id="section-keaktifan" class="space-y-6 hidden">
-            <h1 class="text-2xl font-bold mb-6">Input Poin Keaktifan</h1>
-
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 max-w-xl">
-                <form onsubmit="addPoints(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Pilih Mahasiswa</label>
-                        <select id="k-student"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                            <option value="">-- Cari Nama --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Poin Tambahan</label>
-                        <input type="number" id="k-points"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2" value="10" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase text-slate-500 mb-1">Keterangan /
-                            Pertanyaan</label>
-                        <input type="text" id="k-note"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2"
-                            placeholder="e.g. Bertanya tentang tensor" required>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded font-medium">Berikan
-                        Poin</button>
-                </form>
-            </div>
-
-            <!-- List Poin Log (New Feature: Edit/Delete) -->
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mt-6">
-                <h2 class="font-semibold mb-4 text-slate-300">Riwayat Poin Terakhir</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50">
-                            <tr>
-                                <th class="px-4 py-3">Nama</th>
-                                <th class="px-4 py-3">Poin</th>
-                                <th class="px-4 py-3">Catatan</th>
-                                <th class="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="poin-log-body" class="divide-y divide-slate-700">
-                            <!-- Injected -->
-                        </tbody>
-                    </table>
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Simpan
+                        Presensi</button>
                 </div>
             </div>
         </section>
@@ -493,713 +339,293 @@
     <script>
         // --- Navigation ---
         function showSection(id) {
-            ['tugas', 'berita', 'presensi', 'keaktifan', 'mahasiswa', 'modul'].forEach(sec => {
-                document.getElementById(`section-${sec}`).classList.add('hidden');
-                document.getElementById(`nav-${sec}`).classList.remove('tab-active', 'text-accent-400');
-                document.getElementById(`nav-${sec}`).classList.add('text-slate-400');
-            });
-            document.getElementById(`section-${id}`).classList.remove('hidden');
-            document.getElementById(`nav-${id}`).classList.add('tab-active');
-            document.getElementById(`nav-${id}`).classList.remove('text-slate-400');
-        }
-
-        function logout() {
-            localStorage.removeItem('user_session');
-            window.location.href = 'login.html';
-        }
-
-        // --- Logic ---
-        function toggleSidebar() {
-            const sidebar = document.getElementById('admin-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-
-            if (sidebar.classList.contains('-translate-x-full')) {
-                // Open
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            } else {
-                // Close
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            }
-        }
-
-        let allStudents = [];
-
-        async function initAdmin() {
-            // Populate Meeting Codes
-            const meetSelect = document.getElementById('a-meet-code');
-            for (let w = 1; w <= 16; w++) {
-                for (let s = 1; s <= 2; s++) {
-                    const opt = document.createElement('option');
-                    opt.value = `${w}-${s}`;
-                    opt.text = `Minggu ${w} - Pertemuan ${s}`;
-                    meetSelect.appendChild(opt);
+            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence'].forEach(s => {
+                const sec = document.getElementById('sec-' + s);
+                const nav = document.getElementById('nav-' + s);
+                if (sec) sec.classList.add('hidden');
+                if (nav) {
+                    nav.classList.remove('sidebar-active');
+                    nav.classList.add('sidebar-item');
                 }
+            });
+
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + id);
+            if (activeNav) {
+                activeNav.classList.remove('sidebar-item');
+                activeNav.classList.add('sidebar-active');
             }
 
-            // Fetch Students & Modules for Selects
-            const { data: students } = await supabaseClient.from('students').select('*').order('name');
-            if (students) {
-                allStudents = students;
-                renderAbsenTable();
-
-                const kSelect = document.getElementById('k-student');
-                students.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.nim;
-                    opt.text = `${s.name} (${s.nim})`;
-                    kSelect.appendChild(opt);
-                });
-            }
-
-            // Fetch Modules for Assignment Link
-            const { data: modules } = await supabaseClient.from('modules').select('id, topic, week').order('week');
-            if (modules) {
-                const tLinkSelect = document.getElementById('t-linked-module');
-                modules.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.text = `Minggu ${m.week}: ${m.topic}`;
-                    tLinkSelect.appendChild(opt);
-                });
-            }
-
-            loadAssignmentsAdmin();
-            loadAnnouncementsAdmin();
-            loadStudentsAdmin();
-            loadModulesAdmin();
-            loadPointLogs();
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         }
 
-        // ... (News Logic omitted for brevity, logic remains same)
+        // --- INIT ---
+        async function init() {
+            if (!window.supabaseClient) return;
 
-        // ... [Assignments] ...
-        async function handleAssignmentSubmit(e) {
+            // Stats
+            const { count: studentCount } = await supabaseClient.from('students').select('*', { count: 'exact' });
+            document.getElementById('stat-students').innerText = studentCount || 0;
+            const { count: taskCount } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
+            document.getElementById('stat-active').innerText = taskCount || 0;
+
+            loadStudents();
+            loadTasks();
+            loadModules();
+            loadNews();
+            initPresenceOptions();
+
+            showSection('dashboard');
+        }
+
+        // --- STUDENTS ---
+        let allStudents = [];
+        async function loadStudents() {
+            const { data } = await supabaseClient.from('students').select('*').order('name');
+            allStudents = data || [];
+
+            // Render Table
+            const tbody = document.getElementById('student-list');
+            tbody.innerHTML = allStudents.map(s => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-slate-500 font-mono text-xs">${s.nim}</td>
+                    <td class="px-6 py-4 font-bold text-slate-700">${s.name}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Select Options (Points)
+            const pSelect = document.getElementById('p-student');
+            pSelect.innerHTML = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}">${s.name}</option>`).join('');
+
+            // Render Presence Table
+            renderPresenceTable();
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            const nim = document.getElementById('new-nim').value;
+            const name = document.getElementById('new-name').value;
+            const { error } = await supabaseClient.from('students').insert([{ nim, name, access_code: nim }]);
+            if (!error) { e.target.reset(); loadStudents(); updateStats(); alert('Mahasiswa ditambahkan'); }
+            else alert(error.message);
+        }
+
+        async function deleteStudent(nim) {
+            if (!confirm('Hapus users?')) return;
+            await supabaseClient.from('students').delete().eq('nim', nim);
+            loadStudents();
+        }
+
+        // --- TASKS ---
+        async function loadTasks() {
+            const { data } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
+            const list = document.getElementById('task-list');
+            list.innerHTML = data.map(t => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                             <h4 class="font-bold text-slate-700">${t.title}</h4>
+                             <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}">${t.is_active ? 'Active' : 'Draft'}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-2 line-clamp-1">${t.description}</p>
+                        <p class="text-[10px] font-mono text-slate-500"><i class="fa-regular fa-clock mr-1"></i> ${new Date(t.deadline).toLocaleString()}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editTask('${t.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handleTaskSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('t-id').value;
-            const title = document.getElementById('t-title').value;
-            const desc = document.getElementById('t-desc').value;
-            const sub = document.getElementById('t-sub').value;
-            const deadline = document.getElementById('t-deadline').value;
-            const points = document.getElementById('t-points').value;
-            const linkedModule = document.getElementById('t-linked-module').value || null;
-
             const payload = {
-                title,
-                description: desc,
-                submission_link: sub,
-                deadline: new Date(deadline).toISOString(),
-                is_active: true,
-                points: parseInt(points) || 10,
-                linked_module_id: linkedModule
+                title: document.getElementById('t-title').value,
+                description: document.getElementById('t-desc').value,
+                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                submission_link: document.getElementById('t-link').value,
+                is_active: true
             };
 
             let error;
-            if (id) {
-                const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id);
-                error = err;
-            } else {
-                const { error: err } = await supabaseClient.from('assignments').insert([payload]);
-                error = err;
-            }
+            if (id) { const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id); error = err; }
+            else { const { error: err } = await supabaseClient.from('assignments').insert([payload]); error = err; }
 
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert(id ? 'Tugas berhasil diupdate!' : 'Tugas berhasil dibuat!');
-                resetTaskForm();
-                loadAssignmentsAdmin();
-            }
+            if (!error) { resetTaskForm(); loadTasks(); updateStats(); }
+            else alert(error.message);
         }
 
-        async function editAss(id) {
+        async function editTask(id) {
             const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
             if (data) {
                 document.getElementById('t-id').value = data.id;
                 document.getElementById('t-title').value = data.title;
                 document.getElementById('t-desc').value = data.description;
-                document.getElementById('t-sub').value = data.submission_link || '';
-                document.getElementById('t-points').value = data.points || 10;
-                document.getElementById('t-linked-module').value = data.linked_module_id || '';
-
+                document.getElementById('t-link').value = data.submission_link || '';
                 const d = new Date(data.deadline);
                 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
                 document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
 
-                document.getElementById('form-title').innerText = 'Edit Tugas';
-                document.getElementById('btn-submit-task').innerText = 'Simpan Perubahan';
-                document.getElementById('btn-cancel-edit').classList.remove('hidden');
-                document.getElementById('t-title').focus();
+                document.getElementById('task-form-title').innerText = 'Edit Tugas';
+                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('sec-tasks').scrollIntoView();
+            }
+        }
+
+        async function deleteTask(id) {
+            if (confirm('Hapus tugas?')) {
+                await supabaseClient.from('assignments').delete().eq('id', id);
+                loadTasks();
             }
         }
 
         function resetTaskForm() {
-            document.querySelector('#section-tugas form').reset();
+            document.querySelector('#sec-tasks form').reset();
             document.getElementById('t-id').value = '';
-            document.getElementById('t-points').value = '10';
-            document.getElementById('t-linked-module').value = '';
-            document.getElementById('form-title').innerText = 'Buat Tugas Baru';
-            document.getElementById('btn-submit-task').innerText = 'Publish Tugas';
-            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('task-form-title').innerText = 'Buat Tugas Baru';
+            document.getElementById('btn-save-task').innerText = 'Simpan Tugas';
         }
 
-        // Student Management Logic
-        async function loadStudentsAdmin() {
-            const { data } = await supabaseClient.from('students').select('*').order('name');
-            const tbody = document.getElementById('student-table-body');
-            tbody.innerHTML = data.map(s => `
-                <tr class="hover:bg-slate-800/50">
-                    <td class="px-4 py-3 font-mono text-slate-300">${s.nim}</td>
-                    <td class="px-4 py-3 font-bold text-white">${s.name}</td>
-                    <td class="px-4 py-3 font-mono text-emerald-400 tracking-wider">${s.access_code}</td>
-                    <td class="px-4 py-3 text-right">
-                         <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
+        // --- MODULES ---
+        async function loadModules() {
+            const { data } = await supabaseClient.from('modules').select('*').order('week');
+            const list = document.getElementById('module-list');
+            list.innerHTML = data.map(m => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded">Minggu ${m.week}</span>
+                        <h4 class="font-bold text-slate-700 mt-2">${m.topic}</h4>
+                    </div>
+                    <button onclick="deleteModule('${m.id}')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>
+             `).join('');
+        }
+
+        async function handleModuleSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                week: document.getElementById('m-week').value,
+                topic: document.getElementById('m-topic').value,
+                description: document.getElementById('m-desc').value
+            };
+            const { error } = await supabaseClient.from('modules').insert([payload]);
+            if (!error) { e.target.reset(); loadModules(); }
+            else alert(error.message);
+        }
+
+        async function deleteModule(id) {
+            if (confirm('Hapus modul?')) {
+                await supabaseClient.from('modules').delete().eq('id', id);
+                loadModules();
+            }
+        }
+
+        // --- NEWS ---
+        async function loadNews() {
+            const { data } = await supabaseClient.from('announcements').select('*').order('created_at', { ascending: false });
+            document.getElementById('news-list').innerHTML = data.map(n => `
+                 <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group">
+                     <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                     <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500">${n.type}</span>
+                     <h4 class="font-bold text-slate-800 mt-2">${n.title}</h4>
+                     <p class="text-xs text-slate-500 mt-1">${n.content}</p>
+                 </div>
             `).join('');
         }
 
-        async function addStudent(e) {
+        async function handleNewsSubmit(e) {
             e.preventDefault();
-            const nim = document.getElementById('s-nim').value;
-            const name = document.getElementById('s-name').value;
-            const code = document.getElementById('s-code').value;
+            const payload = {
+                title: document.getElementById('n-title').value,
+                type: document.getElementById('n-type').value,
+                content: document.getElementById('n-content').value,
+                author: 'Admin'
+            };
+            await supabaseClient.from('announcements').insert([payload]);
+            e.target.reset();
+            loadNews();
+            alert('Berita diposting');
+        }
 
-            const { error } = await supabaseClient.from('students').insert([{ nim, name, access_code: code }]);
-
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert('Mahasiswa berhasil ditambahkan.');
-                e.target.reset();
-                loadStudentsAdmin();
-                initAdmin(); // Refresh helper lists
+        async function deleteNews(id) {
+            if (confirm('Hapus berita?')) {
+                await supabaseClient.from('announcements').delete().eq('id', id);
+                loadNews();
             }
         }
 
-        async function deleteStudent(nim) {
-            if (confirm(`Hapus mahasiswa NIM ${nim}?`)) {
-                await supabaseClient.from('students').delete().eq('nim', nim);
-                loadStudentsAdmin();
+        // --- POINTS ---
+        async function addPoints(e) {
+            e.preventDefault();
+            const nim = document.getElementById('p-student').value;
+            if (!nim) return alert('Pilih mahasiswa');
+            const payload = {
+                student_nim: nim,
+                points: document.getElementById('p-amount').value,
+                note: document.getElementById('p-note').value
+            };
+            await supabaseClient.from('participation_logs').insert([payload]);
+            e.target.reset();
+            alert('Poin ditambahkan');
+        }
+
+        // --- PRESENCE ---
+        function initPresenceOptions() {
+            const sel = document.getElementById('a-meet-code');
+            for (let w = 1; w <= 16; w++) {
+                sel.innerHTML += `<option value="${w}-1">Minggu ${w} - Sesi 1</option>`;
+                sel.innerHTML += `<option value="${w}-2">Minggu ${w} - Sesi 2</option>`;
             }
         }
 
-        async function deleteAss(id) {
-            if (confirm('Hapus tugas ini?')) {
-                await supabaseClient.from('assignments').delete().eq('id', id);
-                loadAssignmentsAdmin();
-            }
-        }
-
-        // 2. Attendance Logic
-        function renderAbsenTable() {
-            const tbody = document.getElementById('absen-table-body');
+        function renderPresenceTable() {
+            const tbody = document.getElementById('presence-list');
             tbody.innerHTML = allStudents.map(s => `
                 <tr>
-                    <td class="p-3 border-b border-slate-700">${s.name}</td>
-                    <td class="p-3 border-b border-slate-700 text-center">
-                        <select class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs absen-input" data-nim="${s.nim}">
-                            <option value="">- Belum Input -</option>
+                    <td class="p-3 border-b border-slate-50 text-slate-700">${s.name}</td>
+                    <td class="p-3 border-b border-slate-50 text-center">
+                         <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1" data-nim="${s.nim}">
+                            <option value="">-</option>
                             <option value="Hadir">Hadir</option>
                             <option value="Sakit">Sakit</option>
                             <option value="Izin">Izin</option>
                             <option value="Alfa">Alfa</option>
-                        </select>
+                         </select>
                     </td>
                 </tr>
             `).join('');
         }
 
         async function saveAttendanceBatch() {
-            const meetingCode = document.getElementById('a-meet-code').value;
+            const code = document.getElementById('a-meet-code').value;
             const inputs = document.querySelectorAll('.absen-input');
             const upserts = [];
-
-            inputs.forEach(input => {
-                if (input.value) {
-                    upserts.push({
-                        student_nim: input.dataset.nim,
-                        meeting_code: meetingCode,
-                        status: input.value
-                    });
+            inputs.forEach(i => {
+                if (i.value) {
+                    upserts.push({ student_nim: i.dataset.nim, meeting_code: code, status: i.value });
                 }
             });
-
-            const { error } = await supabaseClient.from('attendance_logs').upsert(upserts, { onConflict: 'student_nim, meeting_code' });
-
-            if (error) alert('Gagal menyimpan: ' + error.message);
-            else alert('Presensi berhasil disimpan!');
-        }
-
-        // 3. Participation Logic
-        async function addPoints(e) {
-            e.preventDefault();
-            const nim = document.getElementById('k-student').value;
-            const pts = document.getElementById('k-points').value;
-            const note = document.getElementById('k-note').value;
-
-            if (!nim) return alert('Pilih mahasiswa dulu!');
-
-            const { error } = await supabaseClient.from('participation_logs').insert([{
-                student_nim: nim,
-                points: parseInt(pts),
-                note: note
-            }]);
-
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert('Poin berhasil ditambahkan!');
-                e.target.reset();
-                loadPointLogs();
-            }
-        }
-
-        async function loadAssignmentsAdmin() {
-            const { data } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
-            const list = document.getElementById('admin-tugas-list');
-            if (data && list) {
-                list.innerHTML = data.map(t => `
-                    <header class="flex justify-between items-center mb-8 bg-slate-800/50 p-4 rounded-xl border border-slate-700 backdrop-blur-md sticky top-4 z-40">
-            <div>
-                <h1 class="text-2xl font-bold text-white">Selamat Datang, Admin</h1>
-                <p class="text-slate-400 text-sm">Kelola data mahasiswa dan aktivitas perkuliahan.</p>
-            </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.is_active ? 'Aktif' : 'Non-Aktif'}</span>
-                            </div>
-                            <div class="text-xs text-slate-500">${new Date(t.deadline).toLocaleDateString()}</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="editAss('${t.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteAss('${t.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function loadAnnouncementsAdmin() {
-            const list = document.getElementById('admin-news-list');
-            try {
-                const { data, error } = await supabaseClient
-                    .from('announcements')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (data && list) {
-                    list.innerHTML = data.map(n => `
-                        <div class="flex justify-between items-start bg-slate-900 border border-slate-700 p-4 rounded group">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-sm font-bold text-white">${n.title}</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded uppercase font-bold 
-                                        ${n.type === 'urgent' ? 'bg-red-500/20 text-red-400' : n.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/20 text-blue-400'}">
-                                        ${n.type}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-slate-400 line-clamp-1">${n.content}</p>
-                                <span class="text-[10px] text-slate-600">${new Date(n.created_at).toLocaleDateString()} oleh ${n.author}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editAnnouncement('${n.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="deleteAnnouncement('${n.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        async function handleAnnouncementSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('n-id').value;
-            const title = document.getElementById('n-title').value;
-            const content = document.getElementById('n-content').value;
-            const type = document.getElementById('n-type').value;
-            const author = document.getElementById('n-author').value;
-
-            const payload = { title, content, type, author, is_active: true };
-
-            let error;
-            if (id) {
-                const { error: err } = await supabaseClient.from('announcements').update(payload).eq('id', id);
-                error = err;
+            if (upserts.length > 0) {
+                const { error } = await supabaseClient.from('attendance_logs').upsert(upserts, { onConflict: 'student_nim, meeting_code' });
+                if (!error) alert('Presensi disimpan!'); else alert(error.message);
             } else {
-                const { error: err } = await supabaseClient.from('announcements').insert([payload]);
-                error = err;
-            }
-
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert(id ? 'Berita berhasil diupdate!' : 'Berita berhasil diposting!');
-                resetNewsForm();
-                loadAnnouncementsAdmin();
+                alert('Tidak ada data yang dipilih');
             }
         }
 
-        async function editAnnouncement(id) {
-            const { data } = await supabaseClient.from('announcements').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('n-id').value = data.id;
-                document.getElementById('n-title').value = data.title;
-                document.getElementById('n-content').value = data.content;
-                document.getElementById('n-type').value = data.type;
-                document.getElementById('n-author').value = data.author;
-
-                document.getElementById('news-form-title').innerText = 'Edit Berita';
-                document.getElementById('btn-submit-news').innerText = 'Simpan Perubahan';
-                document.getElementById('btn-cancel-news').classList.remove('hidden');
-                document.getElementById('n-title').focus();
-            }
+        async function updateStats() {
+            const { count: taskCount } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
+            document.getElementById('stat-active').innerText = taskCount || 0;
+            const { count: studentCount } = await supabaseClient.from('students').select('*', { count: 'exact' });
+            document.getElementById('stat-students').innerText = studentCount || 0;
         }
 
-        function resetNewsForm() {
-            document.querySelector('#section-berita form').reset();
-            document.getElementById('n-id').value = '';
-            document.getElementById('news-form-title').innerText = 'Buat Berita / Pengumuman';
-            document.getElementById('btn-submit-news').innerText = 'Posting Berita';
-            document.getElementById('btn-cancel-news').classList.add('hidden');
-        }
-
-        async function deleteAnnouncement(id) {
-            if (confirm('Hapus berita ini?')) {
-                await supabaseClient.from('announcements').delete().eq('id', id);
-                loadAnnouncementsAdmin();
-            }
-        }
-
-        // --- Module Management ---
-        let currentSteps = [];
-
-        function uID() { return 'step-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9); }
-
-        async function loadModulesAdmin() {
-            const list = document.getElementById('admin-modul-list');
-            try {
-                const { data } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
-                if (data && list) {
-                    list.innerHTML = data.map(m => `
-                        <div class="bg-slate-900 border border-slate-700 p-4 rounded flex justify-between items-center group">
-                            <div class="flex items-center gap-4">
-                                <span class="flex items-center justify-center w-8 h-8 rounded bg-slate-800 text-slate-400 font-bold border border-slate-700">${m.week}</span>
-                                <div>
-                                    <h3 class="font-bold text-slate-200">${m.topic}</h3>
-                                    <div class="text-xs text-slate-500 mt-1 flex gap-2">
-                                        <span>${Array.isArray(m.content_steps) ? m.content_steps.length : 0} Langkah</span>
-                                        ${m.formula ? '<span class="text-accent-400">Formula LaTeX</span>' : ''}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editModul('${m.id}')" class="text-blue-400 hover:text-blue-300 bg-blue-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="deleteModul('${m.id}')" class="text-red-400 hover:text-red-300 bg-red-900/30 w-8 h-8 rounded flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        async function handleModuleSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('m-id').value;
-            const week = document.getElementById('m-week').value;
-            const topic = document.getElementById('m-topic').value;
-            const desc = document.getElementById('m-desc').value;
-            const formula = document.getElementById('m-formula').value;
-
-            const payload = {
-                week: parseInt(week),
-                topic,
-                description: desc,
-                formula,
-                content_steps: currentSteps,
-                is_visible: true
-            };
-
-            let error;
-            if (id) {
-                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
-                error = err;
-            } else {
-                const { error: err } = await supabaseClient.from('modules').insert([payload]);
-                error = err;
-            }
-
-            if (error) alert('Error: ' + error.message);
-            else {
-                alert(id ? 'Modul berhasil diupdate!' : 'Modul berhasil dibuat!');
-                resetModulForm();
-                loadModulesAdmin();
-            }
-        }
-
-        async function editModul(id) {
-            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('m-id').value = data.id;
-                document.getElementById('m-week').value = data.week;
-                document.getElementById('m-topic').value = data.topic;
-                document.getElementById('m-desc').value = data.description;
-                document.getElementById('m-formula').value = data.formula || '';
-
-                currentSteps = [];
-                if (data.content_steps && Array.isArray(data.content_steps)) {
-                    data.content_steps.forEach(s => addStep(s));
-                }
-                renderSteps();
-
-                document.getElementById('modul-form-title').innerText = 'Edit Modul (v2)';
-                document.getElementById('btn-submit-modul').innerText = 'Simpan Perubahan';
-                document.getElementById('btn-cancel-modul').classList.remove('hidden');
-                document.getElementById('m-week').focus();
-            }
-        }
-
-        function resetModulForm() {
-            document.querySelector('#section-modul form').reset();
-            currentSteps = [];
-            renderSteps();
-            document.getElementById('m-id').value = '';
-            document.getElementById('modul-form-title').innerText = 'Tambah Modul Baru';
-            document.getElementById('btn-submit-modul').innerText = 'Simpan Modul';
-            document.getElementById('btn-cancel-modul').classList.add('hidden');
-        }
-
-        function addStep(existingData = null) {
-            const id = existingData ? existingData.id : uID();
-            const step = existingData || {
-                id: id,
-                type: 'youtube',
-                title: '',
-                content: '',
-                questions: []
-            };
-            if (!step.questions) step.questions = [];
-            currentSteps.push(step);
-            renderSteps();
-            if (!existingData) {
-                setTimeout(() => {
-                    const container = document.getElementById('steps-container');
-                    if (container) container.scrollTop = container.scrollHeight;
-                }, 100);
-            }
-        }
-
-        function removeStep(id) {
-            currentSteps = currentSteps.filter(s => s.id !== id);
-            renderSteps();
-        }
-
-        function updateStep(id, field, value) {
-            const step = currentSteps.find(s => s.id === id);
-            if (step) {
-                step[field] = value;
-                if (field === 'type') renderSteps();
-            }
-        }
-
-        // Question Helpers
-        function addQuestion(stepId) {
-            const step = currentSteps.find(s => s.id === stepId);
-            if (step) {
-                if (!step.questions) step.questions = [];
-                step.questions.push({ id: uID(), text: '' });
-                renderSteps();
-            }
-        }
-
-        function removeQuestion(stepId, questionId) {
-            const step = currentSteps.find(s => s.id === stepId);
-            if (step && step.questions) {
-                step.questions = step.questions.filter(q => q.id !== questionId);
-                renderSteps();
-            }
-        }
-
-        function updateQuestion(stepId, questionId, text) {
-            const step = currentSteps.find(s => s.id === stepId);
-            if (step && step.questions) {
-                const q = step.questions.find(q => q.id === questionId);
-                if (q) q.text = text;
-            }
-        }
-
-        function renderSteps() {
-            const container = document.getElementById('steps-container');
-            const emptyMsg = document.getElementById('empty-steps-msg');
-            const badge = document.getElementById('step-count-badge');
-
-            if (badge) badge.innerText = currentSteps.length + ' Langkah';
-
-            if (currentSteps.length === 0) {
-                if (container) container.innerHTML = '';
-                if (emptyMsg) emptyMsg.style.display = 'block';
-                return;
-            }
-
-            if (emptyMsg) emptyMsg.style.display = 'none';
-            if (container) {
-                container.innerHTML = '';
-                currentSteps.forEach((step, index) => {
-                    let placeholder = 'Konten...';
-                    if (step.type === 'youtube') placeholder = 'Link YouTube (e.g. https://youtu.be/...)';
-                    else if (step.type === 'pdf') placeholder = 'Link PDF (GDrive/Direct Link)';
-                    else if (step.type === 'ppt') placeholder = 'Link Presentasi (PPT/Slides)';
-                    else if (step.type === 'quiz') placeholder = 'Link Gambar/Slide Kuis';
-
-                    const div = document.createElement('div');
-                    div.className = 'bg-slate-800 p-3 rounded border border-slate-700 flex flex-col gap-2 relative group';
-                    div.innerHTML = `
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Langkah ${index + 1}</span>
-                            <button type="button" onclick="removeStep('${step.id}')" class="text-red-400 hover:text-red-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                            <div class="md:col-span-1">
-                                <select onchange="updateStep('${step.id}', 'type', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
-                                    <option value="youtube" ${step.type === 'youtube' ? 'selected' : ''}>Video YouTube</option>
-                                    <option value="pdf" ${step.type === 'pdf' ? 'selected' : ''}>Dokumen PDF</option>
-                                    <option value="ppt" ${step.type === 'ppt' ? 'selected' : ''}>Presentasi (PPT/Slides)</option>
-                                    <option value="task" ${step.type === 'task' ? 'selected' : ''}>Instruksi/Tugas</option>
-                                    <option value="quiz" ${step.type === 'quiz' ? 'selected' : ''}>Slide Kuis / Soal</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-3">
-                                <input type="text" value="${step.title}" oninput="updateStep('${step.id}', 'title', this.value)" placeholder="Judul Materi / Langkah" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            ${step.type === 'task'
-                            ? `<textarea oninput="updateStep('${step.id}', 'content', this.value)" placeholder="Tulis instruksi lengkap di sini..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 h-20">${step.content}</textarea>`
-                            : `
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" id="content-${step.id}" value="${step.content}" oninput="updateStep('${step.id}', 'content', this.value)" placeholder="${placeholder}" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 font-mono">
-                                    ${(step.type === 'pdf' || step.type === 'ppt' || step.type === 'quiz') ? `
-                                        <label class="cursor-pointer bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white" title="Upload File">
-                                            <i class="fa-solid fa-upload"></i>
-                                            <input type="file" class="hidden" data-step-id="${step.id}" onchange="handleFileUpload(this, 'content-${step.id}')" accept=".pdf,.ppt,.pptx,image/*">
-                                        </label>
-                                    ` : ''}
-                                </div>
-                            `
-                        }
-                        </div>
-
-                        ${(step.type === 'ppt' || step.type === 'pdf' || step.type === 'quiz') ? `
-                            <div class="mt-2 bg-slate-900/50 p-3 rounded border border-slate-700/50">
-                                ${step.type !== 'quiz' ? `
-                                    <div class="grid grid-cols-2 gap-4 mb-3">
-                                        <div>
-                                            <label class="text-[10px] uppercase text-slate-500">Mulai Slide/Halaman</label>
-                                            <input type="number" value="${step.start_page || ''}" oninput="updateStep('${step.id}', 'start_page', this.value)" placeholder="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] uppercase text-slate-500">Sampai Slide/Halaman</label>
-                                            <input type="number" value="${step.end_page || ''}" oninput="updateStep('${step.id}', 'end_page', this.value)" placeholder="Akhir" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
-                                        </div>
-                                    </div>
-                                ` : ''}
-
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <label class="text-[10px] uppercase text-slate-500 font-bold">Daftar Pertanyaan / Soal</label>
-                                        <button type="button" onclick="addQuestion('${step.id}')" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded hover:bg-emerald-500/30">
-                                            <i class="fa-solid fa-plus mr-1"></i> Tambah Soal
-                                        </button>
-                                    </div>
-                                    <div class="space-y-2" id="questions-${step.id}">
-                                        ${(step.questions || []).map((q, qIndex) => `
-                                            <div class="flex gap-2">
-                                                <input type="text" value="${q.text}" oninput="updateQuestion('${step.id}', '${q.id}', this.value)" placeholder="Tulis pertanyaan nomor ${qIndex + 1}..." class="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
-                                                <button type="button" onclick="removeQuestion('${step.id}', '${q.id}')" class="text-red-400 hover:text-red-300 w-6 flex items-center justify-center bg-slate-900 border border-slate-700 rounded">
-                                                    <i class="fa-solid fa-times"></i>
-                                                </button>
-                                            </div>
-                                        `).join('')}
-                                        ${(!step.questions || step.questions.length === 0) ? '<div class="text-[10px] text-slate-600 italic">Belum ada pertanyaan.</div>' : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        ` : ''}
-                    `;
-                    container.appendChild(div);
-                });
-            }
-        }
-
-        async function deleteModul(id) {
-            if (confirm('Hapus modul ini?')) {
-                await supabaseClient.from('modules').delete().eq('id', id);
-                loadModulesAdmin();
-            }
-        }
-
-        // Helper: Upload File to Supabase Storage
-        async function uploadFile(file) {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-            const filePath = `uploads/${fileName}`;
-            const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
-            if (error) {
-                console.error('Upload Error:', error);
-                alert('Gagal upload: ' + error.message);
-                return null;
-            }
-            const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
-            return publicUrl;
-        }
-
-        async function handleFileUpload(input, targetId) {
-            if (input.files && input.files[0]) {
-                const url = await uploadFile(input.files[0]);
-                if (url) {
-                    const stepId = input.getAttribute('data-step-id');
-                    if (stepId) updateStep(stepId, 'content', url);
-                    // Force input update
-                    document.getElementById(targetId).value = url;
-                }
-            }
-        }
-
-
-
-        async function loadPointLogs() {
-            const list = document.getElementById('poin-log-body');
-            try {
-                // Join with students table to get names
-                const { data, error } = await supabaseClient
-                    .from('participation_logs')
-                    .select('*, students(name)')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-
-                if (data && list) {
-                    list.innerHTML = data.map(log => `
-                        <tr class="hover:bg-slate-800/50">
-                            <td class="px-4 py-3 font-bold text-white">${log.students?.name || log.student_nim}</td>
-                            <td class="px-4 py-3 text-accent-400 font-mono font-bold">+${log.points}</td>
-                            <td class="px-4 py-3 text-slate-400 text-xs">${log.note || '-'}</td>
-                            <td class="px-4 py-3 text-right">
-                                <button onclick="deletePointLog('${log.id}')" class="text-red-400 hover:text-red-300 w-8 h-8 rounded hover:bg-red-900/30 transition-colors">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (err) { console.error("Error loading point logs:", err); }
-        }
-
-        async function deletePointLog(id) {
-            if (confirm('Hapus log poin ini? Poin mahasiswa akan berkurang.')) {
-                const { error } = await supabaseClient.from('participation_logs').delete().eq('id', id);
-                if (error) alert('Gagal menghapus: ' + error.message);
-                else loadPointLogs();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initAdmin);
-
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 
