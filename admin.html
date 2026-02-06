@@ -177,6 +177,10 @@
                         <input id="t-deadline" type="datetime-local"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                             required>
+                        <input id="t-points" type="number" placeholder="Poin (Default: 10)" value="10"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    </div>
+                    <div>
                         <input id="t-link" type="text" placeholder="Link (Opsional)"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                     </div>
@@ -561,6 +565,8 @@
                 description: document.getElementById('t-desc').value,
                 deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
                 submission_link: document.getElementById('t-link').value,
+                points: parseInt(document.getElementById('t-points').value) || 10,
+                module_id: document.getElementById('t-module-id').value || null,
                 is_active: true
             };
 
@@ -579,6 +585,9 @@
                 document.getElementById('t-title').value = data.title;
                 document.getElementById('t-desc').value = data.description;
                 document.getElementById('t-link').value = data.submission_link || '';
+                document.getElementById('t-points').value = data.points || 10;
+                document.getElementById('t-module-id').value = data.module_id || '';
+
                 const d = new Date(data.deadline);
                 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
                 document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);

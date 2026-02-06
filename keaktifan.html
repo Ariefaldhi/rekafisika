@@ -160,8 +160,24 @@
                         });
                     }
                 } else {
-                    // Quick Diligence Mock Logic
-                    leaderboard = students.map(s => ({ ...s, totalPoints: Math.floor(Math.random() * 50) })); // Placeholder to ensure UI renders
+                    // --- Kerajinan (Diligence) Logic ---
+                    // Points from Completed Assignments
+                    const { data: assignments } = await supabaseClient.from('assignments').select('id, points');
+                    const { data: submissions } = await supabaseClient.from('assignment_submissions').select('student_nim, assignment_id');
+
+                    if (assignments && submissions) {
+                        // Create Map: Assignment ID -> Points
+                        const pointsMap = {};
+                        assignments.forEach(a => pointsMap[a.id] = (a.points || 10)); // Default 10 if null
+
+                        leaderboard = students.map(s => {
+                            // Find all submissions for this student
+                            const userSubs = submissions.filter(sub => sub.student_nim === s.nim);
+                            // Sum points
+                            const total = userSubs.reduce((sum, sub) => sum + (pointsMap[sub.assignment_id] || 0), 0);
+                            return { ...s, totalPoints: total };
+                        });
+                    }
                 }
 
                 leaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
