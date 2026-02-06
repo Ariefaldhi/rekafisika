@@ -27,29 +27,34 @@
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
     <!-- Header -->
-    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Tugas</h1>
-        <p class="text-sm text-slate-500 mt-1">Selesaikan tugas sebelum tenggat waktu.</p>
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Tugas</h1>
+            <p class="text-sm text-slate-500 mt-1">Selesaikan tugas sebelum tenggat waktu.</p>
+        </div>
+        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+            <i class="fa-solid fa-clipboard-list text-lg"></i>
+        </div>
     </div>
 
     <!-- Content -->
     <main class="px-6 py-6" id="tasks-container">
         <!-- Active Tasks -->
-        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
             <span class="w-2 h-2 rounded-full bg-blue-500"></span> Belum Selesai
         </h3>
-        <div id="active-list" class="space-y-4 mb-8">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 text-center animate-pulse">
+        <div id="active-list" class="space-y-6 mb-8">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center animate-pulse">
                 <div class="h-4 bg-slate-200 rounded w-1/2 mx-auto mb-2"></div>
                 <div class="h-3 bg-slate-100 rounded w-1/3 mx-auto"></div>
             </div>
         </div>
 
         <!-- Completed Tasks -->
-        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider mt-8">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Selesai
         </h3>
-        <div id="completed-list" class="space-y-4">
+        <div id="completed-list" class="space-y-6">
             <!-- Injected -->
         </div>
     </main>
@@ -119,7 +124,7 @@
                 let hasActive = false;
                 let hasCompleted = false;
 
-                allTasks.forEach(task => {
+                allTasks.forEach((task, index) => {
                     const isCompleted = submittedIds.has(task.id);
                     const container = isCompleted ? completedList : activeList;
 
@@ -129,39 +134,101 @@
                     // Detail Link
                     const detailAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
 
-                    // Main Action Button (Only for Active Tasks)
-                    let mainBtn = '';
+                    // Card Styling Specs
+                    let badgeClass = isCompleted
+                        ? "bg-emerald-100 text-emerald-600 border-emerald-200"
+                        : "bg-purple-100 text-purple-600 border-purple-200";
+
+                    let btnClass = isCompleted
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100 cursor-default"
+                        : "bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800";
+
+                    let bgIcon = isCompleted ? "fa-check-circle" : "fa-clipboard-list";
+                    let bgIconColor = isCompleted ? "text-emerald-500" : "text-purple-500";
+                    let bgIconPos = isCompleted ? "-bottom-6 -right-6" : "-top-6 -right-6";
+
+
+                    // Action Button Logic
+                    let actionBtn = '';
                     if (!isCompleted) {
                         if (task.module_id) {
-                            mainBtn = `<button onclick="window.location.href = 'detail_modul.html?id=${task.module_id}'" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">Buka Modul & Kerjakan</button>`;
+                            actionBtn = `
+                                <button onclick="window.location.href = 'detail_modul.html?id=${task.module_id}'" 
+                                    class="w-full py-3.5 rounded-2xl font-bold text-sm bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                    <span>Buka Modul</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>`;
                         } else {
+                            // Link & Mark as Done
+                            let linkBtn = '';
                             if (task.submission_link) {
-                                mainBtn += `<button onclick="window.open('${task.submission_link}', '_blank')" class="w-full py-3 mb-2 rounded-xl font-bold text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Buka Link Tugas</button>`;
+                                linkBtn = `
+                                    <button onclick="window.open('${task.submission_link}', '_blank')" 
+                                        class="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-link"></i> Link
+                                    </button>`;
                             }
-                            mainBtn += `<button onclick="markTaskManual('${task.id}')" class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">Tandai Selesai</button>`;
+                            actionBtn = `
+                                <div class="flex gap-3">
+                                    ${linkBtn}
+                                    <button onclick="markTaskManual('${task.id}')" 
+                                        class="flex-[2] py-3.5 rounded-2xl font-bold text-sm bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-check"></i> Tandai Selesai
+                                    </button>
+                                </div>
+                            `;
                         }
                     } else {
-                        // Completed State
-                        mainBtn = `<div class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-50 text-emerald-600 border border-emerald-100 text-center cursor-default"><i class="fa-solid fa-check-circle mr-2"></i>Tugas Selesai</div>`;
+                        actionBtn = `
+                            <div class="w-full py-3 rounded-2xl font-bold text-sm bg-emerald-50 text-emerald-600 border border-emerald-100 text-center flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check-circle"></i> Tugas Selesai
+                            </div>`;
                     }
 
+                    const deadlineDate = new Date(task.deadline);
+                    const deadlineStr = deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+                    const isUrgent = !isCompleted && (deadlineDate - new Date() < 1000 * 60 * 60 * 48); // < 48 hours
+
                     const card = `
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
-                           <div class="flex justify-between items-start mb-3">
-                               <span class="${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'} px-3 py-1 rounded-full text-xs font-bold border">
-                                   ${isCompleted ? 'Selesai' : 'Deadline: ' + new Date(task.deadline).toLocaleDateString('id-ID')}
-                               </span>
-                           </div>
-                           <h4 class="font-bold text-slate-800 text-lg mb-1">${task.title}</h4>
-                           <p class="text-sm text-slate-500 line-clamp-2 mb-4 cursor-pointer" onclick="${detailAction}">${task.description}</p>
-                           ${mainBtn}
+                        <div class="relative bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden group hover:shadow-lg transition-all duration-300">
+                             <!-- Deco Icon -->
+                            <i class="fa-solid ${bgIcon} absolute ${bgIconPos} text-9xl ${bgIconColor} opacity-5 group-hover:opacity-10 transition-opacity duration-300 rotate-12"></i>
+                            
+                            <!-- Header -->
+                            <div class="relative z-10 flex justify-between items-start mb-4">
+                                <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeClass}">
+                                    ${isCompleted ? 'Selesai' : 'Deadline: ' + deadlineStr}
+                                </span>
+                                ${isUrgent ? '<span class="animate-pulse w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>' : ''}
+                            </div>
+
+                            <!-- Content -->
+                            <div class="relative z-10 mb-6">
+                                <h3 class="text-xl font-black text-slate-900 leading-tight mb-2 group-hover:text-primary-600 transition-colors">
+                                    ${task.title}
+                                </h3>
+                                <p class="text-sm text-slate-500 leading-relaxed line-clamp-2 cursor-pointer hover:text-slate-700 transition-colors" onclick="${detailAction}">
+                                    ${task.description}
+                                </p>
+                            </div>
+
+                            <!-- Footer / Action -->
+                            <div class="relative z-10 pt-4 border-t border-slate-50">
+                                ${actionBtn}
+                            </div>
                         </div>
                     `;
                     container.innerHTML += card;
                 });
 
-                if (!hasActive) activeList.innerHTML = '<div class="text-center py-8 text-slate-400">Tidak ada tugas aktif.</div>';
-                if (!hasCompleted) completedList.innerHTML = '<div class="text-center py-8 text-slate-400">Belum ada tugas selesai.</div>';
+                if (!hasActive) activeList.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                            <i class="fa-solid fa-clipboard-check text-2xl"></i>
+                        </div>
+                        <p class="text-slate-400 font-medium text-sm">Tidak ada tugas aktif.</p>
+                    </div>`;
+
+                if (!hasCompleted) completedList.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">Belum ada tugas selesai.</div>`;
 
             } catch (e) { console.error(e); }
         }

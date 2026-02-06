@@ -386,25 +386,39 @@
         async function loadAssignmentPreview() {
             if (!window.supabaseClient) return;
             try {
+                const user = checkAuth();
+                if (!user) return; // Need user for submissions
+
                 const nowISO = new Date().toISOString();
-                const { data, error } = await supabaseClient
+
+                // 1. Fetch ALL Active Future Tasks
+                const { data: assignments } = await supabaseClient
                     .from('assignments')
                     .select('*')
                     .eq('is_active', true)
                     .gt('deadline', nowISO)
-                    .order('deadline', { ascending: true })
-                    .limit(1)
-                    .single();
+                    .order('deadline', { ascending: true });
 
-                if (data) {
+                // 2. Fetch User Submissions
+                const { data: submissions } = await supabaseClient
+                    .from('assignment_submissions')
+                    .select('assignment_id')
+                    .eq('student_nim', user.nim);
+
+                const submittedIds = new Set((submissions || []).map(s => s.assignment_id));
+
+                // 3. Find First Incomplete
+                const nextTask = (assignments || []).find(t => !submittedIds.has(t.id));
+
+                if (nextTask) {
                     const container = document.getElementById('assignment-preview');
                     container.innerHTML = `
                         <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
                              <i class="fa-solid fa-clock"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-slate-800 truncate">${data.title}</p>
-                            <p class="text-xs text-slate-400">Deadline: ${new Date(data.deadline).toLocaleDateString('id-ID')}</p>
+                            <p class="text-sm font-semibold text-slate-800 truncate">${nextTask.title}</p>
+                            <p class="text-xs text-slate-400">Deadline: ${new Date(nextTask.deadline).toLocaleDateString('id-ID')}</p>
                         </div>
                         <a href="tugas.html" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-primary-50 hover:text-primary-500 transition-colors">
                             <i class="fa-solid fa-chevron-right text-xs"></i>
@@ -417,7 +431,7 @@
                         </div>
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-slate-800">Semua Tugas Selesai</p>
-                            <p class="text-xs text-slate-400">Kerja bagus!</p>
+                            <p class="text-xs text-slate-400">Kerja bagus, tidak ada PR!</p>
                         </div>
                     `;
                 }
