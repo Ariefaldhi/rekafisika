@@ -131,15 +131,14 @@
 
                 const user = typeof checkAuth === 'function' ? checkAuth() : null;
 
-                // Fetch Progress with completed_steps (Selecting * to avoid missing cols issue)
+                // Fetch Progress
                 const { data: progressList } = user ? await supabaseClient
                     .from('module_progress')
                     .select('*')
                     .eq('student_nim', user.nim)
                     : { data: [] };
 
-                // Map for easier lookup
-                const progressMap = {}; // { module_id: { is_completed, completed_steps: [] } }
+                const progressMap = {};
                 if (progressList) {
                     progressList.forEach(p => {
                         progressMap[p.module_id] = p;
@@ -149,97 +148,80 @@
                 container.innerHTML = '';
 
                 if (data && data.length > 0) {
-                    // Find first incomplete to mark as "Active" (based on is_completed flag)
-                    let firstIncompleteId = data.find(m => !progressMap[m.id]?.is_completed)?.id;
-                    if (!firstIncompleteId && data.length > 0) firstIncompleteId = null;
-
-                    data.forEach((item, index) => {
-                        const prog = progressMap[item.id] || { is_completed: false, completed_steps: [] };
-                        const isCompleted = prog.is_completed;
-                        const isActive = item.id === firstIncompleteId;
-
-                        // Calculate Percentage
-                        let percent = 0;
-                        if (isCompleted) {
-                            percent = 100;
-                        } else {
-                            const totalSteps = item.steps ? item.steps.length : 0;
-                            const doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
-                            if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
-                        }
-
-                        let cardClass = "bg-white border border-slate-100";
-                        let titleColor = "text-slate-800";
-                        let descColor = "text-slate-500";
-                        let badgeClass = "bg-blue-50 text-blue-600 border border-blue-100";
-                        let descClass = "text-slate-400";
-                        let bigIconColor = "text-slate-100";
-
-                        // BASE PROGRESS BAR (Default Gray)
-                        let barColor = "bg-slate-300";
-                        let barBg = "bg-slate-100";
-                        let percentColor = "text-slate-400";
-
-                        // STYLES
-                        if (isCompleted) {
-                            // COMPLETED
-                            cardClass = "bg-emerald-50 border border-emerald-100";
-                            titleColor = "text-emerald-900";
-                            descColor = "text-emerald-600";
-                            badgeClass = "bg-white text-emerald-600 border border-emerald-200";
-                            bigIconColor = "text-emerald-500/10";
-
-                            barColor = "bg-emerald-500";
-                            barBg = "bg-emerald-200/50";
-                            percentColor = "text-emerald-600";
-                        } else if (isActive) {
-                            // ACTIVE (Blue Gradient)
-                            cardClass = "bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 border-none transition-transform hover:scale-[1.02]";
-                            titleColor = "text-white";
-                            descColor = "text-blue-100";
-                            badgeClass = "bg-white/20 text-white border border-white/10 backdrop-blur-sm";
-                            bigIconColor = "text-white/10";
-
-                            barColor = "bg-white";
-                            barBg = "bg-black/20";
-                            percentColor = "text-white font-mono";
-                        }
-
-                        const card = `
-                            <a href="detail_modul.html?id=${item.id}" class="block p-6 rounded-[2rem] mb-5 relative overflow-hidden group shadow-sm ${cardClass} relative">
-                                <!-- Background Objects for Active -->
-                                ${isActive ? `
-                                    <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-blue-400 opacity-20 rounded-full blur-xl -ml-5 -mb-5"></div>
-                                ` : ''}
-
-                                <div class="flex items-start justify-between mb-3 relative z-10">
-                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${badgeClass}">
-                                        Minggu ${item.week}
-                                    </span>
-                                    ${isCompleted
-                                ? `<div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>`
-                                : `<i class="fa-solid fa-arrow-right ${isActive ? 'text-white/50' : 'text-slate-300'} group-hover:translate-x-1 transition-transform"></i>`
-                            }
-                                </div>
-                                
-                                <h3 class="text-xl font-bold ${titleColor} mb-1 relative z-10 leading-tight">${item.topic}</h3>
-                                <p class="text-xs ${descColor} line-clamp-2 relative z-10 font-medium">${item.description || 'Pelajari materi minggu ini.'}</p>
-                                
-                                <!-- Progress Bar Dynamic -->
-                                <div class="relative z-10 flex items-center gap-3 mt-4">
-                                    <div class="flex-1 ${barBg} rounded-full h-2 overflow-hidden backdrop-blur-sm border border-white/5">
-                                        <div class="${barColor} h-full rounded-full transition-all duration-700" style="width: ${percent}%"></div>
-                                    </div>
-                                    <span class="text-xs font-bold ${percentColor}">${percent}%</span>
-                                </div>
-
-                                <!-- Decorative Icon Bg -->
-                                <i class="fa-solid fa-shapes absolute -bottom-4 -right-4 text-8xl ${bigIconColor} z-0 rotate-12 group-hover:rotate-6 transition-transform duration-500"></i>
-                            </a>
-                        `;
-                        container.innerHTML += card;
+                    // GROUP BY WEEK
+                    const weeklyModules = {};
+                    data.forEach(m => {
+                        if (!weeklyModules[m.week]) weeklyModules[m.week] = [];
+                        weeklyModules[m.week].push(m);
                     });
+
+                    // RENDER EACH WEEK
+                    Object.keys(weeklyModules).sort((a, b) => a - b).forEach(week => {
+                        const modules = weeklyModules[week];
+
+                        // Check if ALL modules in this week are complete
+                        const allComplete = modules.every(m => progressMap[m.id]?.is_completed);
+
+                        let weekHtml = `
+                            <div class="mb-8 animate-enter">
+                                <div class="flex items-center gap-3 mb-4 px-2">
+                                    <span class="bg-primary-600 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                                        Minggu ${week}
+                                    </span>
+                                    ${allComplete ? '<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>' : ''}
+                                </div>
+                                <div class="grid grid-cols-1 gap-4">
+                        `;
+
+                        // RENDER MODULES IN THIS WEEK
+                        modules.forEach(item => {
+                            const prog = progressMap[item.id] || { is_completed: false, completed_steps: [] };
+                            const isCompleted = prog.is_completed;
+
+                            // Calculate Percentage
+                            let percent = 0;
+                            if (isCompleted) percent = 100;
+                            else {
+                                const totalSteps = item.steps ? item.steps.length : 0;
+                                const doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
+                                if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
+                            }
+
+                            // STYLES
+                            let cardClass = isCompleted ? "bg-emerald-50/50 border-emerald-100" : "bg-white border-slate-100";
+                            let iconClass = isCompleted ? "text-emerald-500" : "text-primary-500";
+                            let textClass = isCompleted ? "text-slate-600" : "text-slate-800";
+
+                            weekHtml += `
+                                <a href="detail_modul.html?id=${item.id}" class="group block p-5 rounded-2xl border ${cardClass} shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                                    <div class="flex items-start gap-4 relative z-10">
+                                        <div class="w-10 h-10 rounded-full ${isCompleted ? 'bg-emerald-100' : 'bg-primary-50'} flex items-center justify-center shrink-0">
+                                            ${isCompleted
+                                    ? `<i class="fa-solid fa-check ${iconClass}"></i>`
+                                    : `<i class="fa-solid fa-book-open ${iconClass}"></i>`
+                                }
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="font-bold ${textClass} text-lg leading-tight mb-1 group-hover:text-primary-600 transition-colors">${item.topic}</h3>
+                                            <p class="text-xs text-slate-500 line-clamp-2">${item.description || 'Pelajari materi ini.'}</p>
+                                            
+                                            <div class="mt-3 flex items-center gap-3">
+                                                 <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                    <div class="h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-primary-500'}" style="width: ${percent}%"></div>
+                                                </div>
+                                                <span class="text-[10px] font-bold text-slate-400">${percent}%</span>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors self-center"></i>
+                                    </div>
+                                </a>
+                            `;
+                        });
+
+                        weekHtml += `</div></div>`; // Close grid & wrapper
+                        container.innerHTML += weekHtml;
+                    });
+
                 } else {
                     container.innerHTML = `
                         <div class="text-center py-12 text-slate-500">
