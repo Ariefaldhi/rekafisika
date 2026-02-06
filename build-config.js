@@ -23,6 +23,7 @@ const SUPABASE_ANON_KEY = '${supabaseKey}';
 const GROQ_API_KEY = '${groqApiKey}';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabaseClient = supabaseClient; // EXPORT TO GLOBAL
 
 function checkAuth() {
     const session = localStorage.getItem('user_session');
@@ -32,6 +33,14 @@ function checkAuth() {
 
 window.isSupabaseReady = true;
 document.dispatchEvent(new Event('supabaseReady'));
+
+// VISUAL DEBUG (Only shows if keys are missing)
+if (SUPABASE_URL.includes('PLACEHOLDER') || !SUPABASE_URL.startsWith('http')) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-[100] font-bold text-sm';
+    alertDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> ERROR: Vercel Env Vars Missing (Build Script ran but keys not found).';
+    document.body.appendChild(alertDiv);
+}
 `;
 
 fs.writeFileSync('config.js', configContent);
