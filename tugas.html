@@ -94,10 +94,8 @@
             const completedList = document.getElementById('completed-list');
 
             try {
-                // Fetch assignments (Same logic, new styling)
+                // Fetch assignments
                 const { data: assignments } = await supabaseClient.from('assignments').select('*').eq('is_active', true).order('deadline', { ascending: true });
-
-                // MOCK Data if empty for demo
                 const tasks = assignments || [];
 
                 activeList.innerHTML = '';
@@ -109,16 +107,19 @@
                 }
 
                 tasks.forEach(task => {
-                    // Logic for Detail Button
-                    let btnAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
-                    let btnText = "Lihat Deskripsi";
+                    // Logic for Actions
+                    let mainBtn = '';
 
                     if (task.module_id) {
-                        btnAction = `window.location.href = 'detail_modul.html?id=${task.module_id}'`;
-                        btnText = "Buka Modul & Kerjakan";
-                    } else if (task.submission_link) {
-                        btnAction = `window.open('${task.submission_link}', '_blank')`;
-                        btnText = "Buka Link Tugas";
+                        // Linked to Module -> Auto Complete via Module only
+                        mainBtn = `<button onclick="window.location.href = 'detail_modul.html?id=${task.module_id}'" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">Buka Modul & Kerjakan</button>`;
+                    } else {
+                        // Manual Task -> Link + Mark Done
+                        if (task.submission_link) {
+                            mainBtn += `<button onclick="window.open('${task.submission_link}', '_blank')" class="w-full py-3 mb-2 rounded-xl font-bold text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Buka Link Tugas</button>`;
+                        }
+
+                        mainBtn += `<button onclick="markTaskManual('${task.id}')" class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">Tandai Selesai</button>`;
                     }
 
                     const card = `
@@ -127,14 +128,11 @@
                                <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs font-bold border border-orange-100">
                                    Deadline: ${new Date(task.deadline).toLocaleDateString('id-ID')}
                                </span>
-                               ${task.submission_link ? `<a href="${task.submission_link}" target="_blank" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-link"></i></a>` : ''}
                            </div>
                            <h4 class="font-bold text-slate-800 text-lg mb-1">${task.title}</h4>
-                           <p class="text-sm text-slate-500 line-clamp-2 mb-4">${task.description}</p>
+                           <p class="text-sm text-slate-500 line-clamp-2 mb-4 cursor-pointer hover:line-clamp-none transition-all" onclick="alert('${task.description.replace(/'/g, "\\'")}')">${task.description}</p>
                            
-                           <button onclick="${btnAction}" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
-                               ${btnText}
-                           </button>
+                           ${mainBtn}
                         </div>
                     `;
                     activeList.innerHTML += card;
