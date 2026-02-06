@@ -623,15 +623,21 @@
             div.innerHTML = `
                 <div class="grid grid-cols-3 gap-2">
                     <input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}">
-                    <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1">
+                    <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)">
                         <option value="ppt" ${data.type === 'ppt' ? 'selected' : ''}>PPT</option>
-                        <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
                         <option value="pdf" ${data.type === 'pdf' ? 'selected' : ''}>PDF</option>
+                        <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
                         <option value="link" ${data.type === 'link' ? 'selected' : ''}>Link</option>
                     </select>
                     <div class="col-span-1 flex gap-1">
                         <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button>
                     </div>
+                </div>
+
+                <!-- Page Range (Only for PDF/PPT) -->
+                <div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}">
+                    <input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}">
+                    <input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}">
                 </div>
 
                 <!-- URL / Upload -->
@@ -652,11 +658,21 @@
                     </label>
                     <div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}">
                         <input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}">
+                        <input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}">
                         <input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}">
                     </div>
                 </div>
             `;
             container.appendChild(div);
+        }
+
+        function togglePageInputs(select) {
+            const pagesDiv = select.parentElement.nextElementSibling;
+            if (['pdf', 'ppt'].includes(select.value)) {
+                pagesDiv.classList.remove('hidden');
+            } else {
+                pagesDiv.classList.add('hidden');
+            }
         }
 
         function toggleStepQuestion(cb) {
@@ -712,11 +728,15 @@
             const steps = [];
             items.forEach(div => {
                 const hasQ = div.querySelector('.step-has-q').checked;
+                const type = div.querySelector('.step-type').value;
                 steps.push({
                     title: div.querySelector('.step-title').value,
-                    type: div.querySelector('.step-type').value,
+                    type: type,
                     url: div.querySelector('.step-url').value,
+                    start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
+                    end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
                     question: hasQ ? div.querySelector('.step-q-text').value : null,
+                    hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
                     answer_key: hasQ ? div.querySelector('.step-q-key').value : null
                 });
             });

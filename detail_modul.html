@@ -148,14 +148,32 @@
                         if (step.type === 'ppt') { icon = 'fa-file-powerpoint'; color = 'bg-orange-100 text-orange-500'; }
                         if (step.type === 'pdf') { icon = 'fa-file-pdf'; color = 'bg-red-100 text-red-500'; }
 
+                        // Construct Link
+                        let finalUrl = step.url;
+                        let targetAttr = 'target="_blank"';
+
+                        if (['pdf', 'ppt'].includes(step.type)) {
+                            // Link to internal viewer
+                            const params = new URLSearchParams();
+                            params.set('file', step.url);
+                            if (step.start_page) params.set('start', step.start_page);
+                            if (step.end_page) params.set('end', step.end_page);
+                            finalUrl = `viewer.html?${params.toString()}`;
+                            targetAttr = ''; // Open in same tab or new? User preference. Usually viewer is same tab/new tab. Let's stick to default behavior or new tab.
+                            // If same tab, we need back button in viewer (it has one).
+                        }
+
                         const html = `
-                             <a href="${step.url}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-white border-l-4 border-l-primary-500 shadow-sm hover:shadow-md transition-all">
+                             <a href="${finalUrl}" ${targetAttr} class="flex items-center gap-4 p-4 rounded-2xl bg-white border-l-4 border-l-primary-500 shadow-sm hover:shadow-md transition-all">
                                  <div class="w-10 h-10 ${color} rounded-xl flex items-center justify-center font-bold text-sm">
                                      ${idx + 1}
                                  </div>
                                  <div class="flex-1">
                                      <h4 class="font-bold text-slate-700 text-sm">${step.title}</h4>
-                                     <p class="text-xs text-slate-400 uppercase">${step.type}</p>
+                                     <p class="text-xs text-slate-400 uppercase flex gap-2 items-center">
+                                        ${step.type}
+                                        ${step.start_page ? `<span class="bg-slate-100 px-1 rounded">Hal ${step.start_page}-${step.end_page || 'end'}</span>` : ''}
+                                     </p>
                                  </div>
                                  <i class="fa-solid fa-arrow-up-right-from-square text-slate-300"></i>
                              </a>
