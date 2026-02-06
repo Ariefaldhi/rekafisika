@@ -188,8 +188,27 @@
                 if (!currentModule && modules.length > 0) currentModule = modules[modules.length - 1];
                 if (!currentModule) return; // No modules at all
 
-                // Calculate "Course Progress" (Just for visual percentage)
-                const percent = Math.round((completedIds.size / modules.length) * 100);
+                // Calculate Real Progress % based on Steps
+                let percent = 0;
+                let isReview = completedIds.has(currentModule.id);
+
+                if (isReview) {
+                    percent = 100;
+                } else {
+                    // Fetch specific progress for this module to get steps
+                    const { data: stepProg } = await supabaseClient
+                        .from('module_progress')
+                        .select('completed_steps')
+                        .eq('student_nim', user.nim)
+                        .eq('module_id', currentModule.id)
+                        .maybeSingle();
+
+                    if (stepProg && stepProg.completed_steps && currentModule.steps) {
+                        const totalSteps = currentModule.steps.length;
+                        const doneSteps = stepProg.completed_steps.length;
+                        if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
+                    }
+                }
 
                 const container = document.getElementById('resume-learning-container');
                 container.classList.remove('hidden');
