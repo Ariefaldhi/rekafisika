@@ -3,54 +3,54 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi | FisikaLab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulasi Vektor | KawanFismat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
                     colors: {
-                        primary: '#3B82F6',
-                        secondary: '#64748B',
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B', sub: '#64748B' }
                     }
                 }
             }
         }
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="bg-slate-50 font-inter text-slate-800 min-h-screen flex flex-col">
+<body class="bg-ui-bg font-inter text-ui-text h-screen flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="bg-white sticky top-0 z-50 px-6 py-4 shadow-sm flex items-center gap-4">
-        <a href="index.html" class="text-slate-600 hover:text-primary transition-colors">
-            <i class="fa-solid fa-arrow-left text-xl"></i>
+    <div class="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10 shrink-0">
+        <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="text-sm font-bold">Kembali</span>
         </a>
-        <h1 class="text-xl font-bold text-slate-900">Simulasi</h1>
-    </header>
+        <h1 class="text-sm font-bold text-slate-900">Lab Virtual: Vektor</h1>
+        <div class="w-8"></div> <!-- Spacer for center alignment -->
+    </div>
 
-    <!-- Content -->
-    <main class="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-6">
-        <div class="w-32 h-32 bg-blue-100/50 rounded-full flex items-center justify-center animate-pulse">
-            <i class="fa-solid fa-gamepad text-5xl text-blue-500"></i>
+    <!-- Simulation Container -->
+    <div class="flex-1 relative bg-slate-900 w-full h-full">
+        <!-- Loader / Placeholder -->
+        <div class="absolute inset-0 flex items-center justify-center text-white z-0">
+            <div class="text-center">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-2 text-primary-500"></i>
+                <p class="text-xs">Memuat Simulasi...</p>
+            </div>
         </div>
-        <div>
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Praktikum Virtual</h2>
-            <p class="text-slate-500 max-w-xs mx-auto">Fitur ini sedang dalam pengembangan. Segera hadir untuk membantu
-                pemahaman konsep fisikamu!</p>
-        </div>
-        <a href="index.html"
-            class="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all">
-            Kembali ke Beranda
-        </a>
-    </main>
 
-    <!-- Bottom Nav Placeholder (Optional for deep pages, but good for consistency) -->
-    <!-- Keeping it simple for this placeholder page -->
+        <!-- PhET Iframe -->
+        <iframe src="https://phet.colorado.edu/sims/html/vector-addition/latest/vector-addition_all.html?locale=in"
+            class="absolute inset-0 w-full h-full z-10 border-none" allowfullscreen>
+        </iframe>
+    </div>
 
 </body>
 
