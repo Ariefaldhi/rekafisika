@@ -80,7 +80,8 @@
             animation-delay: 400ms;
         }
     </style>
-<script src="config.js?v=2.5"></script></head>
+    <script src="config.js?v=2.5"></script>
+</head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
@@ -387,7 +388,7 @@
     </nav>
 
     <!-- Scripts -->
-    
+
     <script>
         // Greeting Logic
         const hour = new Date().getHours();
@@ -422,36 +423,46 @@
             }
         });
 
-        async function loadAssignmentPreview() {
-            if (!window.supabaseClient) return;
-            try {
-                const user = checkAuth();
-                if (!user) return; // Need user for submissions
+        if (!window.supabaseClient) {
+            document.getElementById('assignment-preview').innerHTML = `
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
+                         <i class="fa-solid fa-wifi"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-slate-800">Offline</p>
+                        <p class="text-xs text-slate-400">Database tidak terhubung.</p>
+                    </div>
+                `;
+            return;
+        }
+        try {
+            const user = checkAuth();
+            if (!user) return; // Need user for submissions
 
-                const nowISO = new Date().toISOString();
+            const nowISO = new Date().toISOString();
 
-                // 1. Fetch ALL Active Future Tasks
-                const { data: assignments } = await supabaseClient
-                    .from('assignments')
-                    .select('*')
-                    .eq('is_active', true)
-                    .gt('deadline', nowISO)
-                    .order('deadline', { ascending: true });
+            // 1. Fetch ALL Active Future Tasks
+            const { data: assignments } = await supabaseClient
+                .from('assignments')
+                .select('*')
+                .eq('is_active', true)
+                .gt('deadline', nowISO)
+                .order('deadline', { ascending: true });
 
-                // 2. Fetch User Submissions
-                const { data: submissions } = await supabaseClient
-                    .from('assignment_submissions')
-                    .select('assignment_id')
-                    .eq('student_nim', user.nim);
+            // 2. Fetch User Submissions
+            const { data: submissions } = await supabaseClient
+                .from('assignment_submissions')
+                .select('assignment_id')
+                .eq('student_nim', user.nim);
 
-                const submittedIds = new Set((submissions || []).map(s => s.assignment_id));
+            const submittedIds = new Set((submissions || []).map(s => s.assignment_id));
 
-                // 3. Find First Incomplete
-                const nextTask = (assignments || []).find(t => !submittedIds.has(t.id));
+            // 3. Find First Incomplete
+            const nextTask = (assignments || []).find(t => !submittedIds.has(t.id));
 
-                if (nextTask) {
-                    const container = document.getElementById('assignment-preview');
-                    container.innerHTML = `
+            if (nextTask) {
+                const container = document.getElementById('assignment-preview');
+                container.innerHTML = `
                         <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
                              <i class="fa-solid fa-clock"></i>
                         </div>
@@ -463,8 +474,8 @@
                             <i class="fa-solid fa-chevron-right text-xs"></i>
                         </a>
                     `;
-                } else {
-                    document.getElementById('assignment-preview').innerHTML = `
+            } else {
+                document.getElementById('assignment-preview').innerHTML = `
                         <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-500">
                              <i class="fa-solid fa-check"></i>
                         </div>
@@ -473,10 +484,10 @@
                             <p class="text-xs text-slate-400">Kerja bagus, tidak ada PR!</p>
                         </div>
                     `;
-                }
-            } catch (e) {
-                console.error("Assignment fetch error", e);
             }
+        } catch (e) {
+            console.error("Assignment fetch error", e);
+        }
         }
 
         async function loadAnnouncements() {
@@ -549,4 +560,3 @@
 </body>
 
 </html>
-
