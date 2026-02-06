@@ -61,7 +61,8 @@
     </style>
 
     <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
     <script src="config.js?v=2.5"></script>
 </head>
 
@@ -118,7 +119,8 @@
         document.addEventListener('DOMContentLoaded', loadModules);
 
         async function loadModules() {
-            if (!window.supabaseClient) {
+            // Wait for Supabase (Polling logic handled in config.js)
+            if (!await window.ensureSupabase()) {
                 container.innerHTML = `
                     <div class="text-center py-12">
                         <i class="fa-solid fa-cloud-bolt text-4xl mb-4 text-slate-300"></i>

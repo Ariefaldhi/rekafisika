@@ -29,7 +29,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
     <style>
         @keyframes slide-up {
             from {
@@ -317,7 +318,8 @@
 
         async function loadStats(user) {
             // Reuse existing loadStats logic
-            if (!window.supabaseClient) {
+            // Wait for Supabase
+            if (!await window.ensureSupabase()) {
                 document.getElementById('stat-attendance').innerText = '-';
                 document.getElementById('stat-participation').innerText = '-';
                 document.getElementById('stat-tasks').innerText = '-';

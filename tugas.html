@@ -119,13 +119,15 @@
         </a>
     </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', fetchTasks);
 
         async function fetchTasks() {
-            if (!window.supabaseClient) {
+            // Wait for Supabase (Polling logic handled in config.js)
+            if (!await window.ensureSupabase()) {
                 const activeList = document.getElementById('active-list');
                 activeList.innerHTML = `
                     <div class="text-center py-12">

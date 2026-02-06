@@ -175,31 +175,52 @@ window.VisualModal = VisualModal;
 
 // --- Config & Supabase ---
 let supabaseClient;
-if (typeof supabase !== 'undefined') {
-    try {
-        if(!SUPABASE_URL.startsWith('http')) throw new Error("Invalid Supabase URL");
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        window.supabaseClient = supabaseClient;
-    } catch(e) {
-        console.error("CRITICAL: Supabase Init Failed. Check Keys.", e);
-        if(document.body) {
-             VisualModal.alert('Koneksi Database Gagal. Cek Console.', 'System Error', 'error');
-        } else {
-             document.addEventListener('DOMContentLoaded', () => {
-                 VisualModal.alert('Koneksi Database Gagal. Cek Console.', 'System Error', 'error');
-             });
+
+// Internal Init Function
+function tryInitSupabase() {
+    if (window.supabaseClient) return true; // Already init
+    if (typeof supabase !== 'undefined') {
+        try {
+            // Check for valid URL/Key before init
+            if (!SUPABASE_URL || SUPABASE_URL.includes('your-project') || !SUPABASE_URL.startsWith('http')) {
+                console.warn("Supabase URL invalid.");
+                return false;
+            }
+            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            return true;
+        } catch (e) {
+            console.error("Supabase Init Error:", e);
+            return false;
         }
     }
-} else {
-    console.error('Supabase SDK not loaded.');
-    if (document.body) {
-         VisualModal.alert('Gagal memuat Script Database (Supabase). Cek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
-    } else {
-         document.addEventListener('DOMContentLoaded', () => {
-             VisualModal.alert('Gagal memuat Script Database (Supabase). Cek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
-         });
-    }
+    return false;
 }
+
+// Try immediately (Normal case)
+if (!tryInitSupabase()) {
+    console.warn("Supabase SDK not ready immediately. Will poll...");
+}
+
+// Global Promise for Pages to Wait
+window.ensureSupabase = async (timeoutMs = 5000) => {
+    if (tryInitSupabase()) return window.supabaseClient;
+
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+        await new Promise(r => setTimeout(r, 500)); // Wait 500ms
+        if (tryInitSupabase()) {
+            console.log("Supabase recovered via polling!");
+            return window.supabaseClient;
+        }
+    }
+    
+    // Final check failed & Timeout passed
+    if (document.body && !document.getElementById('vm-offline-alert')) {
+         VisualModal.alert('Gagal memuat Script Database (Supabase). Cek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
+         const m = document.createElement('div'); m.id = 'vm-offline-alert'; document.body.appendChild(m);
+    }
+    return null;
+};
 
 function checkAuth() {
     try {

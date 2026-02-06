@@ -424,7 +424,9 @@
             }
         });
 
-        if (!window.supabaseClient) {
+        // Wait for Supabase (Polling logic handled in config.js)
+        const client = await window.ensureSupabase();
+        if (!client) {
             document.getElementById('assignment-preview').innerHTML = `
                     <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
                          <i class="fa-solid fa-wifi"></i>
