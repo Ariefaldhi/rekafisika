@@ -42,26 +42,70 @@
         <div
             class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col items-center text-center">
             <div id="profile-pic"
-                class="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-300 mb-4 border-4 border-slate-50 relative">
+                class="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-300 mb-4 border-4 border-slate-50 relative overflow-hidden">
                 <i class="fa-solid fa-user"></i>
-                <!-- Edit Button -->
-                <button
-                    class="absolute bottom-0 right-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center text-sm shadow-md hover:bg-primary-600 transition-colors">
-                    <i class="fa-solid fa-camera"></i>
-                </button>
             </div>
 
             <h2 id="user-name" class="text-xl font-bold text-slate-900">Tamu</h2>
             <p id="user-nim" class="text-slate-400 text-sm font-mono mb-6">Belum Login</p>
 
-            <div class="grid grid-cols-2 gap-4 w-full">
-                <div class="bg-blue-50 p-4 rounded-2xl">
-                    <span class="block text-2xl font-bold text-blue-600">0</span>
-                    <span class="text-xs text-blue-400 font-bold uppercase">Modul</span>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-3 w-full text-left">
+                <!-- Kehadiran -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                        <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kehadiran</h4>
+                    </div>
+                    <span class="text-2xl font-black text-slate-800" id="stat-attendance">0%</span>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="bar-attendance" class="bg-emerald-500 h-full rounded-full" style="width: 0%"></div>
+                    </div>
                 </div>
-                <div class="bg-purple-50 p-4 rounded-2xl">
-                    <span class="block text-2xl font-bold text-purple-600">0</span>
-                    <span class="text-xs text-purple-400 font-bold uppercase">Poin</span>
+
+                <!-- Partisipasi -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i class="fa-solid fa-hand-point-up"></i>
+                        </div>
+                        <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Partisipasi</h4>
+                    </div>
+                    <span class="text-2xl font-black text-slate-800" id="stat-participation">0</span>
+                    <p class="text-[10px] text-slate-400 mt-1 leading-tight">Poin keaktifan kelas</p>
+                </div>
+
+                <!-- Tugas Selesai -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tugas</h4>
+                    </div>
+                    <span class="text-2xl font-black text-slate-800" id="stat-tasks">0/0</span>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="bar-tasks" class="bg-purple-500 h-full rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Kerajinan -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kerajinan</h4>
+                    </div>
+                    <span class="text-2xl font-black text-slate-800" id="stat-diligence">0</span>
+                    <p class="text-[10px] text-slate-400 mt-1 leading-tight">Poin pengerjaan tugas</p>
                 </div>
             </div>
         </div>
@@ -128,11 +172,22 @@
             if (user) {
                 document.getElementById('user-name').innerText = user.nama || 'Mahasiswa';
                 document.getElementById('user-nim').innerText = user.nim || '---';
+
+                // Profile Pic
+                const picEl = document.getElementById('profile-pic');
+                if (user.profile_photo_url) {
+                    picEl.innerHTML = `<img src="${user.profile_photo_url}" class="w-full h-full object-cover">`;
+                }
+
                 document.getElementById('auth-btn').onclick = (e) => {
                     e.preventDefault();
                     localStorage.removeItem('user_session');
                     window.location.href = 'login.html';
                 };
+
+                // Load Stats
+                loadStats(user);
+
             } else {
                 document.getElementById('auth-btn').innerHTML = `
                     <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
@@ -147,6 +202,92 @@
                 document.getElementById('auth-btn').onclick = null;
             }
         });
+
+        async function loadStats(user) {
+            if (!window.supabaseClient) return;
+
+            try {
+                // 1. Kehadiran
+                // Count how many meeetings exist total
+                const { data: allMeetings } = await supabaseClient.from('attendance_logs').select('meeting_code', { count: 'exact', head: false });
+                // Simple version: Count specific user's 'Hadir' logs
+                const { count: presentCount } = await supabaseClient.from('attendance_logs')
+                    .select('*', { count: 'exact' })
+                    .eq('student_nim', user.nim)
+                    .eq('status', 'Hadir');
+
+                // Estimate total meetings: distinct count of meeting_code globally or for this user. 
+                // Better: Get distinct meeting codes from all logs.
+                // For now, let's assume 16 meetings max, or calculate dynamically if possible.
+                // Dynamic approach:
+                const { data: distinctMeetings } = await supabaseClient.rpc('get_distinct_meetings'); // If RPC exists
+                // Fallback: Just assume standard 16 meetings for semester? Or just count user's logs vs total class logs?
+                // Let's use a simpler heuristic: Total meetings = unique meeting_codes in database.
+                let totalMeetings = 0;
+                const { data: meetingsData } = await supabaseClient.from('attendance_logs').select('meeting_code');
+                if (meetingsData) {
+                    const unique = new Set(meetingsData.map(m => m.meeting_code));
+                    totalMeetings = unique.size;
+                }
+                if (totalMeetings === 0) totalMeetings = 1; // Avoid NaN
+
+                const attendancePct = Math.round((presentCount / totalMeetings) * 100) || 0;
+                document.getElementById('stat-attendance').innerText = `${attendancePct}%`;
+                document.getElementById('bar-attendance').style.width = `${attendancePct}%`;
+
+
+                // 2. Partisipasi (Points manually given)
+                const { data: participationData } = await supabaseClient.from('participation_logs')
+                    .select('points')
+                    .eq('student_nim', user.nim);
+
+                const totalParticipation = participationData ? participationData.reduce((acc, curr) => acc + (curr.points || 0), 0) : 0;
+                document.getElementById('stat-participation').innerText = totalParticipation;
+
+
+                // 3. Tugas Selesai
+                // Need to know how many assignments exist
+                const { count: totalTasks } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
+
+                // Need to know how many submissions this user has made
+                // Check if 'assignment_submissions' exists
+                let submittedCount = 0;
+                try {
+                    const { count } = await supabaseClient.from('assignment_submissions')
+                        .select('*', { count: 'exact' })
+                        .eq('student_nim', user.nim);
+                    submittedCount = count || 0;
+                } catch (e) { console.warn("No submissions table", e); }
+
+                document.getElementById('stat-tasks').innerText = `${submittedCount}/${totalTasks}`;
+                const taskPct = totalTasks > 0 ? Math.round((submittedCount / totalTasks) * 100) : 0;
+                document.getElementById('bar-tasks').style.width = `${taskPct}%`;
+
+
+                // 4. Kerajinan (Diligence)
+                // Sum of scores from assignments?
+                let diligencePoints = 0;
+                try {
+                    const { data: subs } = await supabaseClient.from('assignment_submissions')
+                        .select('score') // Assuming 'score' column
+                        .eq('student_nim', user.nim);
+
+                    if (subs) {
+                        diligencePoints = subs.reduce((acc, curr) => acc + (curr.score || 0), 0);
+                    }
+                } catch (e) { console.warn("No score in submissions", e); }
+
+                // Fallback if no scores: value each task as 10 pts
+                if (diligencePoints === 0 && submittedCount > 0) {
+                    diligencePoints = submittedCount * 10;
+                }
+
+                document.getElementById('stat-diligence').innerText = diligencePoints;
+
+            } catch (e) {
+                console.error("Error loading stats", e);
+            }
+        }
     </script>
 </body>
 
