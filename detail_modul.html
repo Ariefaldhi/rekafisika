@@ -59,7 +59,8 @@
             }
         }
     </style>
-<script src="config.js?v=2.5"></script></head>
+    <script src="config.js?v=2.5"></script>
+</head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
@@ -106,14 +107,17 @@
 
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
 
         async function loadDetail() {
-            if (!id || !window.supabaseClient) return;
+            if (!id) return;
+            // Wait for Supabase
+            if (!await window.ensureSupabase()) return;
 
             // Fetch Current Module
             const { data: modul } = await supabaseClient.from('modules').select('*').eq('id', id).single();
@@ -517,4 +521,3 @@
 </body>
 
 </html>
-
