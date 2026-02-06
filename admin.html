@@ -94,6 +94,10 @@
                     class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
                     <i class="fa-solid fa-clipboard-user w-5 text-center"></i> Presensi
                 </button>
+                <button onclick="showSection('progress')" id="nav-progress"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Progress
+                </button>
             </nav>
 
             <div class="mt-auto border-t border-slate-100 pt-6">
@@ -146,6 +150,22 @@
                     </div>
                     <h3 class="text-3xl font-black text-slate-900" id="stat-active">0</h3>
                     <p class="text-xs text-slate-400 uppercase font-bold">Tugas Aktif</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div
+                        class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-slate-900" id="stat-attendance">0%</h3>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Kehadiran (Angkatan)</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div
+                        class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-slate-900" id="stat-avg-score">0</h3>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Rata-rata Poin</p>
                 </div>
             </div>
         </section>
@@ -393,6 +413,55 @@
             </div>
         </section>
 
+        <!-- SEC: Student Progress -->
+        <section id="sec-progress" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Progress Mahasiswa</h2>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label>
+                <select id="prog-student-select" onchange="loadStudentStats(this.value)"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                    <option value="">-- Pilih --</option>
+                </select>
+            </div>
+
+            <div id="prog-details" class="hidden space-y-6">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p>
+                        <h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                        <p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p>
+                        <h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                        <p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p>
+                        <h3 class="text-2xl font-black text-purple-700" id="prog-tasks">0</h3>
+                    </div>
+                </div>
+
+                <!-- Tabs/Tables -->
+                <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-700">Detail Aktivitas</h3>
+                    </div>
+                    <div class="p-6 space-y-8">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Tugas
+                            </h4>
+                            <div id="prog-task-list" class="space-y-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Modul
+                            </h4>
+                            <div id="prog-modul-list" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -400,7 +469,7 @@
     <script>
         // --- Navigation ---
         function showSection(id) {
-            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence'].forEach(s => {
+            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence', 'progress'].forEach(s => {
                 const sec = document.getElementById('sec-' + s);
                 const nav = document.getElementById('nav-' + s);
                 if (sec) sec.classList.add('hidden');
@@ -429,6 +498,8 @@
             document.getElementById('stat-students').innerText = studentCount || 0;
             const { count: taskCount } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
             document.getElementById('stat-active').innerText = taskCount || 0;
+
+            calculateAdvancedStats();
 
             loadStudents();
             loadTasks();
@@ -512,9 +583,13 @@
                 </tr>
             `).join('');
 
-            // Render Select Options (Points)
+            // Render Select Options (Points & Progress)
             const pSelect = document.getElementById('p-student');
-            pSelect.innerHTML = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}">${s.name}</option>`).join('');
+            const progSelect = document.getElementById('prog-student-select');
+
+            const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}">${s.name}</option>`).join('');
+            pSelect.innerHTML = optionsHtml;
+            if (progSelect) progSelect.innerHTML = optionsHtml;
 
             // Render Presence Table
             renderPresenceTable();
@@ -805,7 +880,8 @@
                 description: document.getElementById('m-desc').value,
                 file_url: document.getElementById('m-file').value,
                 video_url: document.getElementById('m-video').value,
-                steps: getStepsPayload() // Add JSON
+                steps: getStepsPayload(), // Add JSON
+                is_visible: true // Ensure module is visible by default
             };
 
             let error;
@@ -997,6 +1073,98 @@
             document.getElementById('stat-active').innerText = taskCount || 0;
             const { count: studentCount } = await supabaseClient.from('students').select('*', { count: 'exact' });
             document.getElementById('stat-students').innerText = studentCount || 0;
+        }
+
+        async function calculateAdvancedStats() {
+            // Avg Stats (Expensive, do carefully)
+            try {
+                // 1. Attendance Rate
+                const { data: att } = await supabaseClient.from('attendance_logs').select('status');
+                if (att && att.length > 0) {
+                    const present = att.filter(a => a.status === 'Hadir').length;
+                    const rate = Math.round((present / att.length) * 100);
+                    document.getElementById('stat-attendance').innerText = rate + '%';
+                }
+
+                // 2. Avg Points
+                const users = allStudents.length;
+                // We need sum of points. Complex query, or simple fetch all logs?
+                // Let's fetch all logs for now (small scale)
+                const { data: points } = await supabaseClient.from('participation_logs').select('points');
+                if (points && users > 0) {
+                    const total = points.reduce((acc, curr) => acc + (curr.points || 0), 0);
+                    const avg = Math.round(total / users);
+                    document.getElementById('stat-avg-score').innerText = avg;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadStudentStats(nim) {
+            if (!nim) {
+                document.getElementById('prog-details').classList.add('hidden');
+                return;
+            }
+
+            try {
+                // 1. Points
+                const { data: pLogs } = await supabaseClient.from('participation_logs').select('points').eq('student_nim', nim);
+                const totalPoints = pLogs ? pLogs.reduce((a, b) => a + b.points, 0) : 0;
+                document.getElementById('prog-points').innerText = totalPoints;
+
+                // 2. Modules
+                const { data: mLog } = await supabaseClient.from('module_progress').select('module_id, is_completed').eq('student_nim', nim);
+                const completedMods = new Set(mLog ? mLog.filter(m => m.is_completed).map(m => m.module_id) : []);
+                document.getElementById('prog-modules').innerText = completedMods.size;
+
+                // 3. Tasks
+                const { data: tLog } = await supabaseClient.from('assignment_submissions').select('assignment_id').eq('student_nim', nim);
+                const submittedTasks = new Set(tLog ? tLog.map(t => t.assignment_id) : []);
+                document.getElementById('prog-tasks').innerText = submittedTasks.size;
+
+                document.getElementById('prog-details').classList.remove('hidden');
+
+                // DETAILS LIST
+                // Tasks
+                const { data: assignments } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
+                const taskContainer = document.getElementById('prog-task-list');
+                taskContainer.innerHTML = assignments.map(a => {
+                    const isDone = submittedTasks.has(a.id);
+                    return `
+                        <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}">
+                             <div>
+                                <p class="text-sm font-bold text-slate-700">${a.title}</p>
+                                <p class="text-[10px] text-slate-400">Deadline: ${new Date(a.deadline).toLocaleDateString()}</p>
+                             </div>
+                             <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}">
+                                ${isDone ? 'SELESAI' : 'BELUM'}
+                             </span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Modules
+                const { data: modules } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+                const modulContainer = document.getElementById('prog-modul-list');
+                modulContainer.innerHTML = modules.map(m => {
+                    const isDone = completedMods.has(m.id);
+                    return `
+                        <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}">
+                             <div class="flex items-center gap-3">
+                                <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200">M${m.week}</span>
+                                <p class="text-sm font-bold text-slate-700 line-clamp-1">${m.topic}</p>
+                             </div>
+                             <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-blue-200 text-blue-700' : 'bg-slate-200 text-slate-500'}">
+                                ${isDone ? 'COMPLETED' : 'PENDING'}
+                             </span>
+                        </div>
+                    `;
+                }).join('');
+
+
+            } catch (e) {
+                console.error(e);
+                alert("Gagal load data mahasiswa");
+            }
         }
 
         document.addEventListener('DOMContentLoaded', init);
