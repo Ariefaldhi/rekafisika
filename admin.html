@@ -110,9 +110,25 @@
 
         <!-- SEC: Dashboard -->
         <section id="sec-dashboard" class="space-y-6 animate-fade-in">
-            <header class="mb-8">
-                <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
-                <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
+            <header class="mb-8 flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
+                    <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
+                </div>
+
+                <!-- Maintenance Toggle -->
+                <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Maintenance Mode</p>
+                        <p id="mt-status" class="text-xs font-bold text-slate-700">OFF</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="mt-toggle" class="sr-only peer" onchange="toggleMaintenance()">
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500">
+                        </div>
+                    </label>
+                </div>
             </header>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -389,8 +405,63 @@
             loadModules();
             loadNews();
             initPresenceOptions();
+            checkMaintenanceStatus(); // Check Maintenance
 
             showSection('dashboard');
+        }
+
+        // --- MAINTENANCE ---
+        async function checkMaintenanceStatus() {
+            const { data } = await supabaseClient.from('announcements').select('*').eq('type', 'system_maintenance').single();
+            const toggle = document.getElementById('mt-toggle');
+            const status = document.getElementById('mt-status');
+
+            if (data && data.content === 'true') {
+                toggle.checked = true;
+                status.innerText = 'ACTIVE';
+                status.className = 'text-xs font-bold text-red-500';
+            } else {
+                toggle.checked = false;
+                status.innerText = 'OFF';
+                status.className = 'text-xs font-bold text-emerald-500';
+            }
+        }
+
+        async function toggleMaintenance() {
+            const toggle = document.getElementById('mt-toggle');
+            const isActive = toggle.checked;
+            const status = document.getElementById('mt-status');
+
+            status.innerText = isActive ? 'UPDATING...' : 'UPDATING...';
+
+            // Upsert special row
+            // We use a fixed ID or assume unique constraint on type? 
+            // Better to use a specific Title or ID if possible. 
+            // Since we can't guarantee ID, we'll Query first.
+
+            const { data: existing } = await supabaseClient.from('announcements').select('id').eq('type', 'system_maintenance').single();
+
+            let error;
+            if (existing) {
+                const { error: err } = await supabaseClient.from('announcements').update({ content: isActive ? 'true' : 'false' }).eq('id', existing.id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('announcements').insert([{
+                    title: 'System Maintenance Flag',
+                    type: 'system_maintenance',
+                    content: isActive ? 'true' : 'false',
+                    author: 'SYSTEM'
+                }]);
+                error = err;
+            }
+
+            if (!error) {
+                status.innerText = isActive ? 'ACTIVE' : 'OFF';
+                status.className = isActive ? 'text-xs font-bold text-red-500' : 'text-xs font-bold text-emerald-500';
+            } else {
+                alert('Gagal update status: ' + error.message);
+                toggle.checked = !isActive; // Revert
+            }
         }
 
         // --- STUDENTS ---
