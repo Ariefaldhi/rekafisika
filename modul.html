@@ -109,10 +109,10 @@
 
                 const user = typeof checkAuth === 'function' ? checkAuth() : null;
 
-                // Fetch Progress with completed_steps
+                // Fetch Progress with completed_steps (Selecting * to avoid missing cols issue)
                 const { data: progressList } = user ? await supabaseClient
                     .from('module_progress')
-                    .select('module_id, is_completed, completed_steps')
+                    .select('*')
                     .eq('student_nim', user.nim)
                     : { data: [] };
 
