@@ -44,7 +44,7 @@
     </style>
     <!-- CRITICAL: Load Config & Security Guard EARLY -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=2.3"></script>
+    
     <script>
             // Inline Redundant Guard to prevent flash-of-content
             (function () {
@@ -61,7 +61,7 @@
                 } catch (e) { window.location.replace('login.html'); }
             })();
     </script>
-</head>
+<script src="config.js?v=2.4"></script></head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen flex selection:bg-primary-500/30">
 
@@ -1294,3 +1294,4 @@
 </body>
 
 </html>
+
