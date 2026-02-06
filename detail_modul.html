@@ -284,6 +284,7 @@
 
                         } catch (e) {
                             console.error("Save step error:", e);
+                            alert("Gagal menyimpan progress! \nKemungkinan database belum diupdate. \nSilakan jalankan file 'add_step_progress_col.sql' di Supabase.");
                         }
                     }
                 };
