@@ -94,49 +94,74 @@
             const completedList = document.getElementById('completed-list');
 
             try {
-                // Fetch assignments
-                const { data: assignments } = await supabaseClient.from('assignments').select('*').eq('is_active', true).order('deadline', { ascending: true });
-                const tasks = assignments || [];
+                const user = checkAuth();
+                if (!user) return;
+
+                // 1. Fetch Assignments
+                const { data: assignments } = await supabaseClient
+                    .from('assignments')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('deadline', { ascending: true });
+
+                // 2. Fetch User Submissions
+                const { data: submissions } = await supabaseClient
+                    .from('assignment_submissions')
+                    .select('assignment_id, score')
+                    .eq('student_nim', user.nim);
+
+                const submittedIds = new Set((submissions || []).map(s => s.assignment_id));
+                const allTasks = assignments || [];
 
                 activeList.innerHTML = '';
                 completedList.innerHTML = '';
 
-                if (tasks.length === 0) {
-                    activeList.innerHTML = '<div class="text-center py-8 text-slate-400">Tidak ada tugas aktif.</div>';
-                    return;
-                }
+                let hasActive = false;
+                let hasCompleted = false;
 
-                tasks.forEach(task => {
-                    // Logic for Actions
+                allTasks.forEach(task => {
+                    const isCompleted = submittedIds.has(task.id);
+                    const container = isCompleted ? completedList : activeList;
+
+                    if (isCompleted) hasCompleted = true;
+                    else hasActive = true;
+
+                    // Detail Link
+                    const detailAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
+
+                    // Main Action Button (Only for Active Tasks)
                     let mainBtn = '';
-
-                    if (task.module_id) {
-                        // Linked to Module -> Auto Complete via Module only
-                        mainBtn = `<button onclick="window.location.href = 'detail_modul.html?id=${task.module_id}'" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">Buka Modul & Kerjakan</button>`;
-                    } else {
-                        // Manual Task -> Link + Mark Done
-                        if (task.submission_link) {
-                            mainBtn += `<button onclick="window.open('${task.submission_link}', '_blank')" class="w-full py-3 mb-2 rounded-xl font-bold text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Buka Link Tugas</button>`;
+                    if (!isCompleted) {
+                        if (task.module_id) {
+                            mainBtn = `<button onclick="window.location.href = 'detail_modul.html?id=${task.module_id}'" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">Buka Modul & Kerjakan</button>`;
+                        } else {
+                            if (task.submission_link) {
+                                mainBtn += `<button onclick="window.open('${task.submission_link}', '_blank')" class="w-full py-3 mb-2 rounded-xl font-bold text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Buka Link Tugas</button>`;
+                            }
+                            mainBtn += `<button onclick="markTaskManual('${task.id}')" class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">Tandai Selesai</button>`;
                         }
-
-                        mainBtn += `<button onclick="markTaskManual('${task.id}')" class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">Tandai Selesai</button>`;
+                    } else {
+                        // Completed State
+                        mainBtn = `<div class="w-full py-3 rounded-xl font-bold text-sm bg-emerald-50 text-emerald-600 border border-emerald-100 text-center cursor-default"><i class="fa-solid fa-check-circle mr-2"></i>Tugas Selesai</div>`;
                     }
 
                     const card = `
                         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
                            <div class="flex justify-between items-start mb-3">
-                               <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs font-bold border border-orange-100">
-                                   Deadline: ${new Date(task.deadline).toLocaleDateString('id-ID')}
+                               <span class="${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'} px-3 py-1 rounded-full text-xs font-bold border">
+                                   ${isCompleted ? 'Selesai' : 'Deadline: ' + new Date(task.deadline).toLocaleDateString('id-ID')}
                                </span>
                            </div>
                            <h4 class="font-bold text-slate-800 text-lg mb-1">${task.title}</h4>
-                           <p class="text-sm text-slate-500 line-clamp-2 mb-4 cursor-pointer hover:line-clamp-none transition-all" onclick="alert('${task.description.replace(/'/g, "\\'")}')">${task.description}</p>
-                           
+                           <p class="text-sm text-slate-500 line-clamp-2 mb-4 cursor-pointer" onclick="${detailAction}">${task.description}</p>
                            ${mainBtn}
                         </div>
                     `;
-                    activeList.innerHTML += card;
+                    container.innerHTML += card;
                 });
+
+                if (!hasActive) activeList.innerHTML = '<div class="text-center py-8 text-slate-400">Tidak ada tugas aktif.</div>';
+                if (!hasCompleted) completedList.innerHTML = '<div class="text-center py-8 text-slate-400">Belum ada tugas selesai.</div>';
 
             } catch (e) { console.error(e); }
         }
