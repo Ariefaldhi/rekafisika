@@ -101,90 +101,8 @@
         </a>
     </header>
 
-    <!-- Main Content -->
-    <main class="px-6 py-6 space-y-8">
-
-        <!-- Quick Actions -->
-        <section class="grid grid-cols-4 gap-4 animate-enter delay-100">
-            <a href="modul.html" class="flex flex-col items-center gap-2 group">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-sm group-active:scale-95 transition-transform duration-200">
-                    <i class="fa-solid fa-book-open"></i>
-                </div>
-                <span class="text-xs font-medium text-slate-600">Modul</span>
-            </a>
-            <a href="simulasi.html" class="flex flex-col items-center gap-2 group">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-sm group-active:scale-95 transition-transform duration-200">
-                    <i class="fa-solid fa-atom"></i>
-                </div>
-                <span class="text-xs font-medium text-slate-600">Simulasi</span>
-            </a>
-            <a href="tugas.html" class="flex flex-col items-center gap-2 group">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl shadow-sm group-active:scale-95 transition-transform duration-200">
-                    <i class="fa-solid fa-list-check"></i>
-                </div>
-                <span class="text-xs font-medium text-slate-600">Tugas</span>
-            </a>
-            <a href="chatbot.html" class="flex flex-col items-center gap-2 group">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm group-active:scale-95 transition-transform duration-200">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <span class="text-xs font-medium text-slate-600">AI Chat</span>
-            </a>
-        </section>
-
-        <!-- Recommended Module -->
-        <section class="animate-enter delay-200">
-            <div class="flex justify-between items-end mb-4">
-                <div>
-                    <h3 class="font-bold text-lg text-slate-800">Lanjut Belajar</h3>
-                    <p class="text-xs text-slate-400">Terakhir dibuka</p>
-                </div>
-            </div>
-
-            <a href="modul.html" class="block group">
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-soft relative overflow-hidden">
-                    <div
-                        class="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full blur-2xl -mr-10 -mt-10 opacity-60">
-                    </div>
-
-                    <div class="relative z-10 flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-play"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-slate-800 group-hover:text-primary-600 transition-colors">
-                                Vektor & Kinematika</h4>
-                            <p class="text-xs text-slate-500 mb-2">Modul 1 • Fisika Dasar</p>
-                            <!-- Progress -->
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-primary-500 h-full rounded-full w-[0%]" id="last-progress-bar"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </section>
-
-        <!-- Assignment Widget -->
-        <section class="animate-enter delay-300">
-            <h3 class="font-bold text-lg text-slate-800 mb-4">Tugas Terdekat</h3>
-            <div id="assignment-preview"
-                class="bg-white p-4 rounded-3xl border border-slate-100 shadow-soft flex items-center gap-4">
-                <!-- Loading State -->
-                <div class="w-full text-center py-2 text-slate-400 text-xs">
-                    <i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Memuat...
-                </div>
-            </div>
-        </section>
-    </main>
-
     <!-- Course Info & Countdown Section -->
-    <div class="px-6 mb-6 space-y-4">
+    <div class="px-6 mb-6 space-y-4 animate-enter delay-100">
 
         <!-- Course Banner (Clean Style) -->
         <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden">
@@ -277,7 +195,7 @@
     </div>
 
     <!-- Resume Learning (Dynamic) -->
-    <div id="resume-learning-container" class="px-6 mb-8 hidden">
+    <div id="resume-learning-container" class="px-6 mb-8 hidden animate-enter delay-200">
         <!-- Injected via JS -->
     </div>
 
