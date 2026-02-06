@@ -5,80 +5,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peringkat | FisikaLab</title>
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;600&display=swap"
         rel="stylesheet">
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    colors: {
-                        primary: {
-                            500: '#3B82F6', // Blue 500
-                        },
-                        ui: {
-                            bg: '#F8FAFC', // Slate 50
-                            card: '#FFFFFF',
-                            text: '#1E293B', // Slate 800
-                            sub: '#64748B', // Slate 500
-                        }
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
                     },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        gold: '#FFD700',
+                        silver: '#C0C0C0',
+                        bronze: '#CD7F32'
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                     }
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .podium-enter {
+            animation: podium-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        .list-enter {
+            animation: slide-up 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes podium-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slide-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+    </style>
 </head>
 
-<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
+<body class="bg-slate-50 font-sans text-slate-900 min-h-screen pb-24 selection:bg-primary-500/30">
 
-    <!-- Header -->
-    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex flex-col">
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Leaderboard 🏆</h1>
-
-        <!-- Tabs -->
-        <div class="mt-4 flex bg-slate-100 p-1 rounded-2xl">
-            <button onclick="switchTab('participation')" id="tab-participation"
-                class="flex-1 py-2 rounded-xl text-sm font-bold text-white bg-primary-500 shadow-sm transition-all">
-                Keaktifan
-            </button>
-            <button onclick="switchTab('diligence')" id="tab-diligence"
-                class="flex-1 py-2 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-800 transition-all">
-                Kerajinan
-            </button>
-        </div>
-    </div>
-
-    <!-- Content -->
-    <main class="px-6 py-6 font-inter">
-
-        <!-- Top 3 Podium (Mobile Stacked for now, easier to read) -->
-        <div id="podium-container" class="space-y-4 mb-8">
-            <!-- Loading -->
-            <div class="animate-pulse space-y-4">
-                <div class="h-24 bg-white rounded-3xl"></div>
-                <div class="h-24 bg-white rounded-3xl"></div>
-                <div class="h-24 bg-white rounded-3xl"></div>
+    <!-- Header / Tab Switcher -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm px-6 pb-4 pt-10">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-extrabold tracking-tight">Leaderboard 🏆</h1>
+            <div id="user-rank-badge"
+                class="hidden px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
+                #?
             </div>
         </div>
 
-        <!-- List Header -->
-        <h3 class="font-bold text-lg text-slate-800 mb-4 px-2">Peringkat Lainnya</h3>
+        <div class="relative bg-slate-100 p-1.5 rounded-2xl flex">
+            <!-- Gliding Background (Optional complicated logic, kept simple class switching for now) -->
+            <button onclick="switchTab('participation')" id="tab-participation"
+                class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm bg-white text-primary-600">
+                🔥 Keaktifan
+            </button>
+            <button onclick="switchTab('diligence')" id="tab-diligence"
+                class="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 text-slate-500 hover:text-slate-700">
+                📚 Kerajinan
+            </button>
+        </div>
+    </header>
 
-        <!-- List Container -->
-        <div id="leaderboard-list" class="space-y-3">
-            <!-- Injected -->
+    <main class="px-6 py-6 overflow-hidden">
+
+        <!-- Podium Section (Top 3) -->
+        <div id="podium-area" class="flex items-end justify-center gap-2 mb-10 h-64 mt-4 relative">
+            <!-- Injected via JS -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-primary-200"></i>
+            </div>
+        </div>
+
+        <!-- List Section (Rank 4+) -->
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-2 min-h-[200px]">
+            <div id="leaderboard-list" class="space-y-1">
+                <!-- Injected via JS -->
+            </div>
         </div>
 
     </main>
@@ -112,119 +145,215 @@
         </a>
     </nav>
 
-    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
         let currentTab = 'participation';
 
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check auth just to highlight current user
+            const user = checkAuth(); // Optional, page visible to guests? Assuming yes.
+            switchTab('participation');
+        });
+
         function switchTab(tab) {
             currentTab = tab;
-            const tab1 = document.getElementById('tab-participation');
-            const tab2 = document.getElementById('tab-diligence');
+            const tabP = document.getElementById('tab-participation');
+            const tabD = document.getElementById('tab-diligence');
 
             if (tab === 'participation') {
-                tab1.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-white bg-primary-500 shadow-sm transition-all';
-                tab2.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-800 transition-all';
+                // Active P
+                tabP.className = "flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-primary-600 shadow-sm transition-all duration-300 transform scale-100";
+                tabD.className = "flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all duration-300";
             } else {
-                tab2.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-white bg-pink-500 shadow-sm transition-all';
-                tab1.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-800 transition-all';
+                // Active D
+                tabD.className = "flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-pink-600 shadow-sm transition-all duration-300 transform scale-100";
+                tabP.className = "flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all duration-300";
             }
             loadData();
         }
 
         async function loadData() {
             if (!window.supabaseClient) return;
-            const podiumContainer = document.getElementById('podium-container');
-            const listContainer = document.getElementById('leaderboard-list');
 
-            podiumContainer.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-primary-500"></i></div>';
-            listContainer.innerHTML = '';
+            const podiumEl = document.getElementById('podium-area');
+            const listEl = document.getElementById('leaderboard-list');
+
+            // Fade out
+            // podiumEl.style.opacity = '0.5';
 
             try {
-                // Fetch basic data (Same logic as before, just styling changed)
+                // 1. Fetch Students
                 const { data: students } = await supabaseClient.from('students').select('*');
                 if (!students) return;
-
-                // Mocking points calculation for display speed (in real app, use the same logic as before)
-                // For this redesign demo, let's assume we have points.
-                // Re-using the logic from previous keaktifan.html is best for data integrity.
 
                 let leaderboard = [];
 
                 if (currentTab === 'participation') {
+                    // Fetch logs
                     const { data: logs } = await supabaseClient.from('participation_logs').select('student_nim, points');
+                    const pointsMap = {};
                     if (logs) {
-                        leaderboard = students.map(s => {
-                            const pts = logs.filter(l => l.student_nim === s.nim).reduce((sum, l) => sum + (l.points || 0), 0);
-                            return { ...s, totalPoints: pts };
+                        logs.forEach(l => {
+                            pointsMap[l.student_nim] = (pointsMap[l.student_nim] || 0) + (l.points || 0);
                         });
                     }
+                    leaderboard = students.map(s => ({ ...s, totalPoints: pointsMap[s.nim] || 0 }));
+
                 } else {
-                    // --- Kerajinan (Diligence) Logic ---
-                    // Points from Completed Assignments
+                    // Diligence logic
                     const { data: assignments } = await supabaseClient.from('assignments').select('id, points');
                     const { data: submissions } = await supabaseClient.from('assignment_submissions').select('student_nim, assignment_id');
 
                     if (assignments && submissions) {
-                        // Create Map: Assignment ID -> Points
-                        const pointsMap = {};
-                        assignments.forEach(a => pointsMap[a.id] = (a.points || 10)); // Default 10 if null
+                        const assignPoints = {};
+                        assignments.forEach(a => assignPoints[a.id] = (a.points || 10));
 
-                        leaderboard = students.map(s => {
-                            // Find all submissions for this student
-                            const userSubs = submissions.filter(sub => sub.student_nim === s.nim);
-                            // Sum points
-                            const total = userSubs.reduce((sum, sub) => sum + (pointsMap[sub.assignment_id] || 0), 0);
-                            return { ...s, totalPoints: total };
+                        const studentPoints = {};
+                        submissions.forEach(sub => {
+                            studentPoints[sub.student_nim] = (studentPoints[sub.student_nim] || 0) + (assignPoints[sub.assignment_id] || 0);
                         });
+
+                        leaderboard = students.map(s => ({ ...s, totalPoints: studentPoints[s.nim] || 0 }));
                     }
                 }
 
+                // Sort: Descending Points
                 leaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
 
-                // Render Top 3
-                const top3 = leaderboard.slice(0, 3);
-                podiumContainer.innerHTML = top3.map((s, idx) => {
-                    const rank = idx + 1;
-                    const color = rank === 1 ? 'bg-yellow-100 text-yellow-600 border-yellow-200' :
-                        rank === 2 ? 'bg-slate-100 text-slate-600 border-slate-200' :
-                            'bg-orange-100 text-orange-600 border-orange-200';
-                    const icon = rank === 1 ? 'fa-crown' : 'fa-medal';
-
-                    return `
-                        <div class="flex items-center gap-4 bg-white p-4 rounded-3xl shadow-soft border border-slate-50 relative overflow-hidden">
-                            <div class="flex-shrink-0 w-12 h-12 rounded-2xl ${color} flex items-center justify-center font-bold text-xl">
-                                <i class="fa-solid ${icon}"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-slate-900 truncate">${s.name}</h3>
-                                <p class="text-xs text-slate-500">Rank #${rank}</p>
-                            </div>
-                            <div class="font-bold text-lg font-mono text-slate-800">${s.totalPoints}</div>
-                        </div>
-                    `;
-                }).join('');
-
-                // Render Rest
-                listContainer.innerHTML = leaderboard.slice(3).map((s, idx) => `
-                    <div class="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100">
-                        <span class="w-8 text-center text-slate-400 font-bold text-sm">#${idx + 4}</span>
-                        <div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
-                             ${s.profile_photo_url ? `<img src="${s.profile_photo_url}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-user"></i></div>'}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-slate-700 text-sm truncate">${s.name}</h4>
-                        </div>
-                         <div class="font-medium text-slate-500 font-mono">${s.totalPoints}</div>
-                    </div>
-                `).join('');
+                renderLeaderboard(leaderboard);
 
             } catch (e) {
                 console.error(e);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => switchTab('participation'));
+        function renderLeaderboard(data) {
+            const podiumEl = document.getElementById('podium-area');
+            const listEl = document.getElementById('leaderboard-list');
+
+            const top3 = data.slice(0, 3);
+            const rest = data.slice(3);
+
+            // -- RENDER PODIUM --
+            let podiumHTML = '';
+
+            // Re-order for visual pyramid: 2 - 1 - 3
+            // Index 0 in Array is #1 Rank.
+            // visual order: Left(#2), Center(#1), Right(#3)
+
+            const rank1 = top3[0] || { name: '-', totalPoints: 0, profile_photo_url: null };
+            const rank2 = top3[1] || { name: '-', totalPoints: 0, profile_photo_url: null };
+            const rank3 = top3[2] || { name: '-', totalPoints: 0, profile_photo_url: null };
+
+            // Rank 2 (Silver)
+            podiumHTML += createPodiumCard(rank2, 2, 'silver', 'delay-100');
+            // Rank 1 (Gold) - Center, Taller
+            podiumHTML += createPodiumCard(rank1, 1, 'gold', 'delay-200');
+            // Rank 3 (Bronze)
+            podiumHTML += createPodiumCard(rank3, 3, 'bronze', 'delay-300');
+
+            podiumEl.innerHTML = podiumHTML;
+
+
+            // -- RENDER LIST --
+            if (rest.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">Belum ada peringkat lainnya.</div>';
+            } else {
+                listEl.innerHTML = rest.map((s, i) => {
+                    const rank = i + 4;
+                    const avatar = s.profile_photo_url
+                        ? `<img src="${s.profile_photo_url}" class="w-full h-full object-cover">`
+                        : `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold">${getInitials(s.name)}</div>`;
+
+                    return `
+                        <div class="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-colors list-enter" style="animation-delay: ${rank * 50}ms">
+                            <span class="w-6 text-center text-xs font-bold text-slate-400">#${rank}</span>
+                            <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden shadow-sm shrink-0">
+                                ${avatar}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-bold text-slate-800 truncate">${s.name}</h4>
+                            </div>
+                            <div class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 font-mono">
+                                ${s.totalPoints}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // User Self Highlight
+            const user = checkAuth();
+            if (user) {
+                const myRank = data.findIndex(s => s.nim === user.nim) + 1;
+                const badge = document.getElementById('user-rank-badge');
+                if (myRank > 0) {
+                    badge.innerText = `Saya #${myRank}`;
+                    badge.classList.remove('hidden');
+                }
+            }
+        }
+
+        function createPodiumCard(user, rank, type, delayClass) {
+            // Adjust styles based on rank
+            let height = 'h-32'; // Rank 3/2
+            let translate = 'translate-y-4';
+            let colorClass = 'bg-orange-100 text-orange-600 border-orange-200';
+            let icon = 'fa-medal';
+            let crown = '';
+
+            if (rank === 1) {
+                height = 'h-40';
+                translate = 'translate-y-0';
+                colorClass = 'bg-yellow-100 text-yellow-600 border-yellow-300 shadow-yellow-100';
+                icon = 'fa-crown';
+                crown = '<i class="fa-solid fa-crown absolute -top-4 w-full text-center text-yellow-400 text-2xl animate-bounce"></i>';
+            } else if (rank === 2) {
+                colorClass = 'bg-slate-100 text-slate-600 border-slate-200';
+            }
+
+            const avatar = user.profile_photo_url
+                ? `<img src="${user.profile_photo_url}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full ${type === 'gold' ? 'bg-yellow-50' : 'bg-white'} flex items-center justify-center text-sm font-bold opacity-50">${getInitials(user.name)}</div>`;
+
+            // Don't render empty card completely if no user, but keep layout structure
+            const opacity = user.totalPoints === 0 ? 'opacity-50 grayscale' : '';
+
+            return `
+                <div class="flex-1 flex flex-col items-center ${translate} podium-enter ${delayClass} ${opacity}">
+                    <div class="relative w-full flex flex-col items-center">
+                        ${rank === 1 ? crown : ''}
+                        
+                        <!-- Avatar Circle -->
+                        <div class="w-16 h-16 rounded-full border-4 border-white shadow-md z-10 overflow-hidden bg-white mb-[-20px]">
+                            ${avatar}
+                        </div>
+                        
+                        <!-- Card Body -->
+                        <div class="w-full ${height} ${colorClass} pt-8 pb-2 rounded-t-[2.5rem] rounded-b-xl border-t border-x shadow-sm flex flex-col items-center justify-end text-center px-1">
+                            <h3 class="text-xs font-bold leading-tight line-clamp-2 max-w-[80%] mb-1">${user.name}</h3>
+                            <div class="px-2 py-0.5 bg-white/50 rounded-full text-[10px] font-black tracking-wide backdrop-blur-sm">
+                                ${user.totalPoints} PTS
+                            </div>
+                            <!-- Rank Number -->
+                            <div class="mt-1 text-2xl font-black opacity-20">${rank}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function checkAuth() {
+            const session = localStorage.getItem('user_session');
+            if (!session) return null;
+            return JSON.parse(session);
+        }
     </script>
 </body>
 
