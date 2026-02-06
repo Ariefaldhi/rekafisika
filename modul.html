@@ -37,6 +37,28 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-enter {
+            animation: slide-up 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+    </style>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -45,13 +67,13 @@
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
     <!-- Header -->
-    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm animate-enter">
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Jelajah Materi</h1>
         <p class="text-sm text-slate-500 mt-1">Modul pembelajaran Fisika Matematika I</p>
     </div>
 
     <!-- Content -->
-    <main class="px-6 py-6" id="module-container">
+    <main class="px-6 py-6 animate-enter delay-100" id="module-container">
         <!-- Loading State -->
         <div class="space-y-4 animate-pulse">
             <div class="bg-white p-5 rounded-3xl h-32"></div>

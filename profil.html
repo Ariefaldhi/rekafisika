@@ -30,12 +30,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-enter {
+            animation: slide-up 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+    </style>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
     <!-- Header -->
-    <div class="px-6 pt-12 pb-6 bg-white shadow-sm mb-4">
+    <div class="px-6 pt-12 pb-6 bg-white shadow-sm mb-4 animate-enter">
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Profil Saya</h1>
     </div>
 
@@ -44,7 +70,7 @@
 
         <!-- User Info -->
         <div
-            class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col items-center text-center relative">
+            class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col items-center text-center relative animate-enter delay-100">
 
             <!-- Profile Pic Container -->
             <div class="relative group cursor-pointer" onclick="document.getElementById('file-input').click()">
@@ -245,62 +271,47 @@
         async function saveCrop() {
             if (!cropper) return;
 
-            // Get canvas
-            cropper.getCroppedCanvas({
-                width: 400,
-                height: 400
-            }).toBlob(async (blob) => {
-                // Upload to Supabase
-                const user = checkAuth();
-                if (!user) return;
-                const fileName = `avatar_${user.nim}_${Date.now()}.jpg`;
+            // 1. Get Base64 String (Data URI)
+            // Smaller size for direct DB storage effectiveness
+            const base64Image = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300
+            }).toDataURL('image/jpeg', 0.7); // 70% quality to save space
 
-                const saveBtn = document.querySelector('button[onclick="saveCrop()"]');
-                const originalText = saveBtn.innerText;
-                saveBtn.innerText = 'Menyimpan...';
-                saveBtn.disabled = true;
+            // Upload to Supabase DB (students table)
+            const user = checkAuth();
+            if (!user) return;
 
-                try {
-                    // 1. Upload to Storage
-                    const { data, error } = await supabaseClient.storage
-                        .from('avatars') // Ensure this bucket exists and is public
-                        .upload(fileName, blob, {
-                            contentType: 'image/jpeg',
-                            upsert: true
-                        });
+            const saveBtn = document.querySelector('button[onclick="saveCrop()"]');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = 'Menyimpan...';
+            saveBtn.disabled = true;
 
-                    if (error) throw error;
+            try {
+                // 2. Update User Record in DB directly with Base64
+                const { error: dbError } = await supabaseClient
+                    .from('students')
+                    .update({ profile_photo_url: base64Image })
+                    .eq('nim', user.nim);
 
-                    // 2. Get Public URL
-                    const { data: { publicUrl } } = supabaseClient.storage
-                        .from('avatars')
-                        .getPublicUrl(fileName);
+                if (dbError) throw dbError;
 
-                    // 3. Update User Record in DB
-                    const { error: dbError } = await supabaseClient
-                        .from('students')
-                        .update({ profile_photo_url: publicUrl })
-                        .eq('nim', user.nim);
+                // 3. Update Local Session
+                user.profile_photo_url = base64Image;
+                localStorage.setItem('user_session', JSON.stringify(user));
 
-                    if (dbError) throw dbError;
+                // 4. UI Update
+                document.getElementById('profile-pic').innerHTML = `<img src="${base64Image}" class="w-full h-full object-cover">`;
+                closeDiffModal();
+                alert('Foto profil berhasil diperbarui!');
 
-                    // 4. Update Local Session
-                    user.profile_photo_url = publicUrl;
-                    localStorage.setItem('user_session', JSON.stringify(user));
-
-                    // 5. UI Update
-                    document.getElementById('profile-pic').innerHTML = `<img src="${publicUrl}" class="w-full h-full object-cover">`;
-                    closeDiffModal();
-                    alert('Foto profil berhasil diperbarui!');
-
-                } catch (e) {
-                    alert('Gagal upload: ' + e.message + '\nPastikan bucket "avatars" ada dan Public.');
-                    console.error(e);
-                } finally {
-                    saveBtn.innerText = originalText;
-                    saveBtn.disabled = false;
-                }
-            }, 'image/jpeg', 0.8);
+            } catch (e) {
+                alert('Gagal menyimpan foto: ' + e.message);
+                console.error(e);
+            } finally {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
         }
 
         async function loadStats(user) {

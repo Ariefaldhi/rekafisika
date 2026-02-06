@@ -22,18 +22,44 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-enter {
+            animation: slide-up 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+    </style>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24">
 
     <!-- Header -->
-    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm">
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm animate-enter">
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Menu Lainnya</h1>
         <p class="text-sm text-slate-500 mt-1">Akses semua fitur lainnya disini.</p>
     </div>
 
     <!-- Menu Grid -->
-    <div class="px-6 py-6 grid grid-cols-2 gap-4">
+    <div class="px-6 py-6 grid grid-cols-2 gap-4 animate-enter delay-100">
 
         <!-- Profil (Moved here) -->
         <a href="profil.html"
