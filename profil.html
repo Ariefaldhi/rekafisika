@@ -303,10 +303,10 @@
                 // 4. UI Update
                 document.getElementById('profile-pic').innerHTML = `<img src="${base64Image}" class="w-full h-full object-cover">`;
                 closeDiffModal();
-                alert('Foto profil berhasil diperbarui!');
+                VisualModal.alert('Foto profil berhasil diperbarui!', 'Sukses', 'success');
 
             } catch (e) {
-                alert('Gagal menyimpan foto: ' + e.message);
+                VisualModal.alert('Gagal menyimpan foto: ' + e.message, 'Error', 'error');
                 console.error(e);
             } finally {
                 saveBtn.innerText = originalText;

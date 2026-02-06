@@ -186,8 +186,8 @@
             }
         });
 
-        function logout() {
-            if (confirm('Apakah Anda yakin ingin keluar?')) {
+        async function logout() {
+            if (await VisualModal.confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
                 window.location.href = 'login.html';
             }

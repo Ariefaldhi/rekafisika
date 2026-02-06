@@ -220,7 +220,7 @@
 
         async function startQuiz() {
             if (!GROQ_API_KEY || GROQ_API_KEY.includes("PASTE_")) {
-                alert("API Key belum disetting di config.js");
+                VisualModal.alert("API Key belum disetting di config.js", 'Konfigurasi Error', 'error');
                 return;
             }
             switchScreen('loading');
@@ -242,7 +242,7 @@
                 switchScreen('quiz');
             } catch (err) {
                 clearInterval(msgInterval);
-                alert("Error: " + err.message);
+                await VisualModal.alert("Error: " + err.message, 'System Error', 'error');
                 location.reload();
             }
         }

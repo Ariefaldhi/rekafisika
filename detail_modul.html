@@ -284,7 +284,7 @@
 
                         } catch (e) {
                             console.error("Save step error:", e);
-                            alert("Gagal menyimpan progress! \nKemungkinan database belum diupdate. \nSilakan jalankan file 'add_step_progress_col.sql' di Supabase.");
+                            VisualModal.alert("Gagal menyimpan progress! \nKemungkinan database belum diupdate. \nSilakan jalankan file 'add_step_progress_col.sql' di Supabase.", 'Error', 'error');
                         }
                     }
                 };
@@ -475,8 +475,8 @@
         // Siblings check function removed
 
         async function completeModule(moduleId, user) {
-            if (!user) { alert('Silakan login terlebih dahulu.'); return; }
-            if (!confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.')) return;
+            if (!user) { await VisualModal.alert('Silakan login terlebih dahulu.', 'Akses Ditolak', 'error'); return; }
+            if (!await VisualModal.confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.', 'Konfirmasi Selesai')) return;
 
             try {
                 // 1. Mark Module Progress
@@ -500,15 +500,15 @@
                         submitted_at: new Date().toISOString()
                     }, { onConflict: 'student_nim, assignment_id' });
 
-                    alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan (Nilai 100).');
+                    await VisualModal.alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan (Nilai 100).', 'Luar Biasa!', 'success');
                 } else {
-                    alert('Modul diselesaikan. (Tidak ada tugas terkait)');
+                    await VisualModal.alert('Modul diselesaikan. (Tidak ada tugas terkait)', 'Sukses', 'success');
                 }
 
                 window.location.href = 'index.html';
             } catch (e) {
                 console.error(e);
-                alert('Gagal menyimpan progress: ' + e.message);
+                VisualModal.alert('Gagal menyimpan progress: ' + e.message, 'Error', 'error');
             }
         }
 

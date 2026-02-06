@@ -162,7 +162,8 @@
                     else hasActive = true;
 
                     // Detail Link
-                    const detailAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
+                    // const detailAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
+                    const detailAction = `VisualModal.alert(this.dataset.desc, 'Detail Tugas', 'info')`;
 
                     // Card Styling Specs
                     let badgeClass = isCompleted
@@ -236,7 +237,9 @@
                                 <h3 class="text-xl font-black text-slate-900 leading-tight mb-2 group-hover:text-primary-600 transition-colors">
                                     ${task.title}
                                 </h3>
-                                <p class="text-sm text-slate-500 leading-relaxed line-clamp-2 cursor-pointer hover:text-slate-700 transition-colors" onclick="${detailAction}">
+                                <p class="text-sm text-slate-500 leading-relaxed line-clamp-2 cursor-pointer hover:text-slate-700 transition-colors" 
+                                   data-desc="${task.description.replace(/"/g, '&quot;')}" 
+                                   onclick="${detailAction}">
                                     ${task.description}
                                 </p>
                             </div>
@@ -267,7 +270,7 @@
             const user = checkAuth(); // Ensure verified
             if (!user) return;
 
-            if (!confirm('Apakah tugas ini sudah Anda kerjakan/kumpulkan?')) return;
+            if (!await VisualModal.confirm('Apakah tugas ini sudah Anda kerjakan/kumpulkan?')) return;
 
             try {
                 const { error } = await supabaseClient.from('assignment_submissions').upsert({
@@ -280,10 +283,10 @@
 
                 if (error) throw error;
 
-                alert('Tugas ditandai selesai!');
+                await VisualModal.alert('Tugas ditandai selesai!', 'Sukses', 'success');
                 fetchTasks();
             } catch (e) {
-                alert('Gagal: ' + e.message);
+                await VisualModal.alert('Gagal: ' + e.message, 'Error', 'error');
             }
         }
     </script>

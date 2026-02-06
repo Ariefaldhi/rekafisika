@@ -560,7 +560,7 @@
                 status.innerText = isActive ? 'ACTIVE' : 'OFF';
                 status.className = isActive ? 'text-xs font-bold text-red-500' : 'text-xs font-bold text-emerald-500';
             } else {
-                alert('Gagal update status: ' + error.message);
+                VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
                 toggle.checked = !isActive; // Revert
             }
         }
@@ -600,12 +600,12 @@
             const nim = document.getElementById('new-nim').value;
             const name = document.getElementById('new-name').value;
             const { error } = await supabaseClient.from('students').insert([{ nim, name, access_code: nim }]);
-            if (!error) { e.target.reset(); loadStudents(); updateStats(); alert('Mahasiswa ditambahkan'); }
-            else alert(error.message);
+            if (!error) { e.target.reset(); loadStudents(); updateStats(); VisualModal.alert('Mahasiswa ditambahkan', 'Sukses', 'success'); }
+            else VisualModal.alert(error.message, 'Error', 'error');
         }
 
         async function deleteStudent(nim) {
-            if (!confirm('Hapus users?')) return;
+            if (!await VisualModal.confirm('Hapus users?')) return;
             await supabaseClient.from('students').delete().eq('nim', nim);
             loadStudents();
         }
@@ -674,7 +674,7 @@
         }
 
         async function deleteTask(id) {
-            if (confirm('Hapus tugas?')) {
+            if (await VisualModal.confirm('Hapus tugas?')) {
                 await supabaseClient.from('assignments').delete().eq('id', id);
                 loadTasks();
             }
@@ -789,13 +789,13 @@
             const btn = input.parentElement; // Label
             // Robust traversal: Input -> Label -> Container -> TextInput
             if (!btn || !btn.parentElement) {
-                alert('Error: Structure mismatch (parent not found)');
+                await VisualModal.alert('Error: Structure mismatch (parent not found)', 'Error', 'error');
                 return;
             }
 
             const textInput = btn.parentElement.querySelector('.step-url');
             if (!textInput) {
-                alert('Error: URL Input field not found related to this button');
+                await VisualModal.alert('Error: URL Input field not found related to this button', 'Error', 'error');
                 return;
             }
 
@@ -811,13 +811,13 @@
                 const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
                 if (error) throw error;
 
-                const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
+                // const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
 
                 textInput.value = publicUrl;
-                alert('Upload Sukses!');
+                await VisualModal.alert('Upload Sukses!', 'Sukses', 'success');
             } catch (e) {
                 console.error(e);
-                alert('Gagal Upload: ' + e.message);
+                await VisualModal.alert('Gagal Upload: ' + e.message, 'Error', 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.classList.remove('cursor-not-allowed', 'opacity-50');
@@ -893,8 +893,8 @@
                 error = err;
             }
 
-            if (!error) { resetModuleForm(); loadModules(); }
-            else alert(error.message);
+            if (!error) { resetModuleForm(); loadModules(); VisualModal.alert('Modul disimpan', 'Sukses', 'success'); }
+            else VisualModal.alert(error.message, 'Error', 'error');
         }
 
         async function editModule(id) {
@@ -929,7 +929,7 @@
         }
 
         async function deleteModule(id) {
-            if (confirm('Hapus modul?')) {
+            if (await VisualModal.confirm('Hapus modul?')) {
                 await supabaseClient.from('modules').delete().eq('id', id);
                 loadModules();
             }
@@ -999,11 +999,11 @@
             await supabaseClient.from('announcements').insert([payload]);
             e.target.reset();
             loadNews();
-            alert('Berita diposting');
+            VisualModal.alert('Berita diposting', 'Sukses', 'success');
         }
 
         async function deleteNews(id) {
-            if (confirm('Hapus berita?')) {
+            if (await VisualModal.confirm('Hapus berita?')) {
                 await supabaseClient.from('announcements').delete().eq('id', id);
                 loadNews();
             }
@@ -1013,7 +1013,7 @@
         async function addPoints(e) {
             e.preventDefault();
             const nim = document.getElementById('p-student').value;
-            if (!nim) return alert('Pilih mahasiswa');
+            if (!nim) return VisualModal.alert('Pilih mahasiswa', 'Warning', 'warning');
             const payload = {
                 student_nim: nim,
                 points: document.getElementById('p-amount').value,
@@ -1021,7 +1021,7 @@
             };
             await supabaseClient.from('participation_logs').insert([payload]);
             e.target.reset();
-            alert('Poin ditambahkan');
+            VisualModal.alert('Poin ditambahkan', 'Sukses', 'success');
         }
 
         // --- PRESENCE ---
@@ -1062,9 +1062,9 @@
             });
             if (upserts.length > 0) {
                 const { error } = await supabaseClient.from('attendance_logs').upsert(upserts, { onConflict: 'student_nim, meeting_code' });
-                if (!error) alert('Presensi disimpan!'); else alert(error.message);
+                if (!error) VisualModal.alert('Presensi disimpan!', 'Sukses', 'success'); else VisualModal.alert(error.message, 'Error', 'error');
             } else {
-                alert('Tidak ada data yang dipilih');
+                VisualModal.alert('Tidak ada data yang dipilih', 'Info');
             }
         }
 
@@ -1163,7 +1163,7 @@
 
             } catch (e) {
                 console.error(e);
-                alert("Gagal load data mahasiswa");
+                VisualModal.alert("Gagal load data mahasiswa", 'Error', 'error');
             }
         }
 
