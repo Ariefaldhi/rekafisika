@@ -265,23 +265,8 @@
 
 
                 // 4. Kerajinan (Diligence)
-                // Sum of scores from assignments?
-                let diligencePoints = 0;
-                try {
-                    const { data: subs } = await supabaseClient.from('assignment_submissions')
-                        .select('score') // Assuming 'score' column
-                        .eq('student_nim', user.nim);
-
-                    if (subs) {
-                        diligencePoints = subs.reduce((acc, curr) => acc + (curr.score || 0), 0);
-                    }
-                } catch (e) { console.warn("No score in submissions", e); }
-
-                // Fallback if no scores: value each task as 10 pts
-                if (diligencePoints === 0 && submittedCount > 0) {
-                    diligencePoints = submittedCount * 10;
-                }
-
+                // Tiap tugas dikerjakan = 10 poin (User Request)
+                const diligencePoints = submittedCount * 10;
                 document.getElementById('stat-diligence').innerText = diligencePoints;
 
             } catch (e) {

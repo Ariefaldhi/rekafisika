@@ -118,14 +118,16 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-users"></i></div>
+                        <i class="fa-solid fa-users"></i>
+                    </div>
                     <h3 class="text-3xl font-black text-slate-900" id="stat-students">0</h3>
                     <p class="text-xs text-slate-400 uppercase font-bold">Mahasiswa</p>
                 </div>
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <div
                         class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-check-circle"></i></div>
+                        <i class="fa-solid fa-check-circle"></i>
+                    </div>
                     <h3 class="text-3xl font-black text-slate-900" id="stat-active">0</h3>
                     <p class="text-xs text-slate-400 uppercase font-bold">Tugas Aktif</p>
                 </div>
@@ -181,7 +183,11 @@
             <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Modul</h2>
 
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-700 mb-4" id="modul-form-title">Tambah Modul</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-700" id="modul-form-title">Tambah Modul</h3>
+                    <button type="button" onclick="resetModuleForm()"
+                        class="text-xs text-slate-400 hover:text-primary-600">Reset</button>
+                </div>
                 <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
                     <input type="hidden" id="m-id">
                     <div class="grid grid-cols-4 gap-4">
@@ -195,9 +201,18 @@
                     <textarea id="m-desc" placeholder="Deskripsi Singkat"
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-20 focus:outline-none focus:ring-2 focus:ring-primary-500/20"></textarea>
 
-                    <button type="submit"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/20">Simpan
-                        Modul</button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="m-file" type="text" placeholder="Link Materi (PDF/Drive)"
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                        <input id="m-video" type="text" placeholder="ID Video YouTube (e.g. dQw4w9MgXcQ)"
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-save-modul"
+                            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/20">Simpan
+                            Modul</button>
+                    </div>
                 </form>
             </div>
 
