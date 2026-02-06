@@ -228,7 +228,7 @@
                                        </div>
                                    </div>
                                     <label class="flex items-center gap-3 cursor-pointer select-none">
-                                        <input type="checkbox" class="step-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 cursor-pointer" onchange="checkAllSteps()">
+                                        <input type="checkbox" data-idx="${idx}" class="step-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 cursor-pointer" onchange="toggleStep(${idx})">
                                         <span class="text-sm font-bold text-slate-500">Selesai</span>
                                     </label>
                                </div>
@@ -249,6 +249,9 @@
                         `;
                         stepsContainer.innerHTML += wrapper;
                     });
+
+                    // LOAD PROGRESS
+                    loadStepProgress(modul.id, user);
                 }
 
                 // --- PROGRESS ACTION ---
@@ -260,9 +263,50 @@
                 actionBtn.onclick = () => completeModule(modul.id, user);
                 document.querySelector('main').appendChild(actionBtn);
 
-                // Initial Check
+                // Main Logic for Toggling Steps
+                window.toggleStep = async (idx) => {
+                    const checkbox = document.querySelector(`.step-check[data-idx="${idx}"]`);
+                    checkAllSteps(); // Update UI first for responsiveness
+
+                    if (user) {
+                        try {
+                            // Get all checked indicies
+                            const checkedNodes = document.querySelectorAll('.step-check:checked');
+                            const completedSteps = Array.from(checkedNodes).map(cb => parseInt(cb.dataset.idx));
+
+                            // Save to DB
+                            await supabaseClient.from('module_progress').upsert({
+                                student_nim: user.nim,
+                                module_id: id,
+                                completed_steps: completedSteps,
+                                last_accessed: new Date().toISOString()
+                            }, { onConflict: 'student_nim, module_id' });
+
+                        } catch (e) {
+                            console.error("Save step error:", e);
+                        }
+                    }
+                };
+
+                // Load Initial
+                async function loadStepProgress(modId, user) {
+                    if (!user) return;
+                    const { data } = await supabaseClient.from('module_progress').select('completed_steps').eq('student_nim', user.nim).eq('module_id', modId).single();
+                    if (data && data.completed_steps) {
+                        data.completed_steps.forEach(idx => {
+                            const cb = document.querySelector(`.step-check[data-idx="${idx}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                        checkAllSteps(); // Updates button state
+                    }
+                }
+
+                // Check UI State
                 window.checkAllSteps = () => {
                     const checks = document.querySelectorAll('.step-check:not(:checked)');
+                    const total = document.querySelectorAll('.step-check').length;
+                    const done = total - checks.length;
+
                     const btn = document.getElementById('complete-btn');
                     if (checks.length === 0) {
                         btn.disabled = false;
