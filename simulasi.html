@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulasi Vektor | KawanFismat</title>
+    <title>Lab Virtual | KawanFismat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,35 +22,203 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sim-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .sim-card:active {
+            transform: scale(0.98);
+        }
+    </style>
 </head>
 
-<body class="bg-ui-bg font-inter text-ui-text h-screen flex flex-col overflow-hidden">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen flex flex-col pb-24">
 
     <!-- Header -->
-    <div class="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10 shrink-0">
-        <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex items-center gap-4">
+        <a href="index.html"
+            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
             <i class="fa-solid fa-arrow-left"></i>
-            <span class="text-sm font-bold">Kembali</span>
         </a>
-        <h1 class="text-sm font-bold text-slate-900">Lab Virtual: Vektor</h1>
-        <div class="w-8"></div> <!-- Spacer for center alignment -->
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Lab Virtual</h1>
+            <p class="text-xs text-slate-500">Pilih simulasi untuk praktikum mandiri.</p>
+        </div>
     </div>
 
-    <!-- Simulation Container -->
-    <div class="flex-1 relative bg-slate-900 w-full h-full">
-        <!-- Loader / Placeholder -->
-        <div class="absolute inset-0 flex items-center justify-center text-white z-0">
-            <div class="text-center">
-                <i class="fa-solid fa-spinner fa-spin text-3xl mb-2 text-primary-500"></i>
-                <p class="text-xs">Memuat Simulasi...</p>
-            </div>
+    <!-- Gallery Grid -->
+    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-container">
+        <!-- Injected via JS -->
+    </div>
+
+    <!-- Simulator Overlay (Hidden by default) -->
+    <div id="sim-overlay" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col">
+        <!-- Overlay Header -->
+        <div
+            class="px-4 py-3 bg-white/10 backdrop-blur-md border-b border-white/5 flex items-center justify-between shrink-0">
+            <button onclick="closeSim()" class="text-white hover:text-slate-300 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> <span class="text-sm font-bold">Keluar</span>
+            </button>
+            <h2 id="overlay-title" class="text-white font-bold text-sm truncate max-w-[200px]">Simulasi</h2>
+            <div class="w-8"></div>
         </div>
 
-        <!-- PhET Iframe -->
-        <iframe src="https://phet.colorado.edu/sims/html/vector-addition/latest/vector-addition_all.html?locale=in"
-            class="absolute inset-0 w-full h-full z-10 border-none" allowfullscreen>
-        </iframe>
+        <!-- Iframe Container -->
+        <div class="flex-1 relative w-full h-full bg-black">
+            <div class="absolute inset-0 flex items-center justify-center text-white z-0 pointer-events-none">
+                <div class="text-center opacity-50">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+                    <p class="text-xs">Memuat...</p>
+                </div>
+            </div>
+            <iframe id="sim-frame" src="" class="absolute inset-0 w-full h-full border-none z-10 bg-white"
+                allowfullscreen></iframe>
+        </div>
     </div>
+
+    <script>
+        const simulations = [
+            {
+                id: 'vector-addition',
+                title: 'Penjumlahan Vektor',
+                desc: 'Eksplorasi vektor dalam 1D dan 2D, serta metode jajar genjang.',
+                icon: 'fa-solid fa-arrows-up-down-left-right',
+                color: 'text-blue-500',
+                bg: 'bg-blue-100',
+                url: 'https://phet.colorado.edu/sims/html/vector-addition/latest/vector-addition_all.html?locale=in'
+            },
+            {
+                id: 'projectile-motion',
+                title: 'Gerak Parabola',
+                desc: 'Pelajari gerak peluru, sudut tembak, dan hambatan udara.',
+                icon: 'fa-solid fa-bow-arrow', // Generic replacement or custom
+                customIcon: true,
+                color: 'text-orange-500',
+                bg: 'bg-orange-100',
+                url: 'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_all.html?locale=in'
+            },
+            {
+                id: 'forces-motion',
+                title: 'Gaya & Gerak',
+                desc: 'Hukum Newton, gesekan, dan percepatan.',
+                icon: 'fa-solid fa-weight-hanging',
+                color: 'text-purple-500',
+                bg: 'bg-purple-100',
+                url: 'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html?locale=in'
+            },
+            {
+                id: 'pendulum',
+                title: 'Bandul Sederhana',
+                desc: 'Periode, frekuensi, dan konservasi energi pada ayunan.',
+                icon: 'fa-solid fa-stopwatch',
+                color: 'text-rose-500',
+                bg: 'bg-rose-100',
+                url: 'https://phet.colorado.edu/sims/html/pendulum-lab/latest/pendulum-lab_all.html?locale=in'
+            },
+            {
+                id: 'circuit',
+                title: 'Rangkaian Listrik DC',
+                desc: 'Buat rangkaian seri/paralel dengan baterai, resistor, dan lampu.',
+                icon: 'fa-solid fa-plug',
+                color: 'text-yellow-500',
+                bg: 'bg-yellow-100',
+                url: 'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html?locale=in'
+            },
+            {
+                id: 'energy-skate',
+                title: 'Taman Energi',
+                desc: 'Kekekalan energi mekanik (potensial dan kinetik).',
+                icon: 'fa-solid fa-person-skating',
+                color: 'text-emerald-500',
+                bg: 'bg-emerald-100',
+                url: 'https://phet.colorado.edu/sims/html/energy-skate-park/latest/energy-skate-park_all.html?locale=in'
+            },
+            {
+                id: 'hooke',
+                title: 'Hukum Hooke',
+                desc: 'Gaya pegas, konstanta pegas, dan energi potensial.',
+                icon: 'fa-solid fa-spring', // Pseudo class if not avail, using generic
+                customIcon: false,
+                iconVal: 'fa-solid fa-lines-leaning', // Generic for spring
+                color: 'text-indigo-500',
+                bg: 'bg-indigo-100',
+                url: 'https://phet.colorado.edu/sims/html/hookes-law/latest/hookes-law_all.html?locale=in'
+            },
+            {
+                id: 'gravity',
+                title: 'Gravitasi & Orbit',
+                desc: 'Simulasi tata surya dan gaya gravitasi antar planet.',
+                icon: 'fa-solid fa-earth-americas',
+                color: 'text-sky-500',
+                bg: 'bg-sky-100',
+                url: 'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html?locale=in'
+            },
+            {
+                id: 'wave-intro',
+                title: 'Gelombang',
+                desc: 'Sifat gelombang bunyi, air, dan cahaya.',
+                icon: 'fa-solid fa-water',
+                color: 'text-cyan-500',
+                bg: 'bg-cyan-100',
+                url: 'https://phet.colorado.edu/sims/html/waves-intro/latest/waves-intro_all.html?locale=in'
+            }
+        ];
+
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = simulations.map(sim => `
+                <div onclick="openSim('${sim.url}', '${sim.title}')" 
+                    class="sim-card bg-white p-5 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:shadow-md flex flex-col gap-4 relative overflow-hidden group">
+                    
+                    <div class="flex justify-between items-start z-10">
+                        <div class="w-14 h-14 rounded-2xl ${sim.bg} ${sim.color} flex items-center justify-center text-2xl shadow-inner">
+                            <i class="${sim.icon || sim.iconVal}"></i>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-500 transition-colors">
+                            <i class="fa-solid fa-play ml-1 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <div class="z-10">
+                        <h3 class="font-bold text-slate-900 text-lg mb-1 leading-tight group-hover:text-primary-600 transition-colors">${sim.title}</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${sim.desc}</p>
+                    </div>
+
+                    <!-- Deco Circle -->
+                    <div class="absolute -bottom-4 -right-4 w-24 h-24 ${sim.bg} opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                </div>
+            `).join('');
+        }
+
+        function openSim(url, title) {
+            const overlay = document.getElementById('sim-overlay');
+            const iframe = document.getElementById('sim-frame');
+            const titleEl = document.getElementById('overlay-title');
+
+            iframe.src = url;
+            titleEl.innerText = title;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSim() {
+            const overlay = document.getElementById('sim-overlay');
+            const iframe = document.getElementById('sim-frame');
+
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            iframe.src = ''; // Stop simulation to save resources
+
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', renderGallery);
+    </script>
 
 </body>
 
