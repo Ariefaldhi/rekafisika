@@ -195,9 +195,15 @@ if (typeof supabase !== 'undefined') {
 }
 
 function checkAuth() {
-    const session = localStorage.getItem('user_session');
-    if (!session) return null;
-    return JSON.parse(session);
+    try {
+        const session = localStorage.getItem('user_session');
+        if (!session) return null;
+        return JSON.parse(session);
+    } catch (e) {
+        console.error("Session corrupted, clearing...", e);
+        localStorage.removeItem('user_session');
+        return null;
+    }
 }
 
 // Event untuk menandakan config siap
