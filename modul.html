@@ -125,7 +125,8 @@
                     .from('modules')
                     .select('*')
                     .eq('is_visible', true)
-                    .order('week', { ascending: true });
+                    .order('week', { ascending: true })
+                    .order('created_at', { ascending: true });
 
                 if (error) throw error;
 
