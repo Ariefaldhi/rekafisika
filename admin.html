@@ -610,31 +610,104 @@
             if (noMsg) noMsg.remove();
 
             const div = document.createElement('div');
-            div.className = 'grid grid-cols-3 gap-2 step-item bg-slate-50 p-2 rounded-lg border border-slate-100';
+            div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
             div.innerHTML = `
-                <input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}">
-                <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1">
-                    <option value="ppt" ${data.type === 'ppt' ? 'selected' : ''}>PPT</option>
-                    <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
-                    <option value="pdf" ${data.type === 'pdf' ? 'selected' : ''}>PDF</option>
-                    <option value="link" ${data.type === 'link' ? 'selected' : ''}>Link</option>
-                </select>
-                <div class="col-span-1 flex gap-1">
-                    <input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL..." value="${data.url || ''}">
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}">
+                    <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1">
+                        <option value="ppt" ${data.type === 'ppt' ? 'selected' : ''}>PPT</option>
+                        <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
+                        <option value="pdf" ${data.type === 'pdf' ? 'selected' : ''}>PDF</option>
+                        <option value="link" ${data.type === 'link' ? 'selected' : ''}>Link</option>
+                    </select>
+                    <div class="col-span-1 flex gap-1">
+                        <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+
+                <!-- URL / Upload -->
+                <div class="flex gap-2 items-center">
+                    <input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link..." value="${data.url || ''}">
+                    <span class="text-[10px] text-slate-400 font-bold">OR</span>
+                    <label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap">
+                        <i class="fa-solid fa-upload"></i> Upload
+                        <input type="file" class="hidden" onchange="uploadStepFile(this)">
+                    </label>
+                </div>
+
+                <!-- Question (Optional) -->
+                <div class="border-t border-slate-200 pt-2 mt-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2">
+                        <input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)" ${data.question ? 'checked' : ''}>
+                        <span>Tambahkan Pertanyaan (Kuis Singkat)</span>
+                    </label>
+                    <div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}">
+                        <input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}">
+                        <input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}">
+                    </div>
                 </div>
             `;
             container.appendChild(div);
+        }
+
+        function toggleStepQuestion(cb) {
+            const box = cb.parentElement.nextElementSibling;
+            if (cb.checked) box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        async function uploadStepFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const btn = input.parentElement;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                // Upload to 'materials' bucket
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `uploads/${fileName}`;
+
+                const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
+
+                // Set URL to input
+                const urlInput = btn.parentElement.previousElementSibling || btn.parentElement.querySelector('.step-url') || input.parentElement.parentElement.querySelector('.step-url');
+                // Navigation to find the text input sibling
+                const textInput = input.parentElement.parentElement.querySelector('.step-url');
+                if (textInput) textInput.value = publicUrl;
+
+                alert('Upload Sukses!');
+            } catch (e) {
+                console.error(e);
+                alert('Gagal Upload: ' + e.message);
+            } finally {
+                btn.innerHTML = originalText;
+                // Re-attach input listener because innerHTML wipes it? No, label logic might be safe, but input is inside label.
+                // Wait, innerHTML replacement destroys the input element itself. 
+                // Better approach: Don't replace innerHTML of label. Change text span inside only.
+                // But for simplicity of this artifact tool: I'll accept re-rendering. 
+                // Actually, the `onchange="uploadStepFile(this)"` is on the input. Replacing parentHTML destroys `this`.
+                // FIX: reload the function logic.
+                btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload <input type="file" class="hidden" onchange="uploadStepFile(this)">`;
+            }
         }
 
         function getStepsPayload() {
             const items = document.querySelectorAll('.step-item');
             const steps = [];
             items.forEach(div => {
+                const hasQ = div.querySelector('.step-has-q').checked;
                 steps.push({
                     title: div.querySelector('.step-title').value,
                     type: div.querySelector('.step-type').value,
-                    url: div.querySelector('.step-url').value
+                    url: div.querySelector('.step-url').value,
+                    question: hasQ ? div.querySelector('.step-q-text').value : null,
+                    answer_key: hasQ ? div.querySelector('.step-q-key').value : null
                 });
             });
             return steps;

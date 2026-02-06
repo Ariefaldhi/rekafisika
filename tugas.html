@@ -109,7 +109,18 @@
                 }
 
                 tasks.forEach(task => {
-                    const isDone = false; // Add real status check logic from previous version
+                    // Logic for Detail Button
+                    let btnAction = `alert('${task.description.replace(/'/g, "\\'")}')`;
+                    let btnText = "Lihat Deskripsi";
+
+                    if (task.module_id) {
+                        btnAction = `window.location.href = 'detail_modul.html?id=${task.module_id}'`;
+                        btnText = "Buka Modul & Kerjakan";
+                    } else if (task.submission_link) {
+                        btnAction = `window.open('${task.submission_link}', '_blank')`;
+                        btnText = "Buka Link Tugas";
+                    }
+
                     const card = `
                         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
                            <div class="flex justify-between items-start mb-3">
@@ -121,8 +132,8 @@
                            <h4 class="font-bold text-slate-800 text-lg mb-1">${task.title}</h4>
                            <p class="text-sm text-slate-500 line-clamp-2 mb-4">${task.description}</p>
                            
-                           <button class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
-                               Detail Tugas
+                           <button onclick="${btnAction}" class="w-full py-3 rounded-xl font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
+                               ${btnText}
                            </button>
                         </div>
                     `;
