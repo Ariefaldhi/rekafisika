@@ -35,6 +35,30 @@
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <style>
+        .pdf-page-enter {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .pdf-page-leave {
+            animation: slideOutLeft 0.3s ease-in;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
@@ -131,17 +155,41 @@
                     modul.steps.forEach((step, idx) => {
                         let contentHtml = '';
 
-                        // 1. PDF / PPT (Embedded Viewer)
+                        // 1. PDF / PPT (Embedded Canvas Slide)
                         if (['pdf', 'ppt'].includes(step.type)) {
-                            const params = new URLSearchParams();
-                            params.set('file', step.url);
-                            params.set('embed', 'true');
-                            if (step.start_page) params.set('start', step.start_page);
-                            if (step.end_page) params.set('end', step.end_page);
+                            const canvasId = `pdf-canvas-${idx}`;
+                            const controlId = `pdf-controls-${idx}`;
+
+                            // Initial render call after DOM insertion
+                            setTimeout(() => {
+                                renderEmbeddedPDF(step.url, canvasId, controlId, step.start_page, step.end_page);
+                            }, 100);
 
                             contentHtml = `
-                                <div class="w-full h-[500px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200 mt-2 relative group-focus-within:ring-2 ring-primary-500/20">
-                                    <iframe src="viewer.html?${params.toString()}" class="w-full h-full" frameborder="0"></iframe>
+                                <div class="w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200 mt-2 relative group isolate">
+                                    <!-- Canvas Wrapper -->
+                                    <div class="flex justify-center items-center min-h-[300px] md:min-h-[400px] bg-slate-500 overflow-hidden relative">
+                                        <canvas id="${canvasId}" class="max-w-full shadow-2xl transition-transform duration-300"></canvas>
+                                        
+                                        <!-- Loading Spinner -->
+                                        <div id="${canvasId}-loader" class="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
+                                            <div class="flex flex-col items-center gap-2">
+                                                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-primary-500"></i>
+                                                <span class="text-xs font-bold text-slate-400">Memuat Dokumen...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Controls -->
+                                    <div id="${controlId}" class="bg-white border-t border-slate-200 p-3 flex justify-between items-center text-sm sticky bottom-0 z-20">
+                                        <button class="prev-btn px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                            <i class="fa-solid fa-arrow-left mr-2"></i> Prev
+                                        </button>
+                                        <span class="page-info font-mono font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">Page <span class="curr-page">-</span> / <span class="total-page">-</span></span>
+                                        <button class="next-btn px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                            Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                                        </button>
+                                    </div>
                                 </div>
                              `;
                         } else if (step.type === 'video') {
@@ -176,7 +224,6 @@
                                            <h4 class="font-bold text-slate-800">${step.title}</h4>
                                            <div class="flex gap-2 text-xs">
                                               <span class="uppercase text-slate-400 font-bold tracking-wider">${step.type}</span>
-                                              ${step.start_page ? `<span class="bg-indigo-50 text-indigo-600 px-1.5 rounded font-mono">Halaman ${step.start_page}-${step.end_page || 'End'}</span>` : ''}
                                            </div>
                                        </div>
                                    </div>
@@ -225,7 +272,100 @@
                     }
                 };
 
-                /* Helper: Get YT ID */
+                // --- PDF EMBED LOGIC ---
+                async function renderEmbeddedPDF(url, canvasId, controlId, startPage, endPage) {
+                    const canvas = document.getElementById(canvasId);
+                    const loader = document.getElementById(canvasId + '-loader');
+                    const controls = document.getElementById(controlId);
+                    if (!canvas) return;
+
+                    const ctx = canvas.getContext('2d');
+                    let pdfDoc = null;
+                    let pageNum = startPage || 1;
+                    let pageRendering = false;
+                    let pageNumPending = null;
+                    const scale = 1.5; // High quality
+
+                    try {
+                        const loadingTask = pdfjsLib.getDocument(url);
+                        pdfDoc = await loadingTask.promise;
+
+                        const maxPage = endPage ? Math.min(endPage, pdfDoc.numPages) : pdfDoc.numPages;
+                        const minPage = startPage || 1;
+
+                        // Update Total Page UI
+                        controls.querySelector('.total-page').textContent = maxPage;
+
+                        // Render Page Function
+                        const renderPage = async (num) => {
+                            pageRendering = true;
+                            // Update UI State
+                            controls.querySelector('.curr-page').textContent = num;
+                            controls.querySelector('.prev-btn').disabled = num <= minPage;
+                            controls.querySelector('.next-btn').disabled = num >= maxPage;
+
+                            const page = await pdfDoc.getPage(num);
+
+                            // Responsive Scale
+                            const viewport = page.getViewport({ scale: scale });
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+
+                            // Responsive visual scale (CSS) handled by max-w-full
+
+                            const renderContext = {
+                                canvasContext: ctx,
+                                viewport: viewport
+                            };
+
+                            const renderTask = page.render(renderContext);
+
+                            // Wait for render to finish
+                            await renderTask.promise;
+                            pageRendering = false;
+
+                            // Hide Loader
+                            if (loader) loader.classList.add('hidden');
+
+                            if (pageNumPending !== null) {
+                                renderPage(pageNumPending);
+                                pageNumPending = null;
+                            }
+                        };
+
+                        // Queue Render
+                        const queueRenderPage = (num) => {
+                            if (pageRendering) {
+                                pageNumPending = num;
+                            } else {
+                                renderPage(num);
+                            }
+                        };
+
+                        // Initial Render
+                        renderPage(pageNum);
+
+                        // Event Listeners
+                        controls.querySelector('.prev-btn').onclick = () => {
+                            if (pageNum <= minPage) return;
+                            pageNum--;
+                            queueRenderPage(pageNum);
+                        };
+                        controls.querySelector('.next-btn').onclick = () => {
+                            if (pageNum >= maxPage) return;
+                            pageNum++;
+                            queueRenderPage(pageNum);
+                        };
+
+                    } catch (e) {
+                        console.error("PDF Load Error:", e);
+                        if (loader) {
+                            loader.innerHTML = `<div class="text-red-500 font-bold p-4 text-center">Gagal memuat dokumen.<br><span class="text-xs font-normal text-slate-500">${e.message}</span></div>`;
+                        }
+                    }
+                }
+
+                // Helper: Get YT ID (Legacy check)
                 const getYouTubeId = (url) => { if (!url) return null; const m = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); return (m && m[2].length === 11) ? m[2] : url; };
 
                 // VIDEO
