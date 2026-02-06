@@ -193,10 +193,10 @@ if (typeof supabase !== 'undefined') {
 } else {
     console.error('Supabase SDK not loaded.');
     if (document.body) {
-         VisualModal.alert('Gagal memuat Script Database (Supabase).\nCek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
+         VisualModal.alert('Gagal memuat Script Database (Supabase). Cek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
     } else {
          document.addEventListener('DOMContentLoaded', () => {
-             VisualModal.alert('Gagal memuat Script Database (Supabase).\nCek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
+             VisualModal.alert('Gagal memuat Script Database (Supabase). Cek koneksi internet atau matikan AdBlock.', 'Koneksi Error', 'error');
          });
     }
 }
