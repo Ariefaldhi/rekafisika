@@ -669,12 +669,24 @@
             const file = input.files[0];
             if (!file) return;
 
-            const btn = input.parentElement;
+            const btn = input.parentElement; // Label
+            // Robust traversal: Input -> Label -> Container -> TextInput
+            if (!btn || !btn.parentElement) {
+                alert('Error: Structure mismatch (parent not found)');
+                return;
+            }
+
+            const textInput = btn.parentElement.querySelector('.step-url');
+            if (!textInput) {
+                alert('Error: URL Input field not found related to this button');
+                return;
+            }
+
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.classList.add('cursor-not-allowed', 'opacity-50');
 
             try {
-                // Upload to 'materials' bucket
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 const filePath = `uploads/${fileName}`;
@@ -684,25 +696,14 @@
 
                 const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
 
-                // Set URL to input
-                const urlInput = btn.parentElement.previousElementSibling || btn.parentElement.querySelector('.step-url') || input.parentElement.parentElement.querySelector('.step-url');
-                // Navigation to find the text input sibling
-                const textInput = input.parentElement.parentElement.querySelector('.step-url');
-                if (textInput) textInput.value = publicUrl;
-
+                textInput.value = publicUrl;
                 alert('Upload Sukses!');
             } catch (e) {
                 console.error(e);
                 alert('Gagal Upload: ' + e.message);
             } finally {
                 btn.innerHTML = originalText;
-                // Re-attach input listener because innerHTML wipes it? No, label logic might be safe, but input is inside label.
-                // Wait, innerHTML replacement destroys the input element itself. 
-                // Better approach: Don't replace innerHTML of label. Change text span inside only.
-                // But for simplicity of this artifact tool: I'll accept re-rendering. 
-                // Actually, the `onchange="uploadStepFile(this)"` is on the input. Replacing parentHTML destroys `this`.
-                // FIX: reload the function logic.
-                btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload <input type="file" class="hidden" onchange="uploadStepFile(this)">`;
+                btn.classList.remove('cursor-not-allowed', 'opacity-50');
             }
         }
 
