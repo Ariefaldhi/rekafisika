@@ -142,6 +142,30 @@
 
             } catch (e) { console.error(e); }
         }
+
+        async function markTaskManual(taskId) {
+            const user = checkAuth(); // Ensure verified
+            if (!user) return;
+
+            if (!confirm('Apakah tugas ini sudah Anda kerjakan/kumpulkan?')) return;
+
+            try {
+                const { error } = await supabaseClient.from('assignment_submissions').upsert({
+                    student_nim: user.nim,
+                    assignment_id: taskId,
+                    checked: false,
+                    score: 0,
+                    submitted_at: new Date().toISOString()
+                }, { onConflict: 'student_nim, assignment_id' });
+
+                if (error) throw error;
+
+                alert('Tugas ditandai selesai!');
+                fetchTasks();
+            } catch (e) {
+                alert('Gagal: ' + e.message);
+            }
+        }
     </script>
 </body>
 
