@@ -180,6 +180,18 @@
                         <input id="t-link" type="text" placeholder="Link (Opsional)"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                     </div>
+
+                    <!-- Module Linkage -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hubungkan dengan Modul
+                            (Auto-Selesai)</label>
+                        <select id="t-module-id"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                            <option value="">-- Tidak Terhubung --</option>
+                            <!-- Populated JS -->
+                        </select>
+                    </div>
+
                     <div class="flex gap-2">
                         <button type="submit" id="btn-save-task"
                             class="flex-1 bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Simpan
@@ -217,11 +229,25 @@
                     <textarea id="m-desc" placeholder="Deskripsi Singkat"
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-20 focus:outline-none focus:ring-2 focus:ring-primary-500/20"></textarea>
 
+                    <!-- Legacy Simple Links (Optional / Backward Compat) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input id="m-file" type="text" placeholder="Link Materi (PDF/Drive)"
                             class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
                         <input id="m-video" type="text" placeholder="ID Video YouTube (e.g. dQw4w9MgXcQ)"
                             class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
+                    </div>
+
+                    <!-- Steps Builder (New Feature) -->
+                    <div class="border-t border-slate-100 pt-4">
+                        <h4 class="font-bold text-slate-700 mb-2">Langkah-Langkah (Steps)</h4>
+                        <div id="steps-container" class="space-y-2 mb-3">
+                            <!-- Helper Text -->
+                            <p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>
+                        </div>
+                        <button type="button" onclick="addStepInput()"
+                            class="text-xs font-bold text-primary-600 hover:text-primary-500 border border-primary-200 px-3 py-1 rounded-lg">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
+                        </button>
                     </div>
 
                     <div class="flex gap-2">
@@ -577,6 +603,43 @@
             document.getElementById('btn-save-task').innerText = 'Simpan Tugas';
         }
 
+        // --- MODULE STEPS HELPER ---
+        function addStepInput(data = {}) {
+            const container = document.getElementById('steps-container');
+            const noMsg = document.getElementById('no-steps-msg');
+            if (noMsg) noMsg.remove();
+
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-3 gap-2 step-item bg-slate-50 p-2 rounded-lg border border-slate-100';
+            div.innerHTML = `
+                <input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}">
+                <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1">
+                    <option value="ppt" ${data.type === 'ppt' ? 'selected' : ''}>PPT</option>
+                    <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
+                    <option value="pdf" ${data.type === 'pdf' ? 'selected' : ''}>PDF</option>
+                    <option value="link" ${data.type === 'link' ? 'selected' : ''}>Link</option>
+                </select>
+                <div class="col-span-1 flex gap-1">
+                    <input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL..." value="${data.url || ''}">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function getStepsPayload() {
+            const items = document.querySelectorAll('.step-item');
+            const steps = [];
+            items.forEach(div => {
+                steps.push({
+                    title: div.querySelector('.step-title').value,
+                    type: div.querySelector('.step-type').value,
+                    url: div.querySelector('.step-url').value
+                });
+            });
+            return steps;
+        }
+
         // --- MODULES ---
         async function loadModules() {
             const { data } = await supabaseClient.from('modules').select('*').order('week');
@@ -586,28 +649,123 @@
                     <div>
                         <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded">Minggu ${m.week}</span>
                         <h4 class="font-bold text-slate-700 mt-2">${m.topic}</h4>
+                        <p class="text-xs text-slate-400 mt-1 line-clamp-1">${m.description || ''}</p>
                     </div>
-                    <button onclick="deleteModule('${m.id}')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex gap-2">
+                        <button onclick="editModule('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteModule('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
                 </div>
              `).join('');
+
+            // Also update Task Dropdown
+            const taskSel = document.getElementById('t-module-id');
+            if (taskSel) {
+                taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' +
+                    data.map(m => `<option value="${m.id}">Minggu ${m.week}: ${m.topic}</option>`).join('');
+            }
         }
 
         async function handleModuleSubmit(e) {
             e.preventDefault();
+            const id = document.getElementById('m-id').value;
             const payload = {
                 week: document.getElementById('m-week').value,
                 topic: document.getElementById('m-topic').value,
-                description: document.getElementById('m-desc').value
+                description: document.getElementById('m-desc').value,
+                file_url: document.getElementById('m-file').value,
+                video_url: document.getElementById('m-video').value,
+                steps: getStepsPayload() // Add JSON
             };
-            const { error } = await supabaseClient.from('modules').insert([payload]);
-            if (!error) { e.target.reset(); loadModules(); }
+
+            let error;
+            if (id) {
+                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabaseClient.from('modules').insert([payload]);
+                error = err;
+            }
+
+            if (!error) { resetModuleForm(); loadModules(); }
             else alert(error.message);
+        }
+
+        async function editModule(id) {
+            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('m-id').value = data.id;
+                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-topic').value = data.topic;
+                document.getElementById('m-desc').value = data.description || '';
+                document.getElementById('m-file').value = data.file_url || '';
+                document.getElementById('m-video').value = data.video_url || '';
+
+                // Populate Steps
+                const container = document.getElementById('steps-container');
+                container.innerHTML = '';
+                if (data.steps && Array.isArray(data.steps)) {
+                    data.steps.forEach(step => addStepInput(step));
+                }
+
+                document.getElementById('modul-form-title').innerText = 'Edit Modul';
+                document.getElementById('btn-save-modul').innerText = 'Update Modul';
+                document.getElementById('sec-modules').scrollIntoView();
+            }
+        }
+
+        function resetModuleForm() {
+            document.querySelector('#sec-modules form').reset();
+            document.getElementById('m-id').value = '';
+            document.getElementById('steps-container').innerHTML = '<p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>';
+            document.getElementById('modul-form-title').innerText = 'Tambah Modul';
+            document.getElementById('btn-save-modul').innerText = 'Simpan Modul';
         }
 
         async function deleteModule(id) {
             if (confirm('Hapus modul?')) {
                 await supabaseClient.from('modules').delete().eq('id', id);
                 loadModules();
+            }
+        }
+
+        // --- TASKS UPDATE ---
+        async function handleTaskSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('t-id').value;
+            const payload = {
+                title: document.getElementById('t-title').value,
+                description: document.getElementById('t-desc').value,
+                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                submission_link: document.getElementById('t-link').value,
+                module_id: document.getElementById('t-module-id').value || null, // Capture Module ID
+                is_active: true
+            };
+
+            let error;
+            if (id) { const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id); error = err; }
+            else { const { error: err } = await supabaseClient.from('assignments').insert([payload]); error = err; }
+
+            if (!error) { resetTaskForm(); loadTasks(); updateStats(); }
+            else alert(error.message);
+        }
+
+        async function editTask(id) {
+            const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('t-id').value = data.id;
+                document.getElementById('t-title').value = data.title;
+                document.getElementById('t-desc').value = data.description;
+                document.getElementById('t-link').value = data.submission_link || '';
+                if (data.module_id) document.getElementById('t-module-id').value = data.module_id; // Set selected
+
+                const d = new Date(data.deadline);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+
+                document.getElementById('task-form-title').innerText = 'Edit Tugas';
+                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('sec-tasks').scrollIntoView();
             }
         }
 

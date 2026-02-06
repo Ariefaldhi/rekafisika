@@ -119,8 +119,9 @@
         async function loadDetail() {
             if (!id || !window.supabaseClient) return;
 
-            // Fetch Current
-            const { data: modul, error } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            // Fetch Current Module
+            const { data: modul } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            const user = checkAuth(); // Need user for progress
 
             if (modul) {
                 document.title = `${modul.topic} | FisikaLab`;
@@ -129,12 +130,53 @@
                 document.getElementById('m-week').innerText = `Minggu ${modul.week}`;
                 document.getElementById('m-desc').innerHTML = marked.parse(modul.description || '');
 
+                const vidSec = document.getElementById('video-section');
+
+                // --- RENDER STEPS (JSON) ---
+                const stepsContainer = document.createElement('div');
+                stepsContainer.className = 'space-y-4 mb-6';
+
+                if (modul.steps && Array.isArray(modul.steps) && modul.steps.length > 0) {
+                    document.querySelector('main').insertBefore(stepsContainer, document.querySelector('#video-section')); // Insert before legacy video or resources
+
+                    stepsContainer.innerHTML = '<h3 class="font-bold text-slate-800 mb-2">Langkah Pembelajaran</h3>';
+
+                    modul.steps.forEach((step, idx) => {
+                        let icon = 'fa-file';
+                        let color = 'bg-slate-100 text-slate-500';
+                        if (step.type === 'video') { icon = 'fa-play'; color = 'bg-red-100 text-red-500'; }
+                        if (step.type === 'ppt') { icon = 'fa-file-powerpoint'; color = 'bg-orange-100 text-orange-500'; }
+                        if (step.type === 'pdf') { icon = 'fa-file-pdf'; color = 'bg-red-100 text-red-500'; }
+
+                        const html = `
+                             <a href="${step.url}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-white border-l-4 border-l-primary-500 shadow-sm hover:shadow-md transition-all">
+                                 <div class="w-10 h-10 ${color} rounded-xl flex items-center justify-center font-bold text-sm">
+                                     ${idx + 1}
+                                 </div>
+                                 <div class="flex-1">
+                                     <h4 class="font-bold text-slate-700 text-sm">${step.title}</h4>
+                                     <p class="text-xs text-slate-400 uppercase">${step.type}</p>
+                                 </div>
+                                 <i class="fa-solid fa-arrow-up-right-from-square text-slate-300"></i>
+                             </a>
+                         `;
+                        stepsContainer.innerHTML += html;
+                    });
+                }
+
+                // --- PROGRESS ACTION ---
+                const actionBtn = document.createElement('button');
+                actionBtn.className = 'w-full py-4 mt-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 transition-all';
+                actionBtn.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>  Selesaikan Modul & Tugas';
+                actionBtn.onclick = () => completeModule(modul.id, user);
+                document.querySelector('main').appendChild(actionBtn);
+
                 // Helper: Get YT ID
                 const getYouTubeId = (url) => {
                     if (!url) return null;
                     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
                     const match = url.match(regExp);
-                    return (match && match[2].length === 11) ? match[2] : url; // Fallback to raw if logic fails (or maybe it IS the ID)
+                    return (match && match[2].length === 11) ? match[2] : url;
                 };
 
                 // VIDEO
@@ -205,6 +247,44 @@
 
             if (prev) prevBtn.onclick = () => window.location.href = `detail_modul.html?id=${prev.id}`;
             else prevBtn.disabled = true;
+        }
+
+        async function completeModule(moduleId, user) {
+            if (!user) { alert('Silakan login terlebih dahulu.'); return; }
+            if (!confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.')) return;
+
+            try {
+                // 1. Mark Module Progress
+                await supabaseClient.from('module_progress').upsert({
+                    student_nim: user.nim,
+                    module_id: moduleId,
+                    is_completed: true,
+                    completed_at: new Date().toISOString()
+                }, { onConflict: 'student_nim, module_id' });
+
+                // 2. Find Linked Assignment
+                const { data: task } = await supabaseClient.from('assignments').select('id').eq('module_id', moduleId).eq('is_active', true).single();
+
+                if (task) {
+                    // 3. Submit Task (Auto)
+                    await supabaseClient.from('assignment_submissions').upsert({
+                        student_nim: user.nim,
+                        assignment_id: task.id,
+                        checked: true,
+                        score: 100,
+                        submitted_at: new Date().toISOString()
+                    }, { onConflict: 'student_nim, assignment_id' });
+
+                    alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan (Nilai 100).');
+                } else {
+                    alert('Modul diselesaikan. (Tidak ada tugas terkait)');
+                }
+
+                window.location.href = 'index.html';
+            } catch (e) {
+                console.error(e);
+                alert('Gagal menyimpan progress: ' + e.message);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', loadDetail);
