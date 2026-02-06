@@ -372,9 +372,16 @@
             const avatarEl = document.getElementById('user-avatar');
 
             if (user) {
-                // Get initials
-                const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
-                avatarEl.textContent = initials;
+                // Profile Pic vs Initials
+                if (user.profile_photo_url) {
+                    // Replace text content with Image
+                    avatarEl.innerHTML = `<img src="${user.profile_photo_url}" class="w-full h-full object-cover rounded-full">`;
+                    avatarEl.classList.add('overflow-hidden'); // Ensure rounded
+                    avatarEl.classList.remove('bg-emerald-100', 'text-emerald-600'); // Remove default colors if desired, or keep as bg
+                } else {
+                    const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
+                    avatarEl.textContent = initials;
+                }
 
                 // Load Assignment Preview (Simple fetch)
                 loadAssignmentPreview();
