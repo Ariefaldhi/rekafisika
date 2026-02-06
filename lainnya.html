@@ -48,6 +48,9 @@
             animation-delay: 200ms;
         }
     </style>
+    <!-- CRITICAL: Load Config EARLY -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js?v=2.3"></script>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24">
@@ -168,7 +171,7 @@
         </a>
     </nav>
 
-    <script src="config.js?v=2.3"></script>
+    <!-- Legacy Script Tags Removed (Moved to Head) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const session = localStorage.getItem('user_session');
