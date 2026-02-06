@@ -3,100 +3,73 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sedang Perbaikan | FisikaLab</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance | KawanFismat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { inter: ['Inter', 'sans-serif'] },
-                    animation: { 'float': 'float 3s ease-in-out infinite' },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 
-<body class="bg-slate-50 font-inter min-h-screen flex items-center justify-center p-6 text-center">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full text-center space-y-6">
+        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <i class="fa-solid fa-person-digging text-4xl text-blue-600"></i>
+        </div>
 
-    <div class="max-w-md w-full">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
-            <!-- decorative bg -->
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 to-red-500"></div>
+        <div class="space-y-2">
+            <h1 class="text-3xl font-black text-slate-900">Sedang Perbaikan</h1>
+            <p class="text-slate-500">Sistem sedang menjalani perawatan berkala untuk meningkatkan performa. Kami akan
+                segera kembali.</p>
+        </div>
 
-            <div
-                class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 text-orange-500 text-4xl animate-float">
-                <i class="fa-solid fa-person-digging"></i>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-left flex items-center gap-4">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-clock text-amber-500"></i>
             </div>
-
-            <h1 class="text-2xl font-black text-slate-900 mb-2">Website Sedang Maintenance</h1>
-            <p class="text-slate-500 text-sm mb-8 leading-relaxed">
-                Mohon maaf, Kawan Fismat sedang dalam perbaikan sistem sementara oleh Admin. Silakan kembali lagi nanti.
-            </p>
-
-            <button onclick="checkStatus()"
-                class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">
-                Coba Akses Lagi
-            </button>
-
-            <div class="mt-6">
-                <a href="login.html" class="text-xs text-slate-400 font-medium hover:text-slate-600">Login Admin</a>
+            <div>
+                <h3 class="font-bold text-slate-800 text-sm">Estimasi Waktu</h3>
+                <p class="text-xs text-slate-400">Hubungi dosen jika mendesak.</p>
             </div>
         </div>
 
-        <p class="mt-8 text-xs text-slate-400 font-mono">System ID: MAINTENANCE_MODE_ACTIVE</p>
+        <button onclick="checkStatus()"
+            class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors">
+            Coba Refresh
+        </button>
+
+        <!-- Admin Bypass Login (Hidden/Subtle) -->
+        <a href="login.html" class="block text-xs text-slate-300 hover:text-blue-500 mt-8">Admin Login</a>
     </div>
 
-    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js?v=2.1"></script>
     <script>
         async function checkStatus() {
-            const btn = document.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
-            btn.disabled = true;
+            if (!window.supabaseClient) { window.location.reload(); return; }
 
             try {
-                // Check Global Flag in Announcements
                 const { data } = await supabaseClient
                     .from('announcements')
-                    .select('*')
+                    .select('content')
                     .eq('type', 'system_maintenance')
                     .single();
 
-                // If no flag exists, or content is 'false', then it's open
-                const maintenanceMode = data ? (data.content === 'true') : false;
-
-                if (!maintenanceMode) {
+                // If maintenance is OFF (false), go home
+                if (!data || data.content !== 'true') {
                     window.location.href = 'index.html';
                 } else {
-                    setTimeout(() => {
-                        btn.innerHTML = 'Masih Maintenance (Coba Lagi)';
-                        btn.disabled = false;
-                        btn.classList.add('bg-red-500');
-                        setTimeout(() => btn.classList.remove('bg-red-500'), 500);
-                    }, 1000);
+                    VisualModal.alert('Sistem masih dalam perbaikan. Silakan coba beberapa saat lagi.', 'Maintenance', 'info');
                 }
             } catch (e) {
-                console.error(e);
-                btn.disabled = false;
-                btn.innerText = 'Gagal Memeriksa';
+                window.location.reload();
             }
         }
-
-        // Auto check once on load if config ready
-        document.addEventListener('supabaseReady', () => {
-            // Logic could go here
-        });
     </script>
 </body>
 

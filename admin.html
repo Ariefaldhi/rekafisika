@@ -97,7 +97,21 @@
                 <button onclick="showSection('progress')" id="nav-progress"
                     class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
                     <i class="fa-solid fa-chart-line w-5 text-center"></i> Progress
-                </button>
+                    <button onclick="showSection('points')"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-white/5 hover:text-white"
+                        id="nav-points">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Input Poin</span>
+                    </button>
+
+                    <div class="my-4 border-t border-white/10"></div>
+
+                    <button onclick="showSection('settings')"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-white/5 hover:text-white"
+                        id="nav-settings">
+                        <i class="fa-solid fa-gears"></i>
+                        <span>Pengaturan</span>
+                    </button>
             </nav>
 
             <div class="mt-auto border-t border-slate-100 pt-6">
@@ -462,14 +476,51 @@
             </div>
         </section>
 
+        </section>
+
+        <!-- SEC: Settings -->
+        <section id="sec-settings" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800">Pengaturan Sistem</h2>
+                        <p class="text-slate-500 text-sm">Kontrol global aplikasi.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Maintenance Mode Toggle -->
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-person-digging"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Maintenance Mode</h4>
+                                <p class="text-xs text-slate-500">Kunci akses untuk semua user kecuali Admin.</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="maintenance-toggle" class="sr-only peer"
+                                onchange="toggleMaintenance()">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
+    <script src="config.js?v=2.1"></script>
     <script>
         // --- Navigation ---
         function showSection(id) {
-            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence', 'progress'].forEach(s => {
+            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence', 'progress', 'settings'].forEach(s => {
                 const sec = document.getElementById('sec-' + s);
                 const nav = document.getElementById('nav-' + s);
                 if (sec) sec.classList.add('hidden');
@@ -479,7 +530,9 @@
                 }
             });
 
-            document.getElementById('sec-' + id).classList.remove('hidden');
+            const target = document.getElementById('sec-' + id) || document.getElementById('tab-' + id);
+            if (target) target.classList.remove('hidden');
+
             const activeNav = document.getElementById('nav-' + id);
             if (activeNav) {
                 activeNav.classList.remove('sidebar-item');
@@ -1006,6 +1059,55 @@
             if (await VisualModal.confirm('Hapus berita?')) {
                 await supabaseClient.from('announcements').delete().eq('id', id);
                 loadNews();
+            }
+        }
+
+        // Initial Load
+        loadOverviewStats();
+
+        // Load Maintenance Status
+        checkMaintenanceStatus();
+
+        async function checkMaintenanceStatus() {
+            try {
+                const { data } = await supabaseClient
+                    .from('announcements')
+                    .select('content')
+                    .eq('type', 'system_maintenance')
+                    .single();
+
+                const isMaintenance = data && data.content === 'true';
+                document.getElementById('maintenance-toggle').checked = isMaintenance;
+            } catch (e) {
+                console.error("Maint Check Fail", e);
+            }
+        }
+
+        async function toggleMaintenance() {
+            const isActive = document.getElementById('maintenance-toggle').checked;
+
+            if (!await VisualModal.confirm(isActive ? 'Aktifkan Mode Maintenance? User lain tidak akan bisa akses.' : 'Matikan Mode Maintenance? User bisa akses kembali.', 'Konfirmasi Sistem', 'warning')) {
+                document.getElementById('maintenance-toggle').checked = !isActive; // Revert UI
+                return;
+            }
+
+            try {
+                // Upsert logic for maintenance row
+                const { error } = await supabaseClient
+                    .from('announcements')
+                    .upsert({
+                        type: 'system_maintenance',
+                        title: 'System Maintenance',
+                        content: isActive ? 'true' : 'false',
+                        is_active: isActive
+                    }, { onConflict: 'type' });
+
+                if (error) throw error;
+                await VisualModal.alert(isActive ? "Maintenance Mode: AKTIF" : "Maintenance Mode: NON-AKTIF", "Sukses", "success");
+            } catch (e) {
+                console.error(e);
+                await VisualModal.alert("Gagal mengubah status: " + e.message, "Error", "error");
+                document.getElementById('maintenance-toggle').checked = !isActive; // Revert
             }
         }
 
