@@ -3,11 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panduan | KawanFismat</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,218 +14,140 @@
                 extend: {
                     fontFamily: { inter: ['Inter', 'sans-serif'] },
                     colors: {
-                        navy: { 800: '#1e293b', 900: '#0f172a' },
-                        accent: { 400: '#22d3ee', 500: '#06b6d4' }
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B', sub: '#64748B' }
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bg-abstract {
-            background-color: #0f172a;
-            background-image:
-                radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
-    </style>
 </head>
 
-<body class="bg-abstract text-slate-100 font-inter min-h-screen">
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <a href="index.html" class="flex items-center gap-2">
-                    <i class="fa-solid fa-atom text-accent-400 text-xl"></i>
-                    <span class="font-bold text-xl tracking-wide">KawanFismat</span>
-                </a>
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex items-center gap-4">
+        <a href="javascript:history.back()"
+            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Panduan Aplikasi</h1>
+            <p class="text-xs text-slate-500">Pusat bantuan KawanFismat.</p>
+        </div>
+    </div>
 
-                <!-- Back to Home -->
-                <a href="index.html"
-                    class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium transition-colors border border-slate-700">
-                    <i class="fa-solid fa-arrow-left mr-2"></i>Kembali
-                </a>
+    <!-- Content -->
+    <div class="px-6 py-6 space-y-6">
+
+        <!-- Intro -->
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg text-slate-900">Selamat Datang!</h2>
+                    <p class="text-xs text-slate-500">KawanFismat Versi 2.0</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Platform pembelajaran interaktif Fisika Matematika I. Sekarang lebih cepat, ringan, dan mudah digunakan
+                di HP (Mobile First).
+            </p>
+        </div>
+
+        <!-- FAQ / Tutorials -->
+
+        <!-- 1. Navigasi -->
+        <div class="space-y-4">
+            <h3 class="font-bold text-slate-800 ml-2">Navigasi Utama</h3>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex gap-4">
+                <span
+                    class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0">1</span>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Beranda (Home)</h4>
+                    <p class="text-xs text-slate-500">Lihat jadwal kuliah, countdown kelas, dan progress belajar
+                        terakhir Anda.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex gap-4">
+                <span
+                    class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0">2</span>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Jelajah (Modul)</h4>
+                    <p class="text-xs text-slate-500">Akses semua materi mingguan, video pembelajaran, dan kuis
+                        interaktif.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex gap-4">
+                <span
+                    class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0">3</span>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Peringkat (Leaderboard)</h4>
+                    <p class="text-xs text-slate-500">Lihat poin keaktifan dan peringkat Anda dibandingkan teman
+                        sekelas.</p>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Panduan Website</h1>
-            <p class="text-slate-400 text-lg">Pusat bantuan dan tutorial penggunaan KawanFismat.</p>
+        <!-- 2. Teknis -->
+        <div class="space-y-4 pt-4">
+            <h3 class="font-bold text-slate-800 ml-2">Bantuan Teknis</h3>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <button onclick="toggleAccordion('acc-1')"
+                    class="w-full flex items-center justify-between p-5 text-left bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="font-bold text-sm text-slate-700">Lupa Kode Akses?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 transform transition-transform"
+                        id="icon-acc-1"></i>
+                </button>
+                <div id="acc-1" class="hidden p-5 border-t border-slate-100 text-sm text-slate-600">
+                    Hubungi PJ Mata Kuliah atau Asisten Dosen (Kang Faldhi) untuk mereset kode akses Anda.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <button onclick="toggleAccordion('acc-2')"
+                    class="w-full flex items-center justify-between p-5 text-left bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="font-bold text-sm text-slate-700">Progress Tidak Tersimpan?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 transform transition-transform"
+                        id="icon-acc-2"></i>
+                </button>
+                <div id="acc-2" class="hidden p-5 border-t border-slate-100 text-sm text-slate-600">
+                    Pastikan koneksi internet stabil. Centang pada langkah (step) modul akan tersimpan otomatis
+                    (Auto-Save). Coba refresh halaman jika angka tidak berubah.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <button onclick="toggleAccordion('acc-3')"
+                    class="w-full flex items-center justify-between p-5 text-left bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="font-bold text-sm text-slate-700">Ganti Foto Profil?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 transform transition-transform"
+                        id="icon-acc-3"></i>
+                </button>
+                <div id="acc-3" class="hidden p-5 border-t border-slate-100 text-sm text-slate-600">
+                    Masuk ke menu <strong>Lainnya > Profil</strong>. Klik ikon kamera di foto profil Anda untuk
+                    mengunggah foto baru.
+                </div>
+            </div>
         </div>
 
-        <div class="space-y-8">
-            <!-- 1. Intro -->
-            <div class="glass-card rounded-2xl p-8">
-                <div class="flex items-start gap-4">
-                    <div class="bg-accent-500/20 p-3 rounded-lg text-accent-400 shrink-0">
-                        <i class="fa-solid fa-rocket text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold mb-2 text-white">Apa itu KawanFismat?</h2>
-                        <p class="text-slate-300 leading-relaxed">
-                            KawanFismat adalah platform pembelajaran terintegrasi untuk mata kuliah Fisika Matematika I.
-                            Website ini dirancang untuk memudahkan mahasiswa mengakses materi, mengecek jadwal, memantau
-                            tugas,
-                            dan melihat rekap keaktifan secara real-time.
-                        </p>
-                    </div>
-                </div>
-            </div>
+    </div>
 
-            <!-- 2. Cara Login -->
-            <div class="glass-card rounded-2xl p-8">
-                <div class="flex items-start gap-4">
-                    <div class="bg-emerald-500/20 p-3 rounded-lg text-emerald-400 shrink-0">
-                        <i class="fa-solid fa-right-to-bracket text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold mb-4 text-white">Cara Masuk (Login)</h2>
-                        <ul class="space-y-4 text-slate-300">
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">1</span>
-                                <span>Buka halaman <a href="login.html"
-                                        class="text-accent-400 hover:underline">Login</a>.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">2</span>
-                                <span>Pilih tab <strong>"Mahasiswa"</strong> (Default).</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">3</span>
-                                <span>Masukkan <strong>NIM</strong> Anda (tanpa spasi).</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">4</span>
-                                <span>Masukkan <strong>Kode Akses</strong> unik Anda (Hubungi PJ jika lupa).</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">5</span>
-                                <span>Klik tombol <strong>"Masuk Sekarang"</strong>.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Edit Profil -->
-            <div class="glass-card rounded-2xl p-8">
-                <div class="flex items-start gap-4">
-                    <div class="bg-purple-500/20 p-3 rounded-lg text-purple-400 shrink-0">
-                        <i class="fa-solid fa-user-pen text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold mb-4 text-white">Cara Edit Profil</h2>
-                        <p class="text-slate-300 mb-4">Anda dapat mengganti foto profil agar lebih personal dan
-                            dikenali.</p>
-                        <ul class="space-y-4 text-slate-300">
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">1</span>
-                                <span>Masuk ke menu <a href="profil.html"
-                                        class="text-accent-400 hover:underline">Profil</a>.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">2</span>
-                                <span>Klik tombol <strong>Kamera</strong> <i
-                                        class="fa-solid fa-camera text-slate-400 bg-slate-800 rounded-full px-1 text-xs"></i>
-                                    di pojok kanan bawah foto profil Anda.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">3</span>
-                                <span>Klik area upload dan pilih foto terbaik Anda (Format JPG/PNG, Max 2MB).</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">4</span>
-                                <span>Sesuaikan foto dengan fitur <strong>Crop/Zoom</strong> yang muncul.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span
-                                    class="bg-slate-800 px-2 py-0.5 rounded text-sm font-mono border border-slate-700">5</span>
-                                <span>Klik <strong>Simpan</strong>. Foto Anda akan otomatis diperbarui di seluruh
-                                    website (Leaderboard, Presensi, dll).</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Fitur Utama -->
-            <div class="glass-card rounded-2xl p-8">
-                <h2 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">Fitur Utama</h2>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                        <h3 class="font-bold text-accent-400 mb-2"><i
-                                class="fa-regular fa-calendar-check mr-2"></i>Jadwal & Countdown</h3>
-                        <p class="text-sm text-slate-400">Lihat hitung mundur ke kelas berikutnya langsung di halaman
-                            Beranda agar tidak terlambat.</p>
-                    </div>
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                        <h3 class="font-bold text-yellow-400 mb-2"><i class="fa-solid fa-list-check mr-2"></i>Tugas
-                            Aktif</h3>
-                        <p class="text-sm text-slate-400">Pantau tugas yang sedang aktif, deadline, dan detail
-                            pengerjaan
-                            langsung melalui website.</p>
-                    </div>
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                        <h3 class="font-bold text-purple-400 mb-2"><i
-                                class="fa-solid fa-book-journal-whills mr-2"></i>Modul & Silabus</h3>
-                        <p class="text-sm text-slate-400">Akses RPS, materi per minggu, slide presentasi, dan rumus
-                            penting dalam satu tempat.</p>
-                    </div>
-                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                        <h3 class="font-bold text-emerald-400 mb-2"><i class="fa-solid fa-star mr-2"></i>Poin Keaktifan
-                        </h3>
-                        <p class="text-sm text-slate-400">Cek rekap poin keaktifan Anda di kelas secara transparan
-                            melalui menu Keaktifan.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CTA -->
-            <div class="text-center pt-8">
-                <a href="login.html"
-                    class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-accent-500 to-blue-600 hover:from-accent-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-accent-500/20 transform hover:-translate-y-1">
-                    Login Sekarang <i class="fa-solid fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="py-8 text-center text-slate-500 text-sm border-t border-slate-800 bg-slate-900/50">
-        &copy; 2026 KawanFismat. Dibuat dengan <i class="fa-solid fa-heart text-red-500 px-1"></i> untuk Mahasiswa
-        Fisika.
-    </footer>
-
+    <script>
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+    </script>
 </body>
 
 </html>
