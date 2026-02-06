@@ -667,6 +667,11 @@
                     </label>
                 </div>
 
+                <!-- Additional Instructions (Optional) -->
+                <div>
+                    <textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">${data.instruction || ''}</textarea>
+                </div>
+
                 <!-- Question (Optional) -->
                 <div class="border-t border-slate-200 pt-2 mt-2">
                     <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2">
@@ -754,6 +759,7 @@
                     title: div.querySelector('.step-title').value,
                     type: type,
                     url: div.querySelector('.step-url').value,
+                    instruction: div.querySelector('.step-instruction').value,
                     start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
                     end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
                     question: hasQ ? div.querySelector('.step-q-text').value : null,

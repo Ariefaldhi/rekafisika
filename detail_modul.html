@@ -102,16 +102,7 @@
         <!-- Resources (Removed) -->
 
         <!-- Navigation Buttons -->
-        <div class="flex justify-between items-center pt-6">
-            <button id="prev-modul"
-                class="px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
-            </button>
-            <button id="next-modul"
-                class="px-6 py-3 rounded-xl bg-primary-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
-            </button>
-        </div>
+        <!-- Navigation Buttons (Removed) -->
 
     </main>
 
@@ -180,14 +171,23 @@
                                         </div>
                                     </div>
 
-                                    <!-- Controls -->
-                                    <div id="${controlId}" class="bg-white border-t border-slate-200 p-3 flex justify-between items-center text-sm sticky bottom-0 z-20">
-                                        <button class="prev-btn px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                            <i class="fa-solid fa-arrow-left mr-2"></i> Prev
+                                    <!-- Controls (Mobile Optimized) -->
+                                    <div id="${controlId}" class="bg-white border-t border-slate-200 p-3 flex justify-between items-center gap-4 sticky bottom-0 z-20">
+                                        <button class="prev-btn w-12 h-12 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                                            <i class="fa-solid fa-arrow-left text-lg"></i>
                                         </button>
-                                        <span class="page-info font-mono font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">Page <span class="curr-page">-</span> / <span class="total-page">-</span></span>
-                                        <button class="next-btn px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                            Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                                        
+                                        <div class="flex-1 flex flex-col items-center justify-center">
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Halaman</span>
+                                            <div class="flex items-baseline gap-1">
+                                                <span class="curr-page text-xl font-black text-slate-800">-</span>
+                                                <span class="text-slate-400 text-sm font-bold">/</span>
+                                                <span class="total-page text-sm font-bold text-slate-500">-</span>
+                                            </div>
+                                        </div>
+
+                                        <button class="next-btn w-12 h-12 flex items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-500 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <i class="fa-solid fa-arrow-right text-lg"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -232,6 +232,9 @@
                                         <span class="text-sm font-bold text-slate-500">Selesai</span>
                                     </label>
                                </div>
+
+                               ${step.instruction ? `<div class="bg-blue-50 text-blue-700 text-sm p-3 rounded-lg mb-3 border border-blue-100"><i class="fa-solid fa-circle-info mr-2"></i>${step.instruction}</div>` : ''}
+
                                ${contentHtml}
                                ${step.question ? `
                                    <div class="mt-4 pt-4 border-t border-slate-100">
@@ -418,25 +421,13 @@
                 if (window.MathJax) MathJax.typesetPromise();
 
                 // Check Prev/Next
-                checkSiblings(modul.week);
+                // Check Prev/Next (Removed)
             } else {
                 document.querySelector('main').innerHTML = '<div class="text-center p-10 text-red-500">Materi tidak ditemukan.</div>';
             }
         }
 
-        async function checkSiblings(currentWeek) {
-            const { data: next } = await supabaseClient.from('modules').select('id').gt('week', currentWeek).order('week').limit(1).single();
-            const { data: prev } = await supabaseClient.from('modules').select('id').lt('week', currentWeek).order('week', { ascending: false }).limit(1).single();
-
-            const nextBtn = document.getElementById('next-modul');
-            const prevBtn = document.getElementById('prev-modul');
-
-            if (next) nextBtn.onclick = () => window.location.href = `detail_modul.html?id=${next.id}`;
-            else nextBtn.disabled = true;
-
-            if (prev) prevBtn.onclick = () => window.location.href = `detail_modul.html?id=${prev.id}`;
-            else prevBtn.disabled = true;
-        }
+        // Siblings check function removed
 
         async function completeModule(moduleId, user) {
             if (!user) { alert('Silakan login terlebih dahulu.'); return; }
