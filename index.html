@@ -161,42 +161,79 @@
         </div>
     </div>
 
-    <!-- Resume Learning (Blue Hero Style) -->
-    <div class="px-6 mb-8">
-        <a href="detail_modul.html?id=1"
-            class="block bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[2.5rem] p-6 text-white shadow-lg shadow-blue-500/30 relative overflow-hidden group hover:scale-[1.02] transition-transform">
-            <!-- Deco -->
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 bg-blue-300 opacity-20 rounded-full blur-xl -ml-5 -mb-5">
-            </div>
-
-            <div class="relative z-10 flex items-center justify-between mb-2">
-                <span
-                    class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold backdrop-blur-sm border border-white/10">
-                    Lanjutkan Belajar
-                </span>
-                <i
-                    class="fa-solid fa-arrow-right -rotate-45 group-hover:rotate-0 transition-transform duration-300 bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"></i>
-            </div>
-
-            <div class="relative z-10 mt-2">
-                <h2 class="text-2xl font-bold mb-1">Gerak Parabola</h2>
-                <p class="text-blue-100 text-xs mb-4">Minggu 3 • Kinematika</p>
-
-                <!-- Progress Bar -->
-                <div class="flex items-center gap-3">
-                    <div class="flex-1 bg-black/20 rounded-full h-2 overflow-hidden backdrop-blur-sm">
-                        <div class="bg-white h-full rounded-full w-[65%]"></div>
-                    </div>
-                    <span class="text-xs font-bold">65%</span>
-                </div>
-            </div>
-
-            <!-- Big Icon -->
-            <i
-                class="fa-solid fa-rocket absolute -bottom-2 -right-2 text-8xl text-indigo-900 opacity-20 rotate-12 group-hover:translate-x-2 transition-transform"></i>
-        </a>
+    <!-- Resume Learning (Dynamic) -->
+    <div id="resume-learning-container" class="px-6 mb-8 hidden">
+        <!-- Injected via JS -->
     </div>
+
+    <script>
+        async function loadResumeLearning() {
+            if (!window.supabaseClient) return;
+
+            const user = typeof checkAuth === 'function' ? checkAuth() : null;
+            if (!user) return; // Don't show if not logged in
+
+            try {
+                // 1. Fetch All Modules
+                const { data: modules } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+                // 2. Fetch User Progress
+                const { data: progress } = await supabaseClient.from('module_progress').select('module_id').eq('student_nim', user.nim).eq('is_completed', true);
+
+                const completedIds = new Set(progress ? progress.map(p => p.module_id) : []);
+
+                // 3. Find First Incomplete Module
+                let currentModule = modules.find(m => !completedIds.has(m.id));
+
+                // If all completed, show the last one (or a "Done" state)
+                if (!currentModule && modules.length > 0) currentModule = modules[modules.length - 1];
+                if (!currentModule) return; // No modules at all
+
+                // Calculate "Course Progress" (Just for visual percentage)
+                const percent = Math.round((completedIds.size / modules.length) * 100);
+
+                const container = document.getElementById('resume-learning-container');
+                container.classList.remove('hidden');
+                container.innerHTML = `
+                    <a href="detail_modul.html?id=${currentModule.id}"
+                        class="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] p-6 text-white shadow-lg shadow-blue-500/30 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                        <!-- Deco -->
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-blue-400 opacity-20 rounded-full blur-xl -ml-5 -mb-5"></div>
+
+                        <div class="relative z-10 flex items-center justify-between mb-2">
+                            <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold backdrop-blur-sm border border-white/10 shadow-sm">
+                                ${completedIds.has(currentModule.id) ? 'Review Materi' : 'Lanjutkan Belajar'}
+                            </span>
+                            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:rotate-45 transition-transform duration-300">
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 mt-3">
+                            <h2 class="text-2xl font-black mb-1 leading-tight line-clamp-2">${currentModule.topic}</h2>
+                            <p class="text-blue-100 text-xs font-medium mb-5">Minggu ${currentModule.week} • Fisika Matematika</p>
+
+                            <!-- Progress Bar -->
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-black/20 rounded-full h-2.5 overflow-hidden backdrop-blur-sm border border-white/5">
+                                    <div class="bg-white h-full rounded-full transition-all duration-700" style="width: ${percent}%"></div>
+                                </div>
+                                <span class="text-xs font-bold font-mono">${percent}%</span>
+                            </div>
+                        </div>
+
+                        <!-- Big Icon -->
+                        <i class="fa-solid fa-rocket absolute -bottom-4 -right-4 text-9xl text-indigo-900 opacity-20 rotate-12 group-hover:translate-x-2 transition-transform duration-500"></i>
+                    </a>
+                `;
+
+            } catch (e) {
+                console.error("Resume Learning Error:", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadResumeLearning);
+    </script>
 
     <!-- Announcements Section -->
     <div class="px-6 mb-8 hidden" id="announcement-section">
