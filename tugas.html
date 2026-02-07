@@ -303,8 +303,14 @@
 
                 if (error) throw error;
 
+                // 1. Play Sound
+                if (window.SFX) window.SFX.play('success');
+
+                // 2. Refresh UI FIRST
+                await fetchTasks();
+
+                // 3. Show Alert
                 await VisualModal.alert('Tugas ditandai selesai!', 'Sukses', 'success');
-                fetchTasks();
             } catch (e) {
                 await VisualModal.alert('Gagal: ' + e.message, 'Error', 'error');
             }
