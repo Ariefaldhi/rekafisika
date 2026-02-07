@@ -1089,6 +1089,34 @@
             }
         }
 
+        async function loadOverviewStats() {
+            try {
+                // Students count
+                const { count: studentCount } = await supabaseClient
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('role', 'student');
+                document.getElementById('stat-students').innerText = studentCount || 0;
+
+                // Active Assignments count
+                const { count: assignmentCount } = await supabaseClient
+                    .from('assignments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_active', true);
+                document.getElementById('stat-active').innerText = assignmentCount || 0;
+
+                // Attendance (average of latest session or just total log count for now)
+                // For simplicity, let's show total attendance logs
+                const { count: attendanceCount } = await supabaseClient
+                    .from('attendance_log')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('stat-attendance').innerText = attendanceCount || 0;
+
+            } catch (error) {
+                console.error("Error loading stats:", error);
+            }
+        }
+
         // Initial Load
         loadOverviewStats();
 
