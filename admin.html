@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Dashboard | FisikaLab</title>
+    <title>Admin Dashboard | Kawan Fismat</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -477,29 +478,42 @@
                     </div>
                     <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                         <p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p>
-                        <h3 class="text-2xl font-black text-purple-700" id="prog-tasks">0</h3>
-                    </div>
-                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                                <p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p>
+                                <h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                                <p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p>
+                                <h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                                <p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p>
+                                <h3 class="text-2xl font-black text-purple-700" id="prog-tasks">0</h3>
+                            </div>
+                        </div>
 
-                <!-- Tabs/Tables -->
-                <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
-                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
-                        <h3 class="font-bold text-slate-700">Detail Aktivitas</h3>
-                    </div>
-                    <div class="p-6 space-y-8">
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Tugas
-                            </h4>
-                            <div id="prog-task-list" class="space-y-2"></div>
+                        <!-- Tabs/Tables -->
+                        <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
+                                <h3 class="font-bold text-slate-700">Detail Aktivitas</h3>
+                            </div>
+                            <div class="p-6 space-y-8">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat
+                                        Tugas
+                                    </h4>
+                                    <div id="prog-task-list" class="space-y-2"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat
+                                        Modul
+                                    </h4>
+                                    <div id="prog-modul-list" class="space-y-2"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Modul
-                            </h4>
-                            <div id="prog-modul-list" class="space-y-2"></div>
-                        </div>
                     </div>
-                </div>
-            </div>
         </section>
 
         </section>
