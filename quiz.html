@@ -42,6 +42,13 @@
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Supabase SDK MUST load before config.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
     <script src="config.js?v=2.5"></script>
 </head>
 
@@ -167,14 +174,6 @@
         </div>
 
     </main>
-
-    <!-- Supabase & Config & Logic -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        if (typeof supabase === 'undefined') {
-            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
-        }
-    </script>
 
     <script>
         // --- Same Logic as Original Quiz, but tailored for new UI classes ---

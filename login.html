@@ -18,6 +18,13 @@
             }
         }
     </script>
+    <!-- Supabase SDK MUST load before config.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
     <script src="config.js?v=2.5"></script>
 </head>
 
@@ -60,18 +67,6 @@
 
 
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        if (typeof supabase === 'undefined') {
-            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
-        }
-    </script>
-    <script>
-        if (!window.supabase) {
-            document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
-        }
-    </script>
 
     <script>
         document.getElementById('login-form').addEventListener('submit', async (e) => {
