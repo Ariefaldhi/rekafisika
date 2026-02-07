@@ -775,21 +775,17 @@
                     list.innerHTML = data.map(log => {
                         const sName = allStudents.find(s => s.nim === log.student_nim)?.name || log.student_nim;
 
-                        return ` <tr class="hover:bg-slate-50" > <td class="px-4 py-3 text-slate-500 font-mono text-xs" >$ {
-                            new Date(log.created_at).toLocaleDateString()
-                        }
+                        return ` <tr class="hover:bg-slate-50" > <td class="px-4 py-3 text-slate-500 font-mono text-xs" >${new Date(log.created_at).toLocaleDateString()
+                            }
 
-                        </td> <td class="px-4 py-3 font-bold text-slate-700" >$ {
-                            sName
-                        }
+                        </td> <td class="px-4 py-3 font-bold text-slate-700" >${sName
+                            }
 
-                        </td> <td class="px-4 py-3 text-emerald-600 font-bold" >+$ {
-                            log.points
-                        }
+                        </td> <td class="px-4 py-3 text-emerald-600 font-bold" >+${log.points
+                            }
 
-                        </td> <td class="px-4 py-3 text-slate-500 italic text-xs" >$ {
-                            log.note || '-'
-                        }
+                        </td> <td class="px-4 py-3 text-slate-500 italic text-xs" >${log.note || '-'
+                            }
 
                         </td> </tr> `;
                     }).join('');
@@ -918,13 +914,11 @@
             const tbody = document.getElementById('student-list');
 
             if (tbody) {
-                tbody.innerHTML = allStudents.map(s => ` <tr class="hover:bg-slate-50 transition-colors" > <td class="px-6 py-4 text-slate-500 font-mono text-xs" >$ {
-                    s.nim
-                }
+                tbody.innerHTML = allStudents.map(s => ` <tr class="hover:bg-slate-50 transition-colors" > <td class="px-6 py-4 text-slate-500 font-mono text-xs" >${s.nim
+                    }
 
-                </td> <td class="px-6 py-4 font-bold text-slate-700" >$ {
-                    s.name
-                }
+                </td> <td class="px-6 py-4 font-bold text-slate-700" >${s.name
+                    }
 
                 </td> <td class="px-6 py-4 text-right" > <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg transition-colors" ><i class="fa-solid fa-trash" ></i></button> </td> </tr> `).join('');
             }
@@ -933,9 +927,8 @@
             const pSelect = document.getElementById('p-student');
             const progSelect = document.getElementById('prog-student-select');
 
-            const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}" >$ {
-                s.name
-            }
+            const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}" >${s.name
+                }
 
             </option>`).join('');
             if (pSelect) pSelect.innerHTML = optionsHtml;
@@ -950,8 +943,7 @@
             const tbody = document.getElementById('presence-list');
             if (!tbody) return;
 
-            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
-                    s.name
+            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >${s.name
                 }
 
                 </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1 focus:ring-2 focus:ring-primary-500" data-nim="${s.nim}" > <option value="Hadir" selected>Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
@@ -999,21 +991,17 @@
                 });
             const list = document.getElementById('task-list');
 
-            list.innerHTML = data.map(t => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm" > <div> <div class="flex items-center gap-2 mb-1" > <h4 class="font-bold text-slate-700" >$ {
-                t.title
-            }
+            list.innerHTML = data.map(t => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm" > <div> <div class="flex items-center gap-2 mb-1" > <h4 class="font-bold text-slate-700" >${t.title
+                }
 
-            </h4> <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}" >$ {
-                t.is_active ? 'Active' : 'Draft'
-            }
+            </h4> <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}" >${t.is_active ? 'Active' : 'Draft'
+                }
 
-            </span> </div> <p class="text-xs text-slate-400 mb-2 line-clamp-1" >$ {
-                t.description
-            }
+            </span> </div> <p class="text-xs text-slate-400 mb-2 line-clamp-1" >${t.description
+                }
 
-            </p> <p class="text-[10px] font-mono text-slate-500" ><i class="fa-regular fa-clock mr-1" ></i> $ {
-                new Date(t.deadline).toLocaleString()
-            }
+            </p> <p class="text-[10px] font-mono text-slate-500" ><i class="fa-regular fa-clock mr-1" ></i> ${new Date(t.deadline).toLocaleString()
+                }
 
             </p> </div> <div class="flex gap-2" > <button onclick="editTask('${t.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `).join('');
         }
@@ -1114,8 +1102,7 @@
             if (noMsg) noMsg.remove();
 
             // Build Options for Local Files
-            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}" >sumbermodul/$ {
-                    f
+            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}" >sumbermodul/${f
                 }
 
                 </option>`).join('');
@@ -1123,33 +1110,26 @@
             const div = document.createElement('div');
             div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
 
-            div.innerHTML = ` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"$ {
-                data.type==='ppt' ? 'selected': ''
-            }
+            div.innerHTML = ` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"${data.type === 'ppt' ? 'selected' : ''
+                }
 
-            >PPT</option><option value="pdf"$ {
-                data.type==='pdf' ? 'selected': ''
-            }
+            >PPT</option><option value="pdf"${data.type === 'pdf' ? 'selected' : ''
+                }
 
-            >PDF</option><option value="video"$ {
-                data.type==='video' ? 'selected': ''
-            }
+            >PDF</option><option value="video"${data.type === 'video' ? 'selected' : ''
+                }
 
-            >Video</option><option value="link"$ {
-                data.type==='link' ? 'selected': ''
-            }
+            >Video</option><option value="link"${data.type === 'link' ? 'selected' : ''
+                }
 
-            >Link</option></select><div class="col-span-1 flex gap-1"><button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button></div></div><!-- Page Range (Only for PDF/PPT) --><div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}"><input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}"></div><!-- Local File Selection (Only for PDF/PPT) --><div class="step-local-file ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pilih dari SumberModul (Recommended)</label><select class="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="this.parentElement.nextElementSibling.querySelector('.step-url').value = this.value"><option value="">-- Pilih File --</option>$ {
-                fileOptions
-            }
+            >Link</option></select><div class="col-span-1 flex gap-1"><button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button></div></div><!-- Page Range (Only for PDF/PPT) --><div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}"><input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}"></div><!-- Local File Selection (Only for PDF/PPT) --><div class="step-local-file ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pilih dari SumberModul (Recommended)</label><select class="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="this.parentElement.nextElementSibling.querySelector('.step-url').value = this.value"><option value="">-- Pilih File --</option>$fileOptions
+                }
 
-            </select></div><!-- URL / Upload --><div class="flex gap-2 items-center"><input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link / Path..." value="${data.url || ''}"><span class="text-[10px] text-slate-400 font-bold">OR</span><label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-upload"></i>Upload <input type="file" class="hidden" onchange="uploadStepFile(this)"></label></div><!-- Additional Instructions (Optional) --><div><textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">$ {
-                data.instruction || ''
-            }
+            </select></div><!-- URL / Upload --><div class="flex gap-2 items-center"><input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link / Path..." value="${data.url || ''}"><span class="text-[10px] text-slate-400 font-bold">OR</span><label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-upload"></i>Upload <input type="file" class="hidden" onchange="uploadStepFile(this)"></label></div><!-- Additional Instructions (Optional) --><div><textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">${data.instruction || ''
+                }
 
-            </textarea></div><!-- Question (Optional) --><div class="border-t border-slate-200 pt-2 mt-2"><label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2"><input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)"$ {
-                data.question ? 'checked': ''
-            }
+            </textarea></div><!-- Question (Optional) --><div class="border-t border-slate-200 pt-2 mt-2"><label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2"><input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)"${data.question ? 'checked' : ''
+                }
 
             ><span>Tambahkan Pertanyaan (Kuis Singkat)</span></label><div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}"><input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}"><input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}"><input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}"></div></div>`;
             container.appendChild(div);
@@ -1202,23 +1182,19 @@
             try {
                 const fileExt = file.name.split('.').pop();
 
-                const fileName = `$ {
-                    Date.now()
-                }
+                const fileName = `${Date.now()
+                    }
 
-                _$ {
-                    Math.random().toString(36).substring(7)
-                }
+                _${Math.random().toString(36).substring(7)
+                    }
 
-                .$ {
-                    fileExt
-                }
+                .${fileExt
+                    }
 
                 `;
 
-                const filePath = `uploads/$ {
-                    fileName
-                }
+                const filePath = `uploads/${fileName
+                    }
 
                 `;
 
@@ -1282,20 +1258,16 @@
             list.innerHTML = data.map(m => {
                 const isLocked = m.is_locked;
 
-                return ` <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-orange-100 bg-orange-50/30' : 'border-slate-100'} flex justify-between items-center shadow-sm" > <div class="flex-1 min-w-0 pr-4" > <div class="flex items-center gap-2" > <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded" >Minggu $ {
-                        m.week
+                return ` <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-orange-100 bg-orange-50/30' : 'border-slate-100'} flex justify-between items-center shadow-sm" > <div class="flex-1 min-w-0 pr-4" > <div class="flex items-center gap-2" > <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded" >Minggu ${m.week
                     }
 
-                    </span> $ {
-                        isLocked ? '<span class="text-[10px] font-bold uppercase text-orange-500 bg-orange-100 px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i> LOCKED</span>' : ''
+                    </span> ${isLocked ? '<span class="text-[10px] font-bold uppercase text-orange-500 bg-orange-100 px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i> LOCKED</span>' : ''
                     }
 
-                    </div> <h4 class="font-bold text-slate-700 mt-2 truncate" >$ {
-                        m.topic
+                    </div> <h4 class="font-bold text-slate-700 mt-2 truncate" >${m.topic
                     }
 
-                    </h4> <p class="text-xs text-slate-400 mt-1 line-clamp-1" >$ {
-                        m.description || ''
+                    </h4> <p class="text-xs text-slate-400 mt-1 line-clamp-1" >${m.description || ''
                     }
 
                     </p> </div> <div class="flex gap-2 shrink-0" > <button onclick="toggleModuleLock('${m.id}', ${isLocked})" class="w-8 h-8 rounded-lg ${isLocked ? 'bg-orange-100 text-orange-500' : 'bg-slate-100 text-slate-400'} hover:bg-orange-200 flex items-center justify-center transition-colors" title="${isLocked ? 'Buka Kunci' : 'Kunci Modul'}" > <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'} text-xs" ></i> </button> <button onclick="editModule('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteModule('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `
@@ -1305,12 +1277,10 @@
             const taskSel = document.getElementById('t-module-id');
 
             if (taskSel) {
-                taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' + data.map(m => `<option value="${m.id}" >Minggu $ {
-                        m.week
+                taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' + data.map(m => `<option value="${m.id}" >Minggu ${m.week
                     }
 
-                    : $ {
-                        m.topic
+                    : ${m.topic
                     }
 
                     </option>`).join('');
@@ -1508,17 +1478,14 @@
                     ascending: false
                 });
 
-            document.getElementById('news-list').innerHTML = data.map(n => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group" > <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500" ><i class="fa-solid fa-trash" ></i></button> <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" >$ {
-                n.type
-            }
+            document.getElementById('news-list').innerHTML = data.map(n => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group" > <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500" ><i class="fa-solid fa-trash" ></i></button> <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" >${n.type
+                }
 
-            </span> <h4 class="font-bold text-slate-800 mt-2" >$ {
-                n.title
-            }
+            </span> <h4 class="font-bold text-slate-800 mt-2" >${n.title
+                }
 
-            </h4> <p class="text-xs text-slate-500 mt-1" >$ {
-                n.content
-            }
+            </h4> <p class="text-xs text-slate-500 mt-1" >${n.content
+                }
 
             </p> </div> `).join('');
         }
@@ -1671,15 +1638,13 @@
             const sel = document.getElementById('a-meet-code');
 
             for (let w = 1; w <= 16; w++) {
-                sel.innerHTML += `<option value="${w}-1">Minggu $ {
-                    w
-                }
+                sel.innerHTML += `<option value="${w}-1">Minggu ${w
+                    }
 
                 - Sesi 1</option>`;
 
-                sel.innerHTML += `<option value="${w}-2">Minggu $ {
-                    w
-                }
+                sel.innerHTML += `<option value="${w}-2">Minggu ${w
+                    }
 
                 - Sesi 2</option>`;
             }
@@ -1688,8 +1653,7 @@
         function renderPresenceTable() {
             const tbody = document.getElementById('presence-list');
 
-            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
-                    s.name
+            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >${s.name
                 }
 
                 </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1" data-nim="${s.nim}" > <option value="" >-</option> <option value="Hadir" >Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
@@ -1837,17 +1801,14 @@
                 taskContainer.innerHTML = assignments.map(a => {
                     const isDone = submittedTasks.has(a.id);
 
-                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}" > <div> <p class="text-sm font-bold text-slate-700" >$ {
-                        a.title
-                    }
+                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}" > <div> <p class="text-sm font-bold text-slate-700" >${a.title
+                        }
 
-                    </p> <p class="text-[10px] text-slate-400" >Deadline: $ {
-                        new Date(a.deadline).toLocaleDateString()
-                    }
+                    </p> <p class="text-[10px] text-slate-400" >Deadline: ${new Date(a.deadline).toLocaleDateString()
+                        }
 
-                    </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}" > $ {
-                        isDone ? 'SELESAI' : 'BELUM'
-                    }
+                    </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}" > ${isDone ? 'SELESAI' : 'BELUM'
+                        }
 
                     </span> </div> `;
                 }).join('');
@@ -1865,17 +1826,14 @@
                 modulContainer.innerHTML = modules.map(m => {
                     const isDone = completedMods.has(m.id);
 
-                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}" > <div class="flex items-center gap-3" > <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200" >M$ {
-                    m.week
-                }
+                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}" > <div class="flex items-center gap-3" > <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200" >M${m.week
+                        }
 
-                </span> <p class="text-sm font-bold text-slate-700 line-clamp-1" >$ {
-                    m.topic
-                }
+                </span> <p class="text-sm font-bold text-slate-700 line-clamp-1" >${m.topic
+                        }
 
-                </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-blue-200 text-blue-700' : 'bg-slate-200 text-slate-500'}" > $ {
-                    isDone ? 'COMPLETED' : 'PENDING'
-                }
+                </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-blue-200 text-blue-700' : 'bg-slate-200 text-slate-500'}" > ${isDone ? 'COMPLETED' : 'PENDING'
+                        }
 
                 </span> </div> `;
                 }).join('');
