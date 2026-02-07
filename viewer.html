@@ -44,7 +44,15 @@
             margin: 0 auto;
         }
     </style>
-<script src="config.js?v=2.5"></script></head>
+    <!-- Supabase SDK MUST load before config.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
+    <script src="config.js?v=2.5"></script>
+</head>
 
 <body class="bg-slate-100 font-inter text-ui-text min-h-screen">
 
@@ -110,7 +118,7 @@
         <i class="fa-solid fa-wand-magic-sparkles"></i>
     </button>
 
-    
+
     <script>
         <script>
             const urlParams = new URLSearchParams(window.location.search);
@@ -217,5 +225,3 @@
 </body>
 
 </html>
-
-

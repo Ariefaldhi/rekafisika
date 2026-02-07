@@ -14,6 +14,13 @@
             font-family: 'Inter', sans-serif;
         }
     </style>
+    <!-- Supabase SDK MUST load before config.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
     <script src="config.js?v=2.5"></script>
 </head>
 
@@ -47,13 +54,6 @@
         <!-- Admin Bypass Login (Hidden/Subtle) -->
         <a href="login.html" class="block text-xs text-slate-300 hover:text-blue-500 mt-8">Admin Login</a>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        if (typeof supabase === 'undefined') {
-            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
-        }
-    </script>
 
     <script>
         async function checkStatus() {

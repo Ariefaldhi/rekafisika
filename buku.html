@@ -44,7 +44,15 @@
             margin: 0 auto;
         }
     </style>
-<script src="config.js?v=2.5"></script></head>
+    <!-- Supabase SDK MUST load before config.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
+    <script src="config.js?v=2.5"></script>
+</head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
@@ -164,7 +172,7 @@
     </nav>
 
     <!-- Config & Script -->
-    
+
     <script>
         // Keep original Logic, just adjusted UI references
         const url = 'buku.pdf';
@@ -272,5 +280,3 @@
 </body>
 
 </html>
-
-
