@@ -134,129 +134,426 @@
 
             <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
                 < !-- ... skipped header ... -->
-                    < !-- SEC: Dashboard -->
-                        <section id="sec-dashboard" class="space-y-6 animate-fade-in">
-                            <header class="mb-8 flex justify-between items-end">
-                                <div>
-                                    <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
-                                    <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
-                                </div>
-                            </header>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                < !-- ... skipped stats cards ... -->
-                                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
-                                            <i class="fa-solid fa-star"></i></div>
-                                        <h3 class="text-3xl font-black text-slate-900" id="stat-avg-score">0</h3>
-                                        <p class="text-xs text-slate-400 uppercase font-bold">Rata-rata Poin</p>
-                                    </div>
+                    <!-- SEC: Dashboard -->
+                    <section id="sec-dashboard" class="space-y-6 animate-fade-in">
+                        <header class="mb-8 flex justify-between items-end">
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
+                                <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
                             </div>
-                            < !-- Chart Section -->
-                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                    <h3 class="font-bold text-slate-800 mb-4">Distribusi Poin Mahasiswa (Top 10)</h3>
-                                    <canvas id="activityChart" class="w-full h-64"></canvas>
-                                </div>
-                        </section>
-                        < !-- ... skipped tasks/modules/news/students ... -->
-                            < !-- SEC: Points -->
-                                <section id="sec-points" class="hidden space-y-6 animate-fade-in">
-                                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Poin Keaktifan</h2>
-                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        < !-- Form -->
-                                            <div
-                                                class="lg:col-span-1 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit">
-                                                <form onsubmit="addPoints(event)" class="space-y-4">
-                                                    <div><label
-                                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih
-                                                            Mahasiswa</label><select id="p-student"
-                                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                                                            <option>-- Loading --</option>
-                                                        </select></div>
-                                                    <div><label
-                                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah
-                                                            Poin</label><input id="p-amount" type="number" value="10"
-                                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                                                    </div>
-                                                    <div><label
-                                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Catatan</label><input
-                                                            id="p-note" type="text" placeholder="e.g. Menjawab kuis"
-                                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                                                    </div><button
-                                                        class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20">Berikan
-                                                        Poin</button>
-                                                </form>
-                                            </div>
-                                            < !-- Log History -->
-                                                <div
-                                                    class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                                    <h3 class="font-bold text-slate-700 mb-4">Riwayat Pemberian Poin
-                                                    </h3>
-                                                    <div class="overflow-x-auto">
-                                                        <table class="w-full text-sm text-left">
-                                                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                                                                <tr>
-                                                                    <th class="px-4 py-3 rounded-l-xl">Waktu</th>
-                                                                    <th class="px-4 py-3">Nama</th>
-                                                                    <th class="px-4 py-3">Poin</th>
-                                                                    <th class="px-4 py-3 rounded-r-xl">Catatan</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="points-log-list"
-                                                                class="divide-y divide-slate-50">
-                                                                < !-- JS Injected -->
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
+                        </header>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Stat Cards -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                                    <i class="fa-solid fa-users"></i></div>
+                                <h3 class="text-3xl font-black text-slate-900" id="stat-students">0</h3>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Total Mahasiswa</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                                    <i class="fa-solid fa-list-check"></i></div>
+                                <h3 class="text-3xl font-black text-slate-900" id="stat-active">0</h3>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Tugas Aktif</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
+                                    <i class="fa-solid fa-book-open"></i></div>
+                                <h3 class="text-3xl font-black text-slate-900" id="stat-modules">0</h3>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Total Modul</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
+                                    <i class="fa-solid fa-star"></i></div>
+                                <h3 class="text-3xl font-black text-slate-900" id="stat-avg-score">0</h3>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Rata-rata Poin</p>
+                            </div>
+                        </div>
+
+                        <!-- Chart Section -->
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 class="font-bold text-slate-800 mb-4">Distribusi Poin Mahasiswa (Top 10)</h3>
+                            <canvas id="activityChart" class="w-full h-64"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- SEC: Tasks -->
+                    <section id="sec-tasks" class="hidden space-y-6 animate-fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-slate-900">Manajemen Tugas</h2>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 class="font-bold text-slate-700 mb-4" id="task-form-title">Buat Tugas Baru</h3>
+                            <form onsubmit="handleTaskSubmit(event)" class="space-y-4">
+                                <input type="hidden" id="t-id">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Judul
+                                            Tugas</label>
+                                        <input id="t-title" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required placeholder="Contoh: Tugas Matriks 1">
                                     </div>
-                                </section>
-                                < !-- SEC: Presence -->
-                                    <section id="sec-presence" class="hidden space-y-6 animate-fade-in">
-                                        <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Presensi Massal</h2>
-                                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                            <div class="flex items-center gap-4 mb-6"><label
-                                                    class="font-bold text-slate-700">Pertemuan Ke:</label><select
-                                                    id="a-meet-code"
-                                                    class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                                                    < !-- 1-1 to 16-2 -->
+                                    <div>
+                                        <label
+                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Deadline</label>
+                                        <input id="t-deadline" type="datetime-local"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-xs font-bold text-slate-400 uppercase mb-2">Deskripsi</label>
+                                    <textarea id="t-desc" rows="3"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                        placeholder="Instruksi pengerjaan..."></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Link
+                                            Pengumpulan (Google Form/Drive)</label>
+                                        <input id="t-link" type="url"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            placeholder="https://...">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Poin</label>
+                                        <input id="t-points" type="number"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            value="10">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hubungkan ke
+                                        Modul (Opsional)</label>
+                                    <select id="t-module-id"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                        <option value="">-- Tidak Terhubung --</option>
+                                        <!-- JS Populated -->
+                                    </select>
+                                </div>
+                                <div class="flex gap-3 justify-end pt-2">
+                                    <button type="button" onclick="resetTaskForm()"
+                                        class="px-6 py-3 rounded-xl font-bold text-slate-400 hover:text-slate-600">Batal</button>
+                                    <button id="btn-save-task"
+                                        class="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary-500/20">Simpan
+                                        Tugas</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- List -->
+                        <div id="task-list" class="space-y-4">
+                            <!-- JS Injected -->
+                        </div>
+                    </section>
+
+                    <!-- SEC: Modules -->
+                    <section id="sec-modules" class="hidden space-y-6 animate-fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-slate-900">Manajemen Modul</h2>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 class="font-bold text-slate-700 mb-4" id="module-form-title">Tambah / Edit Modul</h3>
+                            <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
+                                <input type="hidden" id="m-id">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Minggu
+                                            Ke-</label>
+                                        <input id="m-week" type="number"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required placeholder="1">
+                                    </div>
+                                    <div class="md:col-span-3">
+                                        <label
+                                            class="block text-xs font-bold text-slate-400 uppercase mb-2">Topik</label>
+                                        <input id="m-topic" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required placeholder="Judul Materi">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Deskripsi
+                                        Singkat</label>
+                                    <textarea id="m-desc" rows="2"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                        placeholder="Ringkasan..."></textarea>
+                                </div>
+
+                                <!-- Legacy Fields (Hidden or kept for compat) -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">File URL
+                                            (PDF/PPT)</label>
+                                        <input id="m-file" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Video URL
+                                            (Youtube)</label>
+                                        <input id="m-video" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- STEPS BUILDER -->
+                                <div class="border-t border-slate-100 pt-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase">Langkah
+                                            Pembelajaran (Steps)</label>
+                                        <button type="button" onclick="addStepInput()"
+                                            class="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"><i
+                                                class="fa-solid fa-plus mr-1"></i> Tambah Step</button>
+                                    </div>
+                                    <div id="steps-container" class="space-y-3">
+                                        <p id="no-steps-msg" class="text-center text-sm text-slate-400 italic py-4">
+                                            Belum ada langkah pembelajaran.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-3 justify-end pt-4">
+                                    <button type="button" onclick="resetModuleForm()"
+                                        class="px-6 py-3 rounded-xl font-bold text-slate-400 hover:text-slate-600">Batal</button>
+                                    <button id="btn-save-module"
+                                        class="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary-500/20">Simpan
+                                        Modul</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- List -->
+                        <div id="module-list" class="space-y-4">
+                            <!-- JS Injected -->
+                        </div>
+                    </section>
+
+                    <!-- SEC: News -->
+                    <section id="sec-news" class="hidden space-y-6 animate-fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-slate-900">Pengumuman</h2>
+                        </div>
+                        <!-- Form -->
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <form onsubmit="handleNewsSubmit(event)" class="space-y-4">
+                                <input type="hidden" id="n-id">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Judul
+                                        Pengumuman</label>
+                                    <input id="n-title" type="text"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                        required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Isi
+                                        Pengumuman</label>
+                                    <textarea id="n-content" rows="3"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                        required></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Label /
+                                        Kategori</label>
+                                    <select id="n-label"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                        <option value="Info">Info Umum</option>
+                                        <option value="Penting">Penting</option>
+                                        <option value="Tugas">Tugas</option>
+                                        <option value="Jadwal">Jadwal</option>
+                                    </select>
+                                </div>
+                                <div class="flex gap-3 justify-end pt-2">
+                                    <button type="button"
+                                        onclick="document.getElementById('n-id').value=''; document.getElementById('sec-news form').reset();"
+                                        class="px-6 py-3 rounded-xl font-bold text-slate-400 hover:text-slate-600">Batal</button>
+                                    <button
+                                        class="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary-500/20">Post
+                                        Berita</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- List -->
+                        <div id="news-list" class="space-y-4">
+                            <!-- JS Injected -->
+                        </div>
+                    </section>
+
+                    <!-- SEC: Students -->
+                    <section id="sec-students" class="hidden space-y-6 animate-fade-in">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-6">Data Mahasiswa</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Form Tambah -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit">
+                                <h3 class="font-bold text-slate-700 mb-4">Tambah Mahasiswa</h3>
+                                <form onsubmit="addStudent(event)" class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">NIM</label>
+                                        <input id="new-nim" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required placeholder="Nomor Induk">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nama
+                                            Lengkap</label>
+                                        <input id="new-name" type="text"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
+                                            required placeholder="Nama Mahasiswa">
+                                    </div>
+                                    <button
+                                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Tambah
+                                        Data</button>
+                                </form>
+                                <div class="mt-6 p-4 bg-orange-50 rounded-xl border border-orange-100">
+                                    <p class="text-xs text-orange-600 leading-relaxed"><span
+                                            class="font-bold">Note:</span> Access Code default sama dengan NIM.
+                                        Mahasiswa bisa mengganti password setelah login.</p>
+                                </div>
+                            </div>
+
+                            <!-- List Table -->
+                            <div class="md:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                <h3 class="font-bold text-slate-700 mb-4">Daftar Mahasiswa</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                            <tr>
+                                                <th class="px-6 py-3 rounded-l-xl">NIM</th>
+                                                <th class="px-6 py-3">Nama</th>
+                                                <th class="px-6 py-3 rounded-r-xl text-right">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="student-list" class="divide-y divide-slate-50">
+                                            <!-- JS Injected -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    < !-- SEC: Points -->
+                        <section id="sec-points" class="hidden space-y-6 animate-fade-in">
+                            <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Poin Keaktifan</h2>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                < !-- Form -->
+                                    <div
+                                        class="lg:col-span-1 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit">
+                                        <form onsubmit="addPoints(event)" class="space-y-4">
+                                            <div><label
+                                                    class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih
+                                                    Mahasiswa</label><select id="p-student"
+                                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                                    <option>-- Loading --</option>
                                                 </select></div>
-                                            <div
-                                                class="max-h-[60vh] overflow-y-auto border border-slate-100 rounded-xl">
-                                                <table class="w-full text-sm">
-                                                    <thead class="bg-slate-50 text-slate-500 sticky top-0">
+                                            <div><label
+                                                    class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah
+                                                    Poin</label><input id="p-amount" type="number" value="10"
+                                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                            </div>
+                                            <div><label
+                                                    class="block text-xs font-bold text-slate-400 uppercase mb-2">Catatan</label><input
+                                                    id="p-note" type="text" placeholder="e.g. Menjawab kuis"
+                                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                            </div><button
+                                                class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20">Berikan
+                                                Poin</button>
+                                        </form>
+                                    </div>
+                                    < !-- Log History -->
+                                        <div
+                                            class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                            <h3 class="font-bold text-slate-700 mb-4">Riwayat Pemberian Poin
+                                            </h3>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-sm text-left">
+                                                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                                                         <tr>
-                                                            <th class="p-4 text-left">Nama</th>
-                                                            <th class="p-4 text-center">Status</th>
+                                                            <th class="px-4 py-3 rounded-l-xl">Waktu</th>
+                                                            <th class="px-4 py-3">Nama</th>
+                                                            <th class="px-4 py-3">Poin</th>
+                                                            <th class="px-4 py-3 rounded-r-xl">Catatan</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="presence-list" class="divide-y divide-slate-100">
-                                                        < !-- JS filled -->
+                                                    <tbody id="points-log-list" class="divide-y divide-slate-50">
+                                                        < !-- JS Injected -->
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div class="mt-4 flex justify-end"><button onclick="saveAttendanceBatch()"
-                                                    class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Simpan
-                                                    Presensi</button></div>
                                         </div>
-                                    </section>
-                                    < !-- SEC: Student Progress -->
-                                        <section id="sec-progress" class="hidden space-y-6 animate-fade-in">
-                                            <h2 class="text-2xl font-bold text-slate-900 mb-6">Progress Mahasiswa</h2>
-                                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                                <label
-                                                    class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih
-                                                    Mahasiswa</label><select id="prog-student-select"
-                                                    onchange="loadStudentStats(this.value)"
-                                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                                                    <option value="">-- Pilih --</option>
-                                                </select></div>
-                                            <div id="prog-details" class="hidden space-y-6">
-                                                < !-- Summary Cards -->
+                            </div>
+                        </section>
+                        < !-- SEC: Presence -->
+                            <section id="sec-presence" class="hidden space-y-6 animate-fade-in">
+                                <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Presensi Massal</h2>
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                    <div class="flex items-center gap-4 mb-6"><label
+                                            class="font-bold text-slate-700">Pertemuan Ke:</label><select
+                                            id="a-meet-code"
+                                            class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                                            < !-- 1-1 to 16-2 -->
+                                        </select></div>
+                                    <div class="max-h-[60vh] overflow-y-auto border border-slate-100 rounded-xl">
+                                        <table class="w-full text-sm">
+                                            <thead class="bg-slate-50 text-slate-500 sticky top-0">
+                                                <tr>
+                                                    <th class="p-4 text-left">Nama</th>
+                                                    <th class="p-4 text-center">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="presence-list" class="divide-y divide-slate-100">
+                                                < !-- JS filled -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="mt-4 flex justify-end"><button onclick="saveAttendanceBatch()"
+                                            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Simpan
+                                            Presensi</button></div>
+                                </div>
+                            </section>
+                            < !-- SEC: Student Progress -->
+                                <section id="sec-progress" class="hidden space-y-6 animate-fade-in">
+                                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Progress Mahasiswa</h2>
+                                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih
+                                            Mahasiswa</label><select id="prog-student-select"
+                                            onchange="loadStudentStats(this.value)"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
+                                            <option value="">-- Pilih --</option>
+                                        </select>
+                                    </div>
+                                    <div id="prog-details" class="hidden space-y-6">
+                                        < !-- Summary Cards -->
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                                                    <p class="text-xs text-blue-400 font-bold uppercase">Total
+                                                        Poin</p>
+                                                    <h3 class="text-2xl font-black text-blue-700" id="prog-points">0
+                                                    </h3>
+                                                </div>
+                                                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                                                    <p class="text-xs text-emerald-400 font-bold uppercase">
+                                                        Modul Selesai</p>
+                                                    <h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0
+                                                    </h3>
+                                                </div>
+                                                <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                                                    <p class="text-xs text-purple-400 font-bold uppercase">Tugas
+                                                        Dikumpul</p>
                                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                                                            <p class="text-xs text-blue-400 font-bold uppercase">Total
-                                                                Poin</p>
+                                                            <p class="text-xs text-blue-400 font-bold uppercase">
+                                                                Total Poin</p>
                                                             <h3 class="text-2xl font-black text-blue-700"
                                                                 id="prog-points">0</h3>
                                                         </div>
@@ -269,271 +566,249 @@
                                                         </div>
                                                         <div
                                                             class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                                                            <p class="text-xs text-purple-400 font-bold uppercase">Tugas
-                                                                Dikumpul</p>
-                                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                                <div
-                                                                    class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                                                                    <p
-                                                                        class="text-xs text-blue-400 font-bold uppercase">
-                                                                        Total Poin</p>
-                                                                    <h3 class="text-2xl font-black text-blue-700"
-                                                                        id="prog-points">0</h3>
-                                                                </div>
-                                                                <div
-                                                                    class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                                                                    <p
-                                                                        class="text-xs text-emerald-400 font-bold uppercase">
-                                                                        Modul Selesai</p>
-                                                                    <h3 class="text-2xl font-black text-emerald-700"
-                                                                        id="prog-modules">0</h3>
-                                                                </div>
-                                                                <div
-                                                                    class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                                                                    <p
-                                                                        class="text-xs text-purple-400 font-bold uppercase">
-                                                                        Tugas Dikumpul</p>
-                                                                    <h3 class="text-2xl font-black text-purple-700"
-                                                                        id="prog-tasks">0</h3>
-                                                                </div>
-                                                            </div>
-                                                            < !-- Tabs/Tables -->
-                                                                <div
-                                                                    class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
-                                                                    <div
-                                                                        class="bg-slate-50 px-6 py-4 border-b border-slate-100">
-                                                                        <h3 class="font-bold text-slate-700">Detail
-                                                                            Aktivitas</h3>
-                                                                    </div>
-                                                                    <div class="p-6 space-y-8">
-                                                                        <div>
-                                                                            <h4
-                                                                                class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">
-                                                                                Riwayat Tugas </h4>
-                                                                            <div id="prog-task-list" class="space-y-2">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div>
-                                                                            <h4
-                                                                                class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">
-                                                                                Riwayat Modul </h4>
-                                                                            <div id="prog-modul-list" class="space-y-2">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                        </div>
-                                        </section>
-                                        </section>
-                                        < !-- SEC: Settings -->
-                                            <section id="sec-settings" class="hidden space-y-6 animate-fade-in">
-                                                <div
-                                                    class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
-                                                    <div class="flex justify-between items-center mb-6">
-                                                        <div>
-                                                            <h2 class="text-xl font-black text-slate-800">Pengaturan
-                                                                Sistem</h2>
-                                                            <p class="text-slate-500 text-sm">Kontrol global aplikasi.
-                                                            </p>
+                                                            <p class="text-xs text-purple-400 font-bold uppercase">
+                                                                Tugas Dikumpul</p>
+                                                            <h3 class="text-2xl font-black text-purple-700"
+                                                                id="prog-tasks">0</h3>
                                                         </div>
                                                     </div>
-                                                    <div class="space-y-4">
-                                                        < !-- Maintenance Mode Toggle -->
+                                                    < !-- Tabs/Tables -->
+                                                        <div
+                                                            class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
                                                             <div
-                                                                class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                                                <div class="flex items-center gap-4">
-                                                                    <div
-                                                                        class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
-                                                                        <i class="fa-solid fa-person-digging"></i></div>
-                                                                    <div>
-                                                                        <h4 class="font-bold text-slate-800 text-sm">
-                                                                            Maintenance Mode</h4>
-                                                                        <p class="text-xs text-slate-500">Kunci akses
-                                                                            untuk semua user kecuali Admin.</p>
-                                                                    </div>
-                                                                </div><label
-                                                                    class="relative inline-flex items-center cursor-pointer"><input
-                                                                        type="checkbox" id="maintenance-toggle"
-                                                                        class="sr-only peer"
-                                                                        onchange="toggleMaintenance()">
-                                                                    <div
-                                                                        class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
-                                                                    </div>
-                                                                </label>
+                                                                class="bg-slate-50 px-6 py-4 border-b border-slate-100">
+                                                                <h3 class="font-bold text-slate-700">Detail
+                                                                    Aktivitas</h3>
                                                             </div>
-                                                    </div>
+                                                            <div class="p-6 space-y-8">
+                                                                <div>
+                                                                    <h4
+                                                                        class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">
+                                                                        Riwayat Tugas </h4>
+                                                                    <div id="prog-task-list" class="space-y-2">
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <h4
+                                                                        class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">
+                                                                        Riwayat Modul </h4>
+                                                                    <div id="prog-modul-list" class="space-y-2">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                 </div>
-                                            </section>
+                                </section>
+                                </section>
+                                < !-- SEC: Settings -->
+                                    <section id="sec-settings" class="hidden space-y-6 animate-fade-in">
+                                        <div
+                                            class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
+                                            <div class="flex justify-between items-center mb-6">
+                                                <div>
+                                                    <h2 class="text-xl font-black text-slate-800">Pengaturan
+                                                        Sistem</h2>
+                                                    <p class="text-slate-500 text-sm">Kontrol global aplikasi.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-4">
+                                                < !-- Maintenance Mode Toggle -->
+                                                    <div
+                                                        class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                        <div class="flex items-center gap-4">
+                                                            <div
+                                                                class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                                                                <i class="fa-solid fa-person-digging"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h4 class="font-bold text-slate-800 text-sm">
+                                                                    Maintenance Mode</h4>
+                                                                <p class="text-xs text-slate-500">Kunci akses
+                                                                    untuk semua user kecuali Admin.</p>
+                                                            </div>
+                                                        </div><label
+                                                            class="relative inline-flex items-center cursor-pointer"><input
+                                                                type="checkbox" id="maintenance-toggle"
+                                                                class="sr-only peer" onchange="toggleMaintenance()">
+                                                            <div
+                                                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </section>
             </div>
         </main>
     </div>
     <!-- Script Logic -->
-            <script> // --- Navigation ---
+    <script> // --- Navigation ---
 
-                function showSection(id) {
+        function showSection(id) {
 
-                    ['dashboard',
-                        'tasks',
-                        'modules',
-                        'news',
-                        'students',
-                        'points',
-                        'presence',
-                        'progress',
-                        'settings'].forEach(s => {
-                            const sec = document.getElementById('sec-' + s);
-                            const nav = document.getElementById('nav-' + s);
-                            if (sec) sec.classList.add('hidden');
+            ['dashboard',
+                'tasks',
+                'modules',
+                'news',
+                'students',
+                'points',
+                'presence',
+                'progress',
+                'settings'].forEach(s => {
+                    const sec = document.getElementById('sec-' + s);
+                    const nav = document.getElementById('nav-' + s);
+                    if (sec) sec.classList.add('hidden');
 
-                            if (nav) {
-                                nav.classList.remove('sidebar-active');
-                                nav.classList.add('sidebar-item');
-                            }
-                        });
-
-                    const target = document.getElementById('sec-' + id) || document.getElementById('tab-' + id);
-                    if (target) target.classList.remove('hidden');
-
-                    const activeNav = document.getElementById('nav-' + id);
-
-                    if (activeNav) {
-                        activeNav.classList.remove('sidebar-item');
-                        activeNav.classList.add('sidebar-active');
+                    if (nav) {
+                        nav.classList.remove('sidebar-active');
+                        nav.classList.add('sidebar-item');
                     }
+                });
 
-                    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+            const target = document.getElementById('sec-' + id) || document.getElementById('tab-' + id);
+            if (target) target.classList.remove('hidden');
+
+            const activeNav = document.getElementById('nav-' + id);
+
+            if (activeNav) {
+                activeNav.classList.remove('sidebar-item');
+                activeNav.classList.add('sidebar-active');
+            }
+
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+
+        // --- INIT ---
+        async function init() {
+            if (!window.supabaseClient) return;
+
+            // Stats (Quick Counts)
+            try {
+                const {
+                    count: studentCount
                 }
 
-                // --- INIT ---
-                async function init() {
-                    if (!window.supabaseClient) return;
+                    = await supabaseClient.from('profiles').select('*', {
+                        count: 'exact', head: true
+                    }).eq('role', 'student');
+                document.getElementById('stat-students').innerText = studentCount || 0;
 
-                    // Stats (Quick Counts)
-                    try {
-                        const {
-                            count: studentCount
-                        }
-
-                            = await supabaseClient.from('profiles').select('*', {
-                                count: 'exact', head: true
-                            }).eq('role', 'student');
-                        document.getElementById('stat-students').innerText = studentCount || 0;
-
-                        const {
-                            count: taskCount
-                        }
-
-                            = await supabaseClient.from('assignments').select('*', {
-                                count: 'exact', head: true
-                            }).eq('is_active', true);
-                        document.getElementById('stat-active').innerText = taskCount || 0;
-                    }
-
-                    catch (e) {
-                        console.error("Quick stats failed", e);
-                    }
-
-                    // Parallel Load (Ensure Students loaded FIRST for name lookups)
-                    await loadStudents();
-
-                    // Now load dependent features
-                    loadTasks();
-                    loadModules();
-                    loadNews();
-                    initPresenceOptions();
-
-                    // New Dashboard Features
-                    initChart();
-                    loadPointsLog();
-
-                    showSection('dashboard');
+                const {
+                    count: taskCount
                 }
 
-                // --- CHART ---
-                async function initChart() {
-                    try {
+                    = await supabaseClient.from('assignments').select('*', {
+                        count: 'exact', head: true
+                    }).eq('is_active', true);
+                document.getElementById('stat-active').innerText = taskCount || 0;
+            }
 
-                        // Fetch ALL logs to client for aggregation (small scale assumption)
-                        const {
-                            data: logs
-                        }
+            catch (e) {
+                console.error("Quick stats failed", e);
+            }
 
-                            = await supabaseClient.from('participation_logs').select('student_nim, points');
+            // Parallel Load (Ensure Students loaded FIRST for name lookups)
+            await loadStudents();
 
-                        if (!logs) return;
+            // Now load dependent features
+            loadTasks();
+            loadModules();
+            loadNews();
+            initPresenceOptions();
 
-                        // Aggregate
-                        const studentPoints = {}
+            // New Dashboard Features
+            initChart();
+            loadPointsLog();
 
-                            ;
+            showSection('dashboard');
+        }
 
-                        logs.forEach(log => {
-                            studentPoints[log.student_nim] = (studentPoints[log.student_nim] || 0) + (log.points || 0);
-                        });
+        // --- CHART ---
+        async function initChart() {
+            try {
 
-                        // Convert to Array & Sort
-                        const sorted = Object.entries(studentPoints).map(([nim, points]) => ({
-                            name: allStudents.find(s => s.nim === nim)?.name || nim,
-                            points: points
-                        })).sort((a, b) => b.points - a.points).slice(0, 10); // Top 10
-
-                        // Render Chart
-                        const ctx = document.getElementById('activityChart').getContext('2d');
-
-                        new Chart(ctx, {
-
-                            type: 'bar',
-                            data: {
-
-                                labels: sorted.map(s => s.name),
-                                datasets: [{
-                                    label: 'Total Poin',
-                                    data: sorted.map(s => s.points),
-                                    backgroundColor: '#3B82F6',
-                                    borderRadius: 6
-                                }
-
-                                ]
-                            }
-
-                            ,
-                            options: {
-
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-
-                    }
-
-                    catch (e) {
-                        console.error("Chart Error", e);
-                    }
+                // Fetch ALL logs to client for aggregation (small scale assumption)
+                const {
+                    data: logs
                 }
 
-                // --- POINTS LOG ---
-                async function loadPointsLog() {
-                    try {
-                        const {
-                            data
+                    = await supabaseClient.from('participation_logs').select('student_nim, points');
+
+                if (!logs) return;
+
+                // Aggregate
+                const studentPoints = {}
+
+                    ;
+
+                logs.forEach(log => {
+                    studentPoints[log.student_nim] = (studentPoints[log.student_nim] || 0) + (log.points || 0);
+                });
+
+                // Convert to Array & Sort
+                const sorted = Object.entries(studentPoints).map(([nim, points]) => ({
+                    name: allStudents.find(s => s.nim === nim)?.name || nim,
+                    points: points
+                })).sort((a, b) => b.points - a.points).slice(0, 10); // Top 10
+
+                // Render Chart
+                const ctx = document.getElementById('activityChart').getContext('2d');
+
+                new Chart(ctx, {
+
+                    type: 'bar',
+                    data: {
+
+                        labels: sorted.map(s => s.name),
+                        datasets: [{
+                            label: 'Total Poin',
+                            data: sorted.map(s => s.points),
+                            backgroundColor: '#3B82F6',
+                            borderRadius: 6
                         }
 
-                            = await supabaseClient.from('participation_logs').select('*').order('created_at', {
-                                ascending: false
-                            }).limit(10);
+                        ]
+                    }
 
-                        const list = document.getElementById('points-log-list');
+                    ,
+                    options: {
 
-                        if (data && list) {
-                            list.innerHTML = data.map(log => {
-                                const sName = allStudents.find(s => s.nim === log.student_nim)?.name || log.student_nim;
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
 
-                                return ` <tr class="hover:bg-slate-50" > <td class="px-4 py-3 text-slate-500 font-mono text-xs" >$ {
+            }
+
+            catch (e) {
+                console.error("Chart Error", e);
+            }
+        }
+
+        // --- POINTS LOG ---
+        async function loadPointsLog() {
+            try {
+                const {
+                    data
+                }
+
+                    = await supabaseClient.from('participation_logs').select('*').order('created_at', {
+                        ascending: false
+                    }).limit(10);
+
+                const list = document.getElementById('points-log-list');
+
+                if (data && list) {
+                    list.innerHTML = data.map(log => {
+                        const sName = allStudents.find(s => s.nim === log.student_nim)?.name || log.student_nim;
+
+                        return ` <tr class="hover:bg-slate-50" > <td class="px-4 py-3 text-slate-500 font-mono text-xs" >$ {
                             new Date(log.created_at).toLocaleDateString()
                         }
 
@@ -550,133 +825,133 @@
                         }
 
                         </td> </tr> `;
-                            }).join('');
-                        }
-                    }
+                    }).join('');
+                }
+            }
 
-                    catch (e) {
-                        console.error("Points Log Error", e);
-                    }
+            catch (e) {
+                console.error("Points Log Error", e);
+            }
+        }
+
+        // --- MAINTENANCE ---
+        async function checkMaintenanceStatus() {
+            const {
+                data
+            }
+
+                = await supabaseClient.from('announcements').select('*').eq('type', 'system_maintenance').single();
+            const toggle = document.getElementById('mt-toggle');
+            const status = document.getElementById('mt-status');
+
+            if (data && data.content === 'true') {
+                toggle.checked = true;
+                status.innerText = 'ACTIVE';
+                status.className = 'text-xs font-bold text-red-500';
+            }
+
+            else {
+                toggle.checked = false;
+                status.innerText = 'OFF';
+                status.className = 'text-xs font-bold text-emerald-500';
+            }
+        }
+
+        async function toggleMaintenance() {
+            const toggle = document.getElementById('mt-toggle');
+            const isActive = toggle.checked;
+            const status = document.getElementById('mt-status');
+
+            status.innerText = isActive ? 'UPDATING...' : 'UPDATING...';
+
+            // Upsert special row
+            // We use a fixed ID or assume unique constraint on type? 
+            // Better to use a specific Title or ID if possible. 
+            // Since we can't guarantee ID, we'll Query first.
+
+            const {
+                data: existing
+            }
+
+                = await supabaseClient.from('announcements').select('id').eq('type', 'system_maintenance').single();
+
+            let error;
+
+            if (existing) {
+                const {
+                    error: err
                 }
 
-                // --- MAINTENANCE ---
-                async function checkMaintenanceStatus() {
-                    const {
-                        data
-                    }
+                    = await supabaseClient.from('announcements').update({
+                        content: isActive ? 'true' : 'false'
+                    }).eq('id', existing.id);
+                error = err;
+            }
 
-                        = await supabaseClient.from('announcements').select('*').eq('type', 'system_maintenance').single();
-                    const toggle = document.getElementById('mt-toggle');
-                    const status = document.getElementById('mt-status');
-
-                    if (data && data.content === 'true') {
-                        toggle.checked = true;
-                        status.innerText = 'ACTIVE';
-                        status.className = 'text-xs font-bold text-red-500';
-                    }
-
-                    else {
-                        toggle.checked = false;
-                        status.innerText = 'OFF';
-                        status.className = 'text-xs font-bold text-emerald-500';
-                    }
+            else {
+                const {
+                    error: err
                 }
 
-                async function toggleMaintenance() {
-                    const toggle = document.getElementById('mt-toggle');
-                    const isActive = toggle.checked;
-                    const status = document.getElementById('mt-status');
-
-                    status.innerText = isActive ? 'UPDATING...' : 'UPDATING...';
-
-                    // Upsert special row
-                    // We use a fixed ID or assume unique constraint on type? 
-                    // Better to use a specific Title or ID if possible. 
-                    // Since we can't guarantee ID, we'll Query first.
-
-                    const {
-                        data: existing
+                    = await supabaseClient.from('announcements').insert([{
+                        title: 'System Maintenance Flag',
+                        type: 'system_maintenance',
+                        content: isActive ? 'true' : 'false',
+                        author: 'SYSTEM'
                     }
 
-                        = await supabaseClient.from('announcements').select('id').eq('type', 'system_maintenance').single();
+                    ]);
+                error = err;
+            }
 
-                    let error;
+            if (!error) {
+                status.innerText = isActive ? 'ACTIVE' : 'OFF';
+                status.className = isActive ? 'text-xs font-bold text-red-500' : 'text-xs font-bold text-emerald-500';
+            }
 
-                    if (existing) {
-                        const {
-                            error: err
-                        }
+            else {
+                VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
+                toggle.checked = !isActive; // Revert
+            }
+        }
 
-                            = await supabaseClient.from('announcements').update({
-                                content: isActive ? 'true' : 'false'
-                            }).eq('id', existing.id);
-                        error = err;
-                    }
+        // --- STUDENTS ---
+        let allStudents = [];
 
-                    else {
-                        const {
-                            error: err
-                        }
+        async function loadStudents() {
 
-                            = await supabaseClient.from('announcements').insert([{
-                                title: 'System Maintenance Flag',
-                                type: 'system_maintenance',
-                                content: isActive ? 'true' : 'false',
-                                author: 'SYSTEM'
-                            }
+            // Using 'profiles' table which is more modern/consistent if available, fallback to students
+            // Wait, existing code used 'students' table. Let's stick to existing pattern or check schema?
+            // Existing code at line 666 used 'students'.
+            const {
+                data
+            }
 
-                            ]);
-                        error = err;
-                    }
+                = await supabaseClient.from('profiles').select('*').eq('role', 'student').order('nama');
 
-                    if (!error) {
-                        status.innerText = isActive ? 'ACTIVE' : 'OFF';
-                        status.className = isActive ? 'text-xs font-bold text-red-500' : 'text-xs font-bold text-emerald-500';
-                    }
-
-                    else {
-                        VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
-                        toggle.checked = !isActive; // Revert
-                    }
+            // Map to standardize format if schema changed (profiles uses 'nama', students uses 'name'?)
+            // Let's assume consistent mapping or adapt.
+            // If data is empty, maybe fallback to 'students' table?
+            if (!data || data.length === 0) {
+                const {
+                    data: specific
                 }
 
-                // --- STUDENTS ---
-                let allStudents = [];
+                    = await supabaseClient.from('students').select('*').order('name');
+                allStudents = specific || [];
+            }
 
-                async function loadStudents() {
+            else {
+                allStudents = data.map(p => ({
+                    nim: p.nim, name: p.nama
+                }));
+            }
 
-                    // Using 'profiles' table which is more modern/consistent if available, fallback to students
-                    // Wait, existing code used 'students' table. Let's stick to existing pattern or check schema?
-                    // Existing code at line 666 used 'students'.
-                    const {
-                        data
-                    }
+            // Render Table
+            const tbody = document.getElementById('student-list');
 
-                        = await supabaseClient.from('profiles').select('*').eq('role', 'student').order('nama');
-
-                    // Map to standardize format if schema changed (profiles uses 'nama', students uses 'name'?)
-                    // Let's assume consistent mapping or adapt.
-                    // If data is empty, maybe fallback to 'students' table?
-                    if (!data || data.length === 0) {
-                        const {
-                            data: specific
-                        }
-
-                            = await supabaseClient.from('students').select('*').order('name');
-                        allStudents = specific || [];
-                    }
-
-                    else {
-                        allStudents = data.map(p => ({
-                            nim: p.nim, name: p.nama
-                        }));
-                    }
-
-                    // Render Table
-                    const tbody = document.getElementById('student-list');
-
-                    if (tbody) {
-                        tbody.innerHTML = allStudents.map(s => ` <tr class="hover:bg-slate-50 transition-colors" > <td class="px-6 py-4 text-slate-500 font-mono text-xs" >$ {
+            if (tbody) {
+                tbody.innerHTML = allStudents.map(s => ` <tr class="hover:bg-slate-50 transition-colors" > <td class="px-6 py-4 text-slate-500 font-mono text-xs" >$ {
                     s.nim
                 }
 
@@ -685,79 +960,79 @@
                 }
 
                 </td> <td class="px-6 py-4 text-right" > <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg transition-colors" ><i class="fa-solid fa-trash" ></i></button> </td> </tr> `).join('');
-                    }
+            }
 
-                    // Render Select Options (Points & Progress)
-                    const pSelect = document.getElementById('p-student');
-                    const progSelect = document.getElementById('prog-student-select');
+            // Render Select Options (Points & Progress)
+            const pSelect = document.getElementById('p-student');
+            const progSelect = document.getElementById('prog-student-select');
 
-                    const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}" >$ {
+            const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}" >$ {
                 s.name
             }
 
             </option>`).join('');
-                    if (pSelect) pSelect.innerHTML = optionsHtml;
-                    if (progSelect) progSelect.innerHTML = optionsHtml;
+            if (pSelect) pSelect.innerHTML = optionsHtml;
+            if (progSelect) progSelect.innerHTML = optionsHtml;
 
-                    // Render Presence Table (UPDATED to default 'Hadir')
-                    renderPresenceTable();
-                }
+            // Render Presence Table (UPDATED to default 'Hadir')
+            renderPresenceTable();
+        }
 
-                // --- PRESENCE --- (Updated Default)
-                function renderPresenceTable() {
-                    const tbody = document.getElementById('presence-list');
-                    if (!tbody) return;
+        // --- PRESENCE --- (Updated Default)
+        function renderPresenceTable() {
+            const tbody = document.getElementById('presence-list');
+            if (!tbody) return;
 
-                    tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
+            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
                     s.name
                 }
 
                 </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1 focus:ring-2 focus:ring-primary-500" data-nim="${s.nim}" > <option value="Hadir" selected>Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            const nim = document.getElementById('new-nim').value;
+            const name = document.getElementById('new-name').value;
+
+            const {
+                error
+            }
+
+                = await supabaseClient.from('students').insert([{
+                    nim, name, access_code: nim
                 }
 
-                async function addStudent(e) {
-                    e.preventDefault();
-                    const nim = document.getElementById('new-nim').value;
-                    const name = document.getElementById('new-name').value;
+                ]);
 
-                    const {
-                        error
-                    }
+            if (!error) {
+                e.target.reset();
+                loadStudents();
+                updateStats();
+                VisualModal.alert('Mahasiswa ditambahkan', 'Sukses', 'success');
+            }
 
-                        = await supabaseClient.from('students').insert([{
-                            nim, name, access_code: nim
-                        }
+            else VisualModal.alert(error.message, 'Error', 'error');
+        }
 
-                        ]);
+        async function deleteStudent(nim) {
+            if (!await VisualModal.confirm('Hapus users?')) return;
+            await supabaseClient.from('students').delete().eq('nim', nim);
+            loadStudents();
+        }
 
-                    if (!error) {
-                        e.target.reset();
-                        loadStudents();
-                        updateStats();
-                        VisualModal.alert('Mahasiswa ditambahkan', 'Sukses', 'success');
-                    }
+        // --- TASKS ---
+        async function loadTasks() {
+            const {
+                data
+            }
 
-                    else VisualModal.alert(error.message, 'Error', 'error');
-                }
+                = await supabaseClient.from('assignments').select('*').order('deadline', {
+                    ascending: false
+                });
+            const list = document.getElementById('task-list');
 
-                async function deleteStudent(nim) {
-                    if (!await VisualModal.confirm('Hapus users?')) return;
-                    await supabaseClient.from('students').delete().eq('nim', nim);
-                    loadStudents();
-                }
-
-                // --- TASKS ---
-                async function loadTasks() {
-                    const {
-                        data
-                    }
-
-                        = await supabaseClient.from('assignments').select('*').order('deadline', {
-                            ascending: false
-                        });
-                    const list = document.getElementById('task-list');
-
-                    list.innerHTML = data.map(t => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm" > <div> <div class="flex items-center gap-2 mb-1" > <h4 class="font-bold text-slate-700" >$ {
+            list.innerHTML = data.map(t => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm" > <div> <div class="flex items-center gap-2 mb-1" > <h4 class="font-bold text-slate-700" >$ {
                 t.title
             }
 
@@ -774,114 +1049,114 @@
             }
 
             </p> </div> <div class="flex gap-2" > <button onclick="editTask('${t.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `).join('');
+        }
+
+        async function handleTaskSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('t-id').value;
+
+            const payload = {
+                title: document.getElementById('t-title').value,
+                description: document.getElementById('t-desc').value,
+                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                submission_link: document.getElementById('t-link').value,
+                points: parseInt(document.getElementById('t-points').value) || 10,
+                module_id: document.getElementById('t-module-id').value || null,
+                is_active: true
+            }
+
+                ;
+
+            let error;
+
+            if (id) {
+                const {
+                    error: err
                 }
 
-                async function handleTaskSubmit(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('t-id').value;
+                    = await supabaseClient.from('assignments').update(payload).eq('id', id);
+                error = err;
+            }
 
-                    const payload = {
-                        title: document.getElementById('t-title').value,
-                        description: document.getElementById('t-desc').value,
-                        deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
-                        submission_link: document.getElementById('t-link').value,
-                        points: parseInt(document.getElementById('t-points').value) || 10,
-                        module_id: document.getElementById('t-module-id').value || null,
-                        is_active: true
-                    }
-
-                        ;
-
-                    let error;
-
-                    if (id) {
-                        const {
-                            error: err
-                        }
-
-                            = await supabaseClient.from('assignments').update(payload).eq('id', id);
-                        error = err;
-                    }
-
-                    else {
-                        const {
-                            error: err
-                        }
-
-                            = await supabaseClient.from('assignments').insert([payload]);
-                        error = err;
-                    }
-
-                    if (!error) {
-                        resetTaskForm();
-                        loadTasks();
-                        updateStats();
-                    }
-
-                    else alert(error.message);
+            else {
+                const {
+                    error: err
                 }
 
-                async function editTask(id) {
-                    const {
-                        data
-                    }
+                    = await supabaseClient.from('assignments').insert([payload]);
+                error = err;
+            }
 
-                        = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+            if (!error) {
+                resetTaskForm();
+                loadTasks();
+                updateStats();
+            }
 
-                    if (data) {
-                        document.getElementById('t-id').value = data.id;
-                        document.getElementById('t-title').value = data.title;
-                        document.getElementById('t-desc').value = data.description;
-                        document.getElementById('t-link').value = data.submission_link || '';
-                        document.getElementById('t-points').value = data.points || 10;
-                        document.getElementById('t-module-id').value = data.module_id || '';
+            else alert(error.message);
+        }
 
-                        const d = new Date(data.deadline);
-                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                        document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+        async function editTask(id) {
+            const {
+                data
+            }
 
-                        document.getElementById('task-form-title').innerText = 'Edit Tugas';
-                        document.getElementById('btn-save-task').innerText = 'Update Tugas';
-                        document.getElementById('sec-tasks').scrollIntoView();
-                    }
-                }
+                = await supabaseClient.from('assignments').select('*').eq('id', id).single();
 
-                async function deleteTask(id) {
-                    if (await VisualModal.confirm('Hapus tugas?')) {
-                        await supabaseClient.from('assignments').delete().eq('id', id);
-                        loadTasks();
-                    }
-                }
+            if (data) {
+                document.getElementById('t-id').value = data.id;
+                document.getElementById('t-title').value = data.title;
+                document.getElementById('t-desc').value = data.description;
+                document.getElementById('t-link').value = data.submission_link || '';
+                document.getElementById('t-points').value = data.points || 10;
+                document.getElementById('t-module-id').value = data.module_id || '';
 
-                function resetTaskForm() {
-                    document.querySelector('#sec-tasks form').reset();
-                    document.getElementById('t-id').value = '';
-                    document.getElementById('task-form-title').innerText = 'Buat Tugas Baru';
-                    document.getElementById('btn-save-task').innerText = 'Simpan Tugas';
-                }
+                const d = new Date(data.deadline);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
 
-                // --- MODULE STEPS HELPER ---
-                const LOCAL_MODULE_FILES = ['matriks.pdf',
-                    'matrikss.pdf'
-                    // Tambahkan file lain manual di sini jika ada
-                ];
+                document.getElementById('task-form-title').innerText = 'Edit Tugas';
+                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('sec-tasks').scrollIntoView();
+            }
+        }
 
-                function addStepInput(data = {}) {
-                    const container = document.getElementById('steps-container');
-                    const noMsg = document.getElementById('no-steps-msg');
-                    if (noMsg) noMsg.remove();
+        async function deleteTask(id) {
+            if (await VisualModal.confirm('Hapus tugas?')) {
+                await supabaseClient.from('assignments').delete().eq('id', id);
+                loadTasks();
+            }
+        }
 
-                    // Build Options for Local Files
-                    const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}" >sumbermodul/$ {
+        function resetTaskForm() {
+            document.querySelector('#sec-tasks form').reset();
+            document.getElementById('t-id').value = '';
+            document.getElementById('task-form-title').innerText = 'Buat Tugas Baru';
+            document.getElementById('btn-save-task').innerText = 'Simpan Tugas';
+        }
+
+        // --- MODULE STEPS HELPER ---
+        const LOCAL_MODULE_FILES = ['matriks.pdf',
+            'matrikss.pdf'
+            // Tambahkan file lain manual di sini jika ada
+        ];
+
+        function addStepInput(data = {}) {
+            const container = document.getElementById('steps-container');
+            const noMsg = document.getElementById('no-steps-msg');
+            if (noMsg) noMsg.remove();
+
+            // Build Options for Local Files
+            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}" >sumbermodul/$ {
                     f
                 }
 
                 </option>`).join('');
 
-                    const div = document.createElement('div');
-                    div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
+            const div = document.createElement('div');
+            div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
 
-                    div.innerHTML = ` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"$ {
+            div.innerHTML = ` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"$ {
                 data.type==='ppt' ? 'selected': ''
             }
 
@@ -910,57 +1185,57 @@
             }
 
             ><span>Tambahkan Pertanyaan (Kuis Singkat)</span></label><div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}"><input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}"><input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}"><input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}"></div></div>`;
-                    container.appendChild(div);
-                }
+            container.appendChild(div);
+        }
 
-                function togglePageInputs(select) {
-                    const pagesDiv = select.parentElement.nextElementSibling;
-                    const fileSelectDiv = pagesDiv.nextElementSibling;
+        function togglePageInputs(select) {
+            const pagesDiv = select.parentElement.nextElementSibling;
+            const fileSelectDiv = pagesDiv.nextElementSibling;
 
-                    if (['pdf', 'ppt'].includes(select.value)) {
-                        pagesDiv.classList.remove('hidden');
-                        fileSelectDiv.classList.remove('hidden');
-                    }
+            if (['pdf', 'ppt'].includes(select.value)) {
+                pagesDiv.classList.remove('hidden');
+                fileSelectDiv.classList.remove('hidden');
+            }
 
-                    else {
-                        pagesDiv.classList.add('hidden');
-                        fileSelectDiv.classList.add('hidden');
-                    }
-                }
+            else {
+                pagesDiv.classList.add('hidden');
+                fileSelectDiv.classList.add('hidden');
+            }
+        }
 
-                function toggleStepQuestion(cb) {
-                    const box = cb.parentElement.nextElementSibling;
-                    if (cb.checked) box.classList.remove('hidden');
-                    else box.classList.add('hidden');
-                }
+        function toggleStepQuestion(cb) {
+            const box = cb.parentElement.nextElementSibling;
+            if (cb.checked) box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
 
-                async function uploadStepFile(input) {
-                    const file = input.files[0];
-                    if (!file) return;
+        async function uploadStepFile(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-                    const btn = input.parentElement; // Label
+            const btn = input.parentElement; // Label
 
-                    // Robust traversal: Input -> Label -> Container -> TextInput
-                    if (!btn || !btn.parentElement) {
-                        await VisualModal.alert('Error: Structure mismatch (parent not found)', 'Error', 'error');
-                        return;
-                    }
+            // Robust traversal: Input -> Label -> Container -> TextInput
+            if (!btn || !btn.parentElement) {
+                await VisualModal.alert('Error: Structure mismatch (parent not found)', 'Error', 'error');
+                return;
+            }
 
-                    const textInput = btn.parentElement.querySelector('.step-url');
+            const textInput = btn.parentElement.querySelector('.step-url');
 
-                    if (!textInput) {
-                        await VisualModal.alert('Error: URL Input field not found related to this button', 'Error', 'error');
-                        return;
-                    }
+            if (!textInput) {
+                await VisualModal.alert('Error: URL Input field not found related to this button', 'Error', 'error');
+                return;
+            }
 
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
-                    btn.classList.add('cursor-not-allowed', 'opacity-50');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.classList.add('cursor-not-allowed', 'opacity-50');
 
-                    try {
-                        const fileExt = file.name.split('.').pop();
+            try {
+                const fileExt = file.name.split('.').pop();
 
-                        const fileName = `$ {
+                const fileName = `$ {
                     Date.now()
                 }
 
@@ -974,73 +1249,73 @@
 
                 `;
 
-                        const filePath = `uploads/$ {
+                const filePath = `uploads/$ {
                     fileName
                 }
 
                 `;
 
-                        const {
-                            data,
-                            error
-                        }
-
-                            = await supabaseClient.storage.from('materials').upload(filePath, file);
-                        if (error) throw error;
-
-                        // const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
-
-                        textInput.value = publicUrl;
-                        await VisualModal.alert('Upload Sukses!', 'Sukses', 'success');
-                    }
-
-                    catch (e) {
-                        console.error(e);
-                        await VisualModal.alert('Gagal Upload: ' + e.message, 'Error', 'error');
-                    }
-
-                    finally {
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('cursor-not-allowed', 'opacity-50');
-                    }
+                const {
+                    data,
+                    error
                 }
 
-                function getStepsPayload() {
-                    const items = document.querySelectorAll('.step-item');
-                    const steps = [];
+                    = await supabaseClient.storage.from('materials').upload(filePath, file);
+                if (error) throw error;
 
-                    items.forEach(div => {
-                        const hasQ = div.querySelector('.step-has-q').checked;
-                        const type = div.querySelector('.step-type').value;
+                // const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
 
-                        steps.push({
-                            title: div.querySelector('.step-title').value,
-                            type: type,
-                            url: div.querySelector('.step-url').value,
-                            instruction: div.querySelector('.step-instruction').value,
-                            start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
-                            end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
-                            question: hasQ ? div.querySelector('.step-q-text').value : null,
-                            hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
-                            answer_key: hasQ ? div.querySelector('.step-q-key').value : null
-                        });
-                    });
-                    return steps;
-                }
+                textInput.value = publicUrl;
+                await VisualModal.alert('Upload Sukses!', 'Sukses', 'success');
+            }
 
-                // --- MODULES ---
-                async function loadModules() {
-                    const {
-                        data
-                    }
+            catch (e) {
+                console.error(e);
+                await VisualModal.alert('Gagal Upload: ' + e.message, 'Error', 'error');
+            }
 
-                        = await supabaseClient.from('modules').select('*').order('week');
-                    const list = document.getElementById('module-list');
+            finally {
+                btn.innerHTML = originalText;
+                btn.classList.remove('cursor-not-allowed', 'opacity-50');
+            }
+        }
 
-                    list.innerHTML = data.map(m => {
-                        const isLocked = m.is_locked;
+        function getStepsPayload() {
+            const items = document.querySelectorAll('.step-item');
+            const steps = [];
 
-                        return ` <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-orange-100 bg-orange-50/30' : 'border-slate-100'} flex justify-between items-center shadow-sm" > <div class="flex-1 min-w-0 pr-4" > <div class="flex items-center gap-2" > <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded" >Minggu $ {
+            items.forEach(div => {
+                const hasQ = div.querySelector('.step-has-q').checked;
+                const type = div.querySelector('.step-type').value;
+
+                steps.push({
+                    title: div.querySelector('.step-title').value,
+                    type: type,
+                    url: div.querySelector('.step-url').value,
+                    instruction: div.querySelector('.step-instruction').value,
+                    start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
+                    end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
+                    question: hasQ ? div.querySelector('.step-q-text').value : null,
+                    hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
+                    answer_key: hasQ ? div.querySelector('.step-q-key').value : null
+                });
+            });
+            return steps;
+        }
+
+        // --- MODULES ---
+        async function loadModules() {
+            const {
+                data
+            }
+
+                = await supabaseClient.from('modules').select('*').order('week');
+            const list = document.getElementById('module-list');
+
+            list.innerHTML = data.map(m => {
+                const isLocked = m.is_locked;
+
+                return ` <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-orange-100 bg-orange-50/30' : 'border-slate-100'} flex justify-between items-center shadow-sm" > <div class="flex-1 min-w-0 pr-4" > <div class="flex items-center gap-2" > <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded" >Minggu $ {
                         m.week
                     }
 
@@ -1057,13 +1332,13 @@
                     }
 
                     </p> </div> <div class="flex gap-2 shrink-0" > <button onclick="toggleModuleLock('${m.id}', ${isLocked})" class="w-8 h-8 rounded-lg ${isLocked ? 'bg-orange-100 text-orange-500' : 'bg-slate-100 text-slate-400'} hover:bg-orange-200 flex items-center justify-center transition-colors" title="${isLocked ? 'Buka Kunci' : 'Kunci Modul'}" > <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'} text-xs" ></i> </button> <button onclick="editModule('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteModule('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `
-                    }).join('');
+            }).join('');
 
-                    // Also update Task Dropdown
-                    const taskSel = document.getElementById('t-module-id');
+            // Also update Task Dropdown
+            const taskSel = document.getElementById('t-module-id');
 
-                    if (taskSel) {
-                        taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' + data.map(m => `<option value="${m.id}" >Minggu $ {
+            if (taskSel) {
+                taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' + data.map(m => `<option value="${m.id}" >Minggu $ {
                         m.week
                     }
 
@@ -1072,201 +1347,201 @@
                     }
 
                     </option>`).join('');
-                    }
+            }
+        }
+
+        async function toggleModuleLock(id, currentStatus) {
+            const newStatus = !currentStatus;
+
+            // Optimistic UI Update (optional, but let's stick to reload for safety)
+            const {
+                error
+            }
+
+                = await supabaseClient.from('modules').update({
+                    is_locked: newStatus
+                }).eq('id', id);
+
+            if (error) {
+                VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
+            }
+
+            else {
+                // await VisualModal.alert(newStatus ? 'Modul dikunci' : 'Modul dibuka', 'Sukses', 'success');
+                // Skip alert for speed, just reload
+                loadModules();
+            }
+        }
+
+        async function handleModuleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('m-id').value;
+
+            const payload = {
+                week: document.getElementById('m-week').value,
+                topic: document.getElementById('m-topic').value,
+                description: document.getElementById('m-desc').value,
+                file_url: document.getElementById('m-file').value,
+                video_url: document.getElementById('m-video').value,
+                steps: getStepsPayload(), // Add JSON
+                is_visible: true // Ensure module is visible by default
+            }
+
+                ;
+
+            let error;
+
+            if (id) {
+                const {
+                    error: err
                 }
 
-                async function toggleModuleLock(id, currentStatus) {
-                    const newStatus = !currentStatus;
+                    = await supabaseClient.from('modules').update(payload).eq('id', id);
+                error = err;
+            }
 
-                    // Optimistic UI Update (optional, but let's stick to reload for safety)
-                    const {
-                        error
-                    }
-
-                        = await supabaseClient.from('modules').update({
-                            is_locked: newStatus
-                        }).eq('id', id);
-
-                    if (error) {
-                        VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
-                    }
-
-                    else {
-                        // await VisualModal.alert(newStatus ? 'Modul dikunci' : 'Modul dibuka', 'Sukses', 'success');
-                        // Skip alert for speed, just reload
-                        loadModules();
-                    }
+            else {
+                const {
+                    error: err
                 }
 
-                async function handleModuleSubmit(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('m-id').value;
+                    = await supabaseClient.from('modules').insert([payload]);
+                error = err;
+            }
 
-                    const payload = {
-                        week: document.getElementById('m-week').value,
-                        topic: document.getElementById('m-topic').value,
-                        description: document.getElementById('m-desc').value,
-                        file_url: document.getElementById('m-file').value,
-                        video_url: document.getElementById('m-video').value,
-                        steps: getStepsPayload(), // Add JSON
-                        is_visible: true // Ensure module is visible by default
-                    }
+            if (!error) {
+                resetModuleForm();
+                loadModules();
+                VisualModal.alert('Modul disimpan', 'Sukses', 'success');
+            }
 
-                        ;
+            else VisualModal.alert(error.message, 'Error', 'error');
+        }
 
-                    let error;
+        async function editModule(id) {
+            const {
+                data
+            }
 
-                    if (id) {
-                        const {
-                            error: err
-                        }
+                = await supabaseClient.from('modules').select('*').eq('id', id).single();
 
-                            = await supabaseClient.from('modules').update(payload).eq('id', id);
-                        error = err;
-                    }
+            if (data) {
+                document.getElementById('m-id').value = data.id;
+                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-topic').value = data.topic;
+                document.getElementById('m-desc').value = data.description || '';
+                document.getElementById('m-file').value = data.file_url || '';
+                document.getElementById('m-video').value = data.video_url || '';
 
-                    else {
-                        const {
-                            error: err
-                        }
+                // Populate Steps
+                const container = document.getElementById('steps-container');
+                container.innerHTML = '';
 
-                            = await supabaseClient.from('modules').insert([payload]);
-                        error = err;
-                    }
-
-                    if (!error) {
-                        resetModuleForm();
-                        loadModules();
-                        VisualModal.alert('Modul disimpan', 'Sukses', 'success');
-                    }
-
-                    else VisualModal.alert(error.message, 'Error', 'error');
+                if (data.steps && Array.isArray(data.steps)) {
+                    data.steps.forEach(step => addStepInput(step));
                 }
 
-                async function editModule(id) {
-                    const {
-                        data
-                    }
+                document.getElementById('modul-form-title').innerText = 'Edit Modul';
+                document.getElementById('btn-save-modul').innerText = 'Update Modul';
+                document.getElementById('sec-modules').scrollIntoView();
+            }
+        }
 
-                        = await supabaseClient.from('modules').select('*').eq('id', id).single();
+        function resetModuleForm() {
+            document.querySelector('#sec-modules form').reset();
+            document.getElementById('m-id').value = '';
+            document.getElementById('steps-container').innerHTML = '<p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>';
+            document.getElementById('modul-form-title').innerText = 'Tambah Modul';
+            document.getElementById('btn-save-modul').innerText = 'Simpan Modul';
+        }
 
-                    if (data) {
-                        document.getElementById('m-id').value = data.id;
-                        document.getElementById('m-week').value = data.week;
-                        document.getElementById('m-topic').value = data.topic;
-                        document.getElementById('m-desc').value = data.description || '';
-                        document.getElementById('m-file').value = data.file_url || '';
-                        document.getElementById('m-video').value = data.video_url || '';
+        async function deleteModule(id) {
+            if (await VisualModal.confirm('Hapus modul?')) {
+                await supabaseClient.from('modules').delete().eq('id', id);
+                loadModules();
+            }
+        }
 
-                        // Populate Steps
-                        const container = document.getElementById('steps-container');
-                        container.innerHTML = '';
+        // --- TASKS UPDATE ---
+        async function handleTaskSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('t-id').value;
 
-                        if (data.steps && Array.isArray(data.steps)) {
-                            data.steps.forEach(step => addStepInput(step));
-                        }
+            const payload = {
+                title: document.getElementById('t-title').value,
+                description: document.getElementById('t-desc').value,
+                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                submission_link: document.getElementById('t-link').value,
+                module_id: document.getElementById('t-module-id').value || null, // Capture Module ID
+                is_active: true
+            }
 
-                        document.getElementById('modul-form-title').innerText = 'Edit Modul';
-                        document.getElementById('btn-save-modul').innerText = 'Update Modul';
-                        document.getElementById('sec-modules').scrollIntoView();
-                    }
+                ;
+
+            let error;
+
+            if (id) {
+                const {
+                    error: err
                 }
 
-                function resetModuleForm() {
-                    document.querySelector('#sec-modules form').reset();
-                    document.getElementById('m-id').value = '';
-                    document.getElementById('steps-container').innerHTML = '<p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>';
-                    document.getElementById('modul-form-title').innerText = 'Tambah Modul';
-                    document.getElementById('btn-save-modul').innerText = 'Simpan Modul';
+                    = await supabaseClient.from('assignments').update(payload).eq('id', id);
+                error = err;
+            }
+
+            else {
+                const {
+                    error: err
                 }
 
-                async function deleteModule(id) {
-                    if (await VisualModal.confirm('Hapus modul?')) {
-                        await supabaseClient.from('modules').delete().eq('id', id);
-                        loadModules();
-                    }
-                }
+                    = await supabaseClient.from('assignments').insert([payload]);
+                error = err;
+            }
 
-                // --- TASKS UPDATE ---
-                async function handleTaskSubmit(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('t-id').value;
+            if (!error) {
+                resetTaskForm();
+                loadTasks();
+                updateStats();
+            }
 
-                    const payload = {
-                        title: document.getElementById('t-title').value,
-                        description: document.getElementById('t-desc').value,
-                        deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
-                        submission_link: document.getElementById('t-link').value,
-                        module_id: document.getElementById('t-module-id').value || null, // Capture Module ID
-                        is_active: true
-                    }
+            else alert(error.message);
+        }
 
-                        ;
+        async function editTask(id) {
+            const {
+                data
+            }
 
-                    let error;
+                = await supabaseClient.from('assignments').select('*').eq('id', id).single();
 
-                    if (id) {
-                        const {
-                            error: err
-                        }
+            if (data) {
+                document.getElementById('t-id').value = data.id;
+                document.getElementById('t-title').value = data.title;
+                document.getElementById('t-desc').value = data.description;
+                document.getElementById('t-link').value = data.submission_link || '';
+                if (data.module_id) document.getElementById('t-module-id').value = data.module_id; // Set selected
 
-                            = await supabaseClient.from('assignments').update(payload).eq('id', id);
-                        error = err;
-                    }
+                const d = new Date(data.deadline);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
 
-                    else {
-                        const {
-                            error: err
-                        }
+                document.getElementById('task-form-title').innerText = 'Edit Tugas';
+                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('sec-tasks').scrollIntoView();
+            }
+        }
 
-                            = await supabaseClient.from('assignments').insert([payload]);
-                        error = err;
-                    }
+        // --- NEWS ---
+        async function loadNews() {
+            const {
+                data
+            }
 
-                    if (!error) {
-                        resetTaskForm();
-                        loadTasks();
-                        updateStats();
-                    }
+                = await supabaseClient.from('announcements').select('*').order('created_at', {
+                    ascending: false
+                });
 
-                    else alert(error.message);
-                }
-
-                async function editTask(id) {
-                    const {
-                        data
-                    }
-
-                        = await supabaseClient.from('assignments').select('*').eq('id', id).single();
-
-                    if (data) {
-                        document.getElementById('t-id').value = data.id;
-                        document.getElementById('t-title').value = data.title;
-                        document.getElementById('t-desc').value = data.description;
-                        document.getElementById('t-link').value = data.submission_link || '';
-                        if (data.module_id) document.getElementById('t-module-id').value = data.module_id; // Set selected
-
-                        const d = new Date(data.deadline);
-                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                        document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
-
-                        document.getElementById('task-form-title').innerText = 'Edit Tugas';
-                        document.getElementById('btn-save-task').innerText = 'Update Tugas';
-                        document.getElementById('sec-tasks').scrollIntoView();
-                    }
-                }
-
-                // --- NEWS ---
-                async function loadNews() {
-                    const {
-                        data
-                    }
-
-                        = await supabaseClient.from('announcements').select('*').order('created_at', {
-                            ascending: false
-                        });
-
-                    document.getElementById('news-list').innerHTML = data.map(n => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group" > <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500" ><i class="fa-solid fa-trash" ></i></button> <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" >$ {
+            document.getElementById('news-list').innerHTML = data.map(n => ` <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group" > <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500" ><i class="fa-solid fa-trash" ></i></button> <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" >$ {
                 n.type
             }
 
@@ -1279,323 +1554,323 @@
             }
 
             </p> </div> `).join('');
+        }
+
+        async function handleNewsSubmit(e) {
+            e.preventDefault();
+
+            const payload = {
+                title: document.getElementById('n-title').value,
+                type: document.getElementById('n-type').value,
+                content: document.getElementById('n-content').value,
+                author: 'Admin'
+            }
+
+                ;
+            await supabaseClient.from('announcements').insert([payload]);
+            e.target.reset();
+            loadNews();
+            VisualModal.alert('Berita diposting', 'Sukses', 'success');
+        }
+
+        async function deleteNews(id) {
+            if (await VisualModal.confirm('Hapus berita?')) {
+                await supabaseClient.from('announcements').delete().eq('id', id);
+                loadNews();
+            }
+        }
+
+        async function loadOverviewStats() {
+            try {
+
+                // Students count
+                const {
+                    count: studentCount
                 }
 
-                async function handleNewsSubmit(e) {
-                    e.preventDefault();
+                    = await supabaseClient.from('profiles').select('*', {
+                        count: 'exact', head: true
+                    }).eq('role', 'student');
+                document.getElementById('stat-students').innerText = studentCount || 0;
 
-                    const payload = {
-                        title: document.getElementById('n-title').value,
-                        type: document.getElementById('n-type').value,
-                        content: document.getElementById('n-content').value,
-                        author: 'Admin'
-                    }
-
-                        ;
-                    await supabaseClient.from('announcements').insert([payload]);
-                    e.target.reset();
-                    loadNews();
-                    VisualModal.alert('Berita diposting', 'Sukses', 'success');
+                // Active Assignments count
+                const {
+                    count: assignmentCount
                 }
 
-                async function deleteNews(id) {
-                    if (await VisualModal.confirm('Hapus berita?')) {
-                        await supabaseClient.from('announcements').delete().eq('id', id);
-                        loadNews();
-                    }
+                    = await supabaseClient.from('assignments').select('*', {
+                        count: 'exact', head: true
+                    }).eq('is_active', true);
+                document.getElementById('stat-active').innerText = assignmentCount || 0;
+
+                // Attendance (average of latest session or just total log count for now)
+                // For simplicity, let's show total attendance logs
+                const {
+                    count: attendanceCount
                 }
 
-                async function loadOverviewStats() {
-                    try {
+                    = await supabaseClient.from('attendance_log').select('*', {
+                        count: 'exact', head: true
+                    });
+                document.getElementById('stat-attendance').innerText = attendanceCount || 0;
 
-                        // Students count
-                        const {
-                            count: studentCount
-                        }
+            }
 
-                            = await supabaseClient.from('profiles').select('*', {
-                                count: 'exact', head: true
-                            }).eq('role', 'student');
-                        document.getElementById('stat-students').innerText = studentCount || 0;
+            catch (error) {
+                console.error("Error loading stats:", error);
+            }
+        }
 
-                        // Active Assignments count
-                        const {
-                            count: assignmentCount
-                        }
+        // Initial Load
+        loadOverviewStats();
 
-                            = await supabaseClient.from('assignments').select('*', {
-                                count: 'exact', head: true
-                            }).eq('is_active', true);
-                        document.getElementById('stat-active').innerText = assignmentCount || 0;
+        // Load Maintenance Status
+        checkMaintenanceStatus();
 
-                        // Attendance (average of latest session or just total log count for now)
-                        // For simplicity, let's show total attendance logs
-                        const {
-                            count: attendanceCount
-                        }
-
-                            = await supabaseClient.from('attendance_log').select('*', {
-                                count: 'exact', head: true
-                            });
-                        document.getElementById('stat-attendance').innerText = attendanceCount || 0;
-
-                    }
-
-                    catch (error) {
-                        console.error("Error loading stats:", error);
-                    }
+        async function checkMaintenanceStatus() {
+            try {
+                const {
+                    data
                 }
 
-                // Initial Load
-                loadOverviewStats();
+                    = await supabaseClient.from('announcements').select('content').eq('type', 'system_maintenance').single();
 
-                // Load Maintenance Status
-                checkMaintenanceStatus();
+                const isMaintenance = data && data.content === 'true';
+                document.getElementById('maintenance-toggle').checked = isMaintenance;
+            }
 
-                async function checkMaintenanceStatus() {
-                    try {
-                        const {
-                            data
-                        }
+            catch (e) {
+                console.error("Maint Check Fail", e);
+            }
+        }
 
-                            = await supabaseClient.from('announcements').select('content').eq('type', 'system_maintenance').single();
+        async function toggleMaintenance() {
+            const isActive = document.getElementById('maintenance-toggle').checked;
 
-                        const isMaintenance = data && data.content === 'true';
-                        document.getElementById('maintenance-toggle').checked = isMaintenance;
-                    }
+            if (!await VisualModal.confirm(isActive ? 'Aktifkan Mode Maintenance? User lain tidak akan bisa akses.' : 'Matikan Mode Maintenance? User bisa akses kembali.', 'Konfirmasi Sistem', 'warning')) {
+                document.getElementById('maintenance-toggle').checked = !isActive; // Revert UI
+                return;
+            }
 
-                    catch (e) {
-                        console.error("Maint Check Fail", e);
-                    }
+            try {
+
+                // Upsert logic for maintenance row
+                const {
+                    error
                 }
 
-                async function toggleMaintenance() {
-                    const isActive = document.getElementById('maintenance-toggle').checked;
-
-                    if (!await VisualModal.confirm(isActive ? 'Aktifkan Mode Maintenance? User lain tidak akan bisa akses.' : 'Matikan Mode Maintenance? User bisa akses kembali.', 'Konfirmasi Sistem', 'warning')) {
-                        document.getElementById('maintenance-toggle').checked = !isActive; // Revert UI
-                        return;
+                    = await supabaseClient.from('announcements').upsert({
+                        type: 'system_maintenance',
+                        title: 'System Maintenance',
+                        content: isActive ? 'true' : 'false',
+                        is_active: isActive
                     }
 
-                    try {
+                        , {
+                            onConflict: 'type'
+                        });
 
-                        // Upsert logic for maintenance row
-                        const {
-                            error
-                        }
+                if (error) throw error;
+                await VisualModal.alert(isActive ? "Maintenance Mode: AKTIF" : "Maintenance Mode: NON-AKTIF", "Sukses", "success");
+            }
 
-                            = await supabaseClient.from('announcements').upsert({
-                                type: 'system_maintenance',
-                                title: 'System Maintenance',
-                                content: isActive ? 'true' : 'false',
-                                is_active: isActive
-                            }
+            catch (e) {
+                console.error(e);
+                await VisualModal.alert("Gagal mengubah status: " + e.message, "Error", "error");
+                document.getElementById('maintenance-toggle').checked = !isActive; // Revert
+            }
+        }
 
-                                , {
-                                    onConflict: 'type'
-                                });
+        // --- POINTS ---
+        async function addPoints(e) {
+            e.preventDefault();
+            const nim = document.getElementById('p-student').value;
+            if (!nim) return VisualModal.alert('Pilih mahasiswa', 'Warning', 'warning');
 
-                        if (error) throw error;
-                        await VisualModal.alert(isActive ? "Maintenance Mode: AKTIF" : "Maintenance Mode: NON-AKTIF", "Sukses", "success");
-                    }
+            const payload = {
+                student_nim: nim,
+                points: document.getElementById('p-amount').value,
+                note: document.getElementById('p-note').value
+            }
 
-                    catch (e) {
-                        console.error(e);
-                        await VisualModal.alert("Gagal mengubah status: " + e.message, "Error", "error");
-                        document.getElementById('maintenance-toggle').checked = !isActive; // Revert
-                    }
-                }
+                ;
+            await supabaseClient.from('participation_logs').insert([payload]);
+            e.target.reset();
+            VisualModal.alert('Poin ditambahkan', 'Sukses', 'success');
+        }
 
-                // --- POINTS ---
-                async function addPoints(e) {
-                    e.preventDefault();
-                    const nim = document.getElementById('p-student').value;
-                    if (!nim) return VisualModal.alert('Pilih mahasiswa', 'Warning', 'warning');
+        // --- PRESENCE ---
+        function initPresenceOptions() {
+            const sel = document.getElementById('a-meet-code');
 
-                    const payload = {
-                        student_nim: nim,
-                        points: document.getElementById('p-amount').value,
-                        note: document.getElementById('p-note').value
-                    }
-
-                        ;
-                    await supabaseClient.from('participation_logs').insert([payload]);
-                    e.target.reset();
-                    VisualModal.alert('Poin ditambahkan', 'Sukses', 'success');
-                }
-
-                // --- PRESENCE ---
-                function initPresenceOptions() {
-                    const sel = document.getElementById('a-meet-code');
-
-                    for (let w = 1; w <= 16; w++) {
-                        sel.innerHTML += `<option value="${w}-1">Minggu $ {
+            for (let w = 1; w <= 16; w++) {
+                sel.innerHTML += `<option value="${w}-1">Minggu $ {
                     w
                 }
 
                 - Sesi 1</option>`;
 
-                        sel.innerHTML += `<option value="${w}-2">Minggu $ {
+                sel.innerHTML += `<option value="${w}-2">Minggu $ {
                     w
                 }
 
                 - Sesi 2</option>`;
-                    }
-                }
+            }
+        }
 
-                function renderPresenceTable() {
-                    const tbody = document.getElementById('presence-list');
+        function renderPresenceTable() {
+            const tbody = document.getElementById('presence-list');
 
-                    tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
+            tbody.innerHTML = allStudents.map(s => ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
                     s.name
                 }
 
                 </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1" data-nim="${s.nim}" > <option value="" >-</option> <option value="Hadir" >Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
-                }
+        }
 
-                async function saveAttendanceBatch() {
-                    const code = document.getElementById('a-meet-code').value;
-                    const inputs = document.querySelectorAll('.absen-input');
-                    const upserts = [];
+        async function saveAttendanceBatch() {
+            const code = document.getElementById('a-meet-code').value;
+            const inputs = document.querySelectorAll('.absen-input');
+            const upserts = [];
 
-                    inputs.forEach(i => {
-                        if (i.value) {
-                            upserts.push({
-                                student_nim: i.dataset.nim, meeting_code: code, status: i.value
-                            });
-                        }
+            inputs.forEach(i => {
+                if (i.value) {
+                    upserts.push({
+                        student_nim: i.dataset.nim, meeting_code: code, status: i.value
                     });
+                }
+            });
 
-                    if (upserts.length > 0) {
-                        const {
-                            error
-                        }
-
-                            = await supabaseClient.from('attendance_logs').upsert(upserts, {
-                                onConflict: 'student_nim, meeting_code'
-                            });
-                        if (!error) VisualModal.alert('Presensi disimpan!', 'Sukses', 'success');
-                        else VisualModal.alert(error.message, 'Error', 'error');
-                    }
-
-                    else {
-                        VisualModal.alert('Tidak ada data yang dipilih', 'Info');
-                    }
+            if (upserts.length > 0) {
+                const {
+                    error
                 }
 
-                async function updateStats() {
-                    const {
-                        count: taskCount
-                    }
+                    = await supabaseClient.from('attendance_logs').upsert(upserts, {
+                        onConflict: 'student_nim, meeting_code'
+                    });
+                if (!error) VisualModal.alert('Presensi disimpan!', 'Sukses', 'success');
+                else VisualModal.alert(error.message, 'Error', 'error');
+            }
 
-                        = await supabaseClient.from('assignments').select('*', {
-                            count: 'exact'
-                        }).eq('is_active', true);
-                    document.getElementById('stat-active').innerText = taskCount || 0;
+            else {
+                VisualModal.alert('Tidak ada data yang dipilih', 'Info');
+            }
+        }
 
-                    const {
-                        count: studentCount
-                    }
+        async function updateStats() {
+            const {
+                count: taskCount
+            }
 
-                        = await supabaseClient.from('students').select('*', {
-                            count: 'exact'
-                        });
-                    document.getElementById('stat-students').innerText = studentCount || 0;
+                = await supabaseClient.from('assignments').select('*', {
+                    count: 'exact'
+                }).eq('is_active', true);
+            document.getElementById('stat-active').innerText = taskCount || 0;
+
+            const {
+                count: studentCount
+            }
+
+                = await supabaseClient.from('students').select('*', {
+                    count: 'exact'
+                });
+            document.getElementById('stat-students').innerText = studentCount || 0;
+        }
+
+        async function calculateAdvancedStats() {
+
+            // Avg Stats (Expensive, do carefully)
+            try {
+
+                // 1. Attendance Rate
+                const {
+                    data: att
                 }
 
-                async function calculateAdvancedStats() {
+                    = await supabaseClient.from('attendance_logs').select('status');
 
-                    // Avg Stats (Expensive, do carefully)
-                    try {
-
-                        // 1. Attendance Rate
-                        const {
-                            data: att
-                        }
-
-                            = await supabaseClient.from('attendance_logs').select('status');
-
-                        if (att && att.length > 0) {
-                            const present = att.filter(a => a.status === 'Hadir').length;
-                            const rate = Math.round((present / att.length) * 100);
-                            document.getElementById('stat-attendance').innerText = rate + '%';
-                        }
-
-                        // 2. Avg Points
-                        const users = allStudents.length;
-
-                        // We need sum of points. Complex query, or simple fetch all logs?
-                        // Let's fetch all logs for now (small scale)
-                        const {
-                            data: points
-                        }
-
-                            = await supabaseClient.from('participation_logs').select('points');
-
-                        if (points && users > 0) {
-                            const total = points.reduce((acc, curr) => acc + (curr.points || 0), 0);
-                            const avg = Math.round(total / users);
-                            document.getElementById('stat-avg-score').innerText = avg;
-                        }
-                    }
-
-                    catch (e) {
-                        console.error(e);
-                    }
+                if (att && att.length > 0) {
+                    const present = att.filter(a => a.status === 'Hadir').length;
+                    const rate = Math.round((present / att.length) * 100);
+                    document.getElementById('stat-attendance').innerText = rate + '%';
                 }
 
-                async function loadStudentStats(nim) {
-                    if (!nim) {
-                        document.getElementById('prog-details').classList.add('hidden');
-                        return;
-                    }
+                // 2. Avg Points
+                const users = allStudents.length;
 
-                    try {
+                // We need sum of points. Complex query, or simple fetch all logs?
+                // Let's fetch all logs for now (small scale)
+                const {
+                    data: points
+                }
 
-                        // 1. Points
-                        const {
-                            data: pLogs
-                        }
+                    = await supabaseClient.from('participation_logs').select('points');
 
-                            = await supabaseClient.from('participation_logs').select('points').eq('student_nim', nim);
-                        const totalPoints = pLogs ? pLogs.reduce((a, b) => a + b.points, 0) : 0;
-                        document.getElementById('prog-points').innerText = totalPoints;
+                if (points && users > 0) {
+                    const total = points.reduce((acc, curr) => acc + (curr.points || 0), 0);
+                    const avg = Math.round(total / users);
+                    document.getElementById('stat-avg-score').innerText = avg;
+                }
+            }
 
-                        // 2. Modules
-                        const {
-                            data: mLog
-                        }
+            catch (e) {
+                console.error(e);
+            }
+        }
 
-                            = await supabaseClient.from('module_progress').select('module_id, is_completed').eq('student_nim', nim);
-                        const completedMods = new Set(mLog ? mLog.filter(m => m.is_completed).map(m => m.module_id) : []);
-                        document.getElementById('prog-modules').innerText = completedMods.size;
+        async function loadStudentStats(nim) {
+            if (!nim) {
+                document.getElementById('prog-details').classList.add('hidden');
+                return;
+            }
 
-                        // 3. Tasks
-                        const {
-                            data: tLog
-                        }
+            try {
 
-                            = await supabaseClient.from('assignment_submissions').select('assignment_id').eq('student_nim', nim);
-                        const submittedTasks = new Set(tLog ? tLog.map(t => t.assignment_id) : []);
-                        document.getElementById('prog-tasks').innerText = submittedTasks.size;
+                // 1. Points
+                const {
+                    data: pLogs
+                }
 
-                        document.getElementById('prog-details').classList.remove('hidden');
+                    = await supabaseClient.from('participation_logs').select('points').eq('student_nim', nim);
+                const totalPoints = pLogs ? pLogs.reduce((a, b) => a + b.points, 0) : 0;
+                document.getElementById('prog-points').innerText = totalPoints;
 
-                        // DETAILS LIST
-                        // Tasks
-                        const {
-                            data: assignments
-                        }
+                // 2. Modules
+                const {
+                    data: mLog
+                }
 
-                            = await supabaseClient.from('assignments').select('*').order('deadline', {
-                                ascending: false
-                            });
-                        const taskContainer = document.getElementById('prog-task-list');
+                    = await supabaseClient.from('module_progress').select('module_id, is_completed').eq('student_nim', nim);
+                const completedMods = new Set(mLog ? mLog.filter(m => m.is_completed).map(m => m.module_id) : []);
+                document.getElementById('prog-modules').innerText = completedMods.size;
 
-                        taskContainer.innerHTML = assignments.map(a => {
-                            const isDone = submittedTasks.has(a.id);
+                // 3. Tasks
+                const {
+                    data: tLog
+                }
 
-                            return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}" > <div> <p class="text-sm font-bold text-slate-700" >$ {
+                    = await supabaseClient.from('assignment_submissions').select('assignment_id').eq('student_nim', nim);
+                const submittedTasks = new Set(tLog ? tLog.map(t => t.assignment_id) : []);
+                document.getElementById('prog-tasks').innerText = submittedTasks.size;
+
+                document.getElementById('prog-details').classList.remove('hidden');
+
+                // DETAILS LIST
+                // Tasks
+                const {
+                    data: assignments
+                }
+
+                    = await supabaseClient.from('assignments').select('*').order('deadline', {
+                        ascending: false
+                    });
+                const taskContainer = document.getElementById('prog-task-list');
+
+                taskContainer.innerHTML = assignments.map(a => {
+                    const isDone = submittedTasks.has(a.id);
+
+                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}" > <div> <p class="text-sm font-bold text-slate-700" >$ {
                         a.title
                     }
 
@@ -1608,22 +1883,22 @@
                     }
 
                     </span> </div> `;
-                        }).join('');
+                }).join('');
 
-                        // Modules
-                        const {
-                            data: modules
-                        }
+                // Modules
+                const {
+                    data: modules
+                }
 
-                            = await supabaseClient.from('modules').select('*').order('week', {
-                                ascending: true
-                            });
-                        const modulContainer = document.getElementById('prog-modul-list');
+                    = await supabaseClient.from('modules').select('*').order('week', {
+                        ascending: true
+                    });
+                const modulContainer = document.getElementById('prog-modul-list');
 
-                        modulContainer.innerHTML = modules.map(m => {
-                            const isDone = completedMods.has(m.id);
+                modulContainer.innerHTML = modules.map(m => {
+                    const isDone = completedMods.has(m.id);
 
-                            return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}" > <div class="flex items-center gap-3" > <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200" >M$ {
+                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}" > <div class="flex items-center gap-3" > <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200" >M$ {
                     m.week
                 }
 
@@ -1636,23 +1911,23 @@
                 }
 
                 </span> </div> `;
-                        }).join('');
+                }).join('');
 
 
-                    }
+            }
 
-                    catch (e) {
-                        console.error(e);
-                        VisualModal.alert("Gagal load data mahasiswa", 'Error', 'error');
-                    }
-                }
+            catch (e) {
+                console.error(e);
+                VisualModal.alert("Gagal load data mahasiswa", 'Error', 'error');
+            }
+        }
 
-                document.addEventListener('DOMContentLoaded', async () => {
-                    if (await window.ensureSupabase()) {
-                        init();
-                    }
-                });
-            </script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await window.ensureSupabase()) {
+                init();
+            }
+        });
+    </script>
 </body>
 
 </html>
