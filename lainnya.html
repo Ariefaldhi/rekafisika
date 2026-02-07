@@ -188,8 +188,14 @@
                 const user = JSON.parse(session);
                 document.getElementById('user-name').innerText = user.nama || 'Pengguna';
 
-                const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
-                document.getElementById('user-avatar').innerText = initials;
+                if (user.profile_photo_url) {
+                    const avatarEl = document.getElementById('user-avatar');
+                    avatarEl.innerHTML = `<img src="${user.profile_photo_url}" class="w-full h-full object-cover rounded-full">`;
+                    avatarEl.classList.add('overflow-hidden');
+                } else {
+                    const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
+                    document.getElementById('user-avatar').innerText = initials;
+                }
 
                 // Check Admin Access (Faldhi or Role Admin)
                 if (user.role === 'admin' || (user.nama && user.nama.toLowerCase().includes('faldhi'))) {
