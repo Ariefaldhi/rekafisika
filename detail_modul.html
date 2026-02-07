@@ -69,6 +69,7 @@
     </script>
     <script src="config.js?v=2.5"></script>
     <script src="modal.js"></script>
+    <script src="sound-effects.js"></script>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
@@ -499,6 +500,9 @@
 
                 // 2. Find Linked Assignment
                 const { data: task } = await supabaseClient.from('assignments').select('id').eq('module_id', moduleId).eq('is_active', true).single();
+
+                // PLAY SUCCESS SOUND
+                if (window.SFX) window.SFX.play('success');
 
                 if (task) {
                     // 3. Submit Task (Auto)
