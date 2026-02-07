@@ -157,7 +157,7 @@
                     .from('assignments')
                     .select('*')
                     .eq('is_active', true)
-                    .order('deadline', { ascending: true });
+                    .order('created_at', { ascending: true });
 
                 // 2. Fetch User Submissions
                 const { data: submissions } = await supabaseClient
