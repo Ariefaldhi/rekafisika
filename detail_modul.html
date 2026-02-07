@@ -70,9 +70,29 @@
     <script src="config.js?v=2.5"></script>
     <script src="modal.js"></script>
     <script src="sound-effects.js"></script>
+    <style>
+        #fake-loader {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+    </style>
 </head>
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
+
+    <!-- Fake Loader -->
+    <div id="fake-loader">
+        <div class="w-16 h-16 border-4 border-slate-100 border-t-primary-500 rounded-full animate-spin mb-4"></div>
+        <img src="logo.png" class="w-12 h-12 absolute animate-pulse">
+        <p class="text-slate-500 font-bold mt-20 animate-pulse">Memuat Materi...</p>
+    </div>
 
     <!-- Header -->
     <div class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm flex items-center gap-4">
@@ -514,7 +534,7 @@
                         submitted_at: new Date().toISOString()
                     }, { onConflict: 'student_nim, assignment_id' });
 
-                    await VisualModal.alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan (Nilai 100).', 'Luar Biasa!', 'success');
+                    await VisualModal.alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan', 'Luar Biasa!', 'success');
                 } else {
                     await VisualModal.alert('Modul diselesaikan. (Tidak ada tugas terkait)', 'Sukses', 'success');
                 }
@@ -526,7 +546,20 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadDetail);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDetail();
+
+            // Fake Loading Logic
+            setTimeout(() => {
+                const loader = document.getElementById('fake-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 500);
+                }
+            }, 2500); // 2.5 seconds delay
+        });
     </script>
 </body>
 
