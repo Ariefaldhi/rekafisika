@@ -43,24 +43,28 @@
         }
     </style>
     <!-- CRITICAL: Load Config & Security Guard EARLY -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
 
     <script>
-            // Inline Redundant Guard to prevent flash-of-content
-            (function () {
-                try {
-                    const s = localStorage.getItem('user_session');
-                    if (!s) { window.location.replace('login.html'); return; }
-                    const sess = JSON.parse(s);
-                    const name = (sess.nama || '').toLowerCase();
-                    const isAdmin = sess.role === 'admin' || name.includes('faldhi');
-                    if (!isAdmin) {
-                        document.documentElement.innerHTML = '<h1>⛔ Akses Ditolak</h1>';
-                        window.location.replace('index.html');
-                    }
-                } catch (e) { window.location.replace('login.html'); }
-            })();
+        // Inline Redundant Guard to prevent flash-of-content
+        (function () {
+            try {
+                const s = localStorage.getItem('user_session');
+                if (!s) { window.location.replace('login.html'); return; }
+                const sess = JSON.parse(s);
+                const name = (sess.nama || '').toLowerCase();
+                const isAdmin = sess.role === 'admin' || name.includes('faldhi');
+                if (!isAdmin) {
+                    document.documentElement.innerHTML = '<h1>⛔ Akses Ditolak</h1>';
+                    window.location.replace('index.html');
+                }
+            } catch (e) { window.location.replace('login.html'); }
+        })();
     </script>
     <script src="config.js?v=2.5"></script>
 </head>

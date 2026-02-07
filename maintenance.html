@@ -14,7 +14,8 @@
             font-family: 'Inter', sans-serif;
         }
     </style>
-<script src="config.js?v=2.5"></script></head>
+    <script src="config.js?v=2.5"></script>
+</head>
 
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
     <div class="max-w-md w-full text-center space-y-6">
@@ -47,8 +48,13 @@
         <a href="login.html" class="block text-xs text-slate-300 hover:text-blue-500 mt-8">Admin Login</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
+
     <script>
         async function checkStatus() {
             if (!window.supabaseClient) { window.location.reload(); return; }
@@ -74,4 +80,3 @@
 </body>
 
 </html>
-
