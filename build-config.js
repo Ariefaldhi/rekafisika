@@ -23,11 +23,12 @@ const SUPABASE_ANON_KEY = '${supabaseKey}';
 const GROQ_API_KEY = '${groqApiKey}';
 
 // Initialize Supabase Client immediately
-let supabaseClient = null;
+var supabaseClient = null;
 if (typeof supabase !== 'undefined') {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabaseClient = supabaseClient;
 }
+window.supabaseClient = supabaseClient;
+
 
 // Simple ensureSupabase for compatibility
 window.ensureSupabase = async function() {
