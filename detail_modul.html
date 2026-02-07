@@ -147,6 +147,13 @@
 
             // Fetch Current Module
             const { data: modul } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+
+            if (modul && modul.is_locked) {
+                await VisualModal.alert('Modul ini terkunci dan belum dibuka oleh Admin.', 'Akses Ditolak', 'lock');
+                window.location.href = 'modul.html';
+                return;
+            }
+
             const user = checkAuth(); // Need user for progress
 
             if (modul) {

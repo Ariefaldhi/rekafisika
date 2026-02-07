@@ -25,745 +25,494 @@
         }
     </script>
     <!-- FontAwesome -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .sidebar-active {
             background-color: #EFF6FF;
-            color: #2563EB;
-            font-weight: 600;
-        }
+            < !-- ... skipped styles ... --><button onclick="showSection('progress')" id="nav-progress"
+            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium"><i class="fa-solid fa-chart-line w-5 text-center"></i>Progress </button><div class="my-4 border-t border-white/10"></div><button onclick="showSection('settings')"
+            < !-- ... skipped header ... -->< !-- SEC: Dashboard --><section id="sec-dashboard" class="space-y-6 animate-fade-in"><header class="mb-8 flex justify-between items-end"><div><h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2><p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p></div></header><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">< !-- ... skipped stats cards ... --><div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100"><div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-4"><i class="fa-solid fa-star"></i></div><h3 class="text-3xl font-black text-slate-900" id="stat-avg-score">0</h3><p class="text-xs text-slate-400 uppercase font-bold">Rata-rata Poin</p></div></div>< !-- Chart Section --><div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100"><h3 class="font-bold text-slate-800 mb-4">Distribusi Poin Mahasiswa (Top 10)</h3><canvas id="activityChart" class="w-full h-64"></canvas></div></section>< !-- ... skipped tasks/modules/news/students ... -->< !-- SEC: Points --><section id="sec-points" class="hidden space-y-6 animate-fade-in"><h2 class="text-2xl font-bold text-slate-900 mb-6">Input Poin Keaktifan</h2><div class="grid grid-cols-1 lg:grid-cols-3 gap-6">< !-- Form --><div class="lg:col-span-1 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit"><form onsubmit="addPoints(event)" class="space-y-4"><div><label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label><select id="p-student"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"><option>-- Loading --</option></select></div><div><label class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah Poin</label><input id="p-amount" type="number" value="10"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"></div><div><label class="block text-xs font-bold text-slate-400 uppercase mb-2">Catatan</label><input id="p-note" type="text" placeholder="e.g. Menjawab kuis"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"></div><button class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20">Berikan Poin</button></form></div>< !-- Log History --><div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100"><h3 class="font-bold text-slate-700 mb-4">Riwayat Pemberian Poin</h3><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-slate-50 text-slate-500 uppercase text-xs"><tr><th class="px-4 py-3 rounded-l-xl">Waktu</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Poin</th><th class="px-4 py-3 rounded-r-xl">Catatan</th></tr></thead><tbody id="points-log-list" class="divide-y divide-slate-50">< !-- JS Injected --></tbody></table></div></div></div></section>< !-- SEC: Presence --><section id="sec-presence" class="hidden space-y-6 animate-fade-in"><h2 class="text-2xl font-bold text-slate-900 mb-6">Input Presensi Massal</h2><div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100"><div class="flex items-center gap-4 mb-6"><label class="font-bold text-slate-700">Pertemuan Ke:</label><select id="a-meet-code" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">< !-- 1-1 to 16-2 --></select></div><div class="max-h-[60vh] overflow-y-auto border border-slate-100 rounded-xl"><table class="w-full text-sm"><thead class="bg-slate-50 text-slate-500 sticky top-0"><tr><th class="p-4 text-left">Nama</th><th class="p-4 text-center">Status</th></tr></thead><tbody id="presence-list" class="divide-y divide-slate-100">< !-- JS filled --></tbody></table></div><div class="mt-4 flex justify-end"><button onclick="saveAttendanceBatch()"
+            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Simpan Presensi</button></div></div></section>< !-- SEC: Student Progress --><section id="sec-progress" class="hidden space-y-6 animate-fade-in"><h2 class="text-2xl font-bold text-slate-900 mb-6">Progress Mahasiswa</h2><div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100"><label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label><select id="prog-student-select" onchange="loadStudentStats(this.value)"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"><option value="">-- Pilih --</option></select></div><div id="prog-details" class="hidden space-y-6">< !-- Summary Cards --><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div class="bg-blue-50 p-4 rounded-2xl border border-blue-100"><p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p><h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3></div><div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100"><p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p><h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3></div><div class="bg-purple-50 p-4 rounded-2xl border border-purple-100"><p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div class="bg-blue-50 p-4 rounded-2xl border border-blue-100"><p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p><h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3></div><div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100"><p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p><h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3></div><div class="bg-purple-50 p-4 rounded-2xl border border-purple-100"><p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p><h3 class="text-2xl font-black text-purple-700" id="prog-tasks">0</h3></div></div>< !-- Tabs/Tables --><div class="bg-white rounded-3xl border border-slate-100 overflow-hidden"><div class="bg-slate-50 px-6 py-4 border-b border-slate-100"><h3 class="font-bold text-slate-700">Detail Aktivitas</h3></div><div class="p-6 space-y-8"><div><h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Tugas </h4><div id="prog-task-list" class="space-y-2"></div></div><div><h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat Modul </h4><div id="prog-modul-list" class="space-y-2"></div></div></div></div></div></section></section>< !-- SEC: Settings --><section id="sec-settings" class="hidden space-y-6 animate-fade-in"><div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6"><div class="flex justify-between items-center mb-6"><div><h2 class="text-xl font-black text-slate-800">Pengaturan Sistem</h2><p class="text-slate-500 text-sm">Kontrol global aplikasi.</p></div></div><div class="space-y-4">< !-- Maintenance Mode Toggle --><div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100"><div class="flex items-center gap-4"><div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-person-digging"></i></div><div><h4 class="font-bold text-slate-800 text-sm">Maintenance Mode</h4><p class="text-xs text-slate-500">Kunci akses untuk semua user kecuali Admin.</p></div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="maintenance-toggle" class="sr-only peer"
+            onchange="toggleMaintenance()"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div></label></div></div></div></section></main></main>< !-- Legacy Script Tags Removed (Moved to Head) --><script> // --- Navigation ---
 
-        .sidebar-item {
-            color: #64748B;
-            transition: all 0.2s;
-        }
+            function showSection(id) {
 
-        .sidebar-item:hover {
-            background-color: #F1F5F9;
-            color: #1E293B;
-        }
-    </style>
-    <!-- CRITICAL: Load Config & Security Guard EARLY -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        if (typeof supabase === 'undefined') {
-            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
-        }
-    </script>
+                ['dashboard',
+                'tasks',
+                'modules',
+                'news',
+                'students',
+                'points',
+                'presence',
+                'progress',
+                'settings'].forEach(s=> {
+                        const sec=document.getElementById('sec-' + s);
+                        const nav=document.getElementById('nav-' + s);
+                        if (sec) sec.classList.add('hidden');
 
-    <script>
-        // Inline Redundant Guard to prevent flash-of-content
-        (function () {
-            try {
-                const s = localStorage.getItem('user_session');
-                if (!s) { window.location.replace('login.html'); return; }
-                const sess = JSON.parse(s);
-                const name = (sess.nama || '').toLowerCase();
-                const isAdmin = sess.role === 'admin' || name.includes('faldhi');
-                if (!isAdmin) {
-                    document.documentElement.innerHTML = '<h1>⛔ Akses Ditolak</h1>';
-                    window.location.replace('index.html');
+                        if (nav) {
+                            nav.classList.remove('sidebar-active');
+                            nav.classList.add('sidebar-item');
+                        }
+                    });
+
+                const target=document.getElementById('sec-' + id) || document.getElementById('tab-' + id);
+                if (target) target.classList.remove('hidden');
+
+                const activeNav=document.getElementById('nav-' + id);
+
+                if (activeNav) {
+                    activeNav.classList.remove('sidebar-item');
+                    activeNav.classList.add('sidebar-active');
                 }
-            } catch (e) { window.location.replace('login.html'); }
-        })();
-    </script>
-    <script src="config.js?v=2.5"></script>
-    <script src="modal.js"></script>
-    <script src="sound-effects.js"></script>
-</head>
 
-<body class="bg-ui-bg font-inter text-ui-text min-h-screen flex selection:bg-primary-500/30">
+                if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
 
-    <!-- Mobile Header -->
-    <div
-        class="md:hidden fixed top-0 w-full bg-white z-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-        <h1 class="font-extrabold text-lg text-slate-900">AdminPanel</h1>
-        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')"
-            class="text-slate-500">
-            <i class="fa-solid fa-bars text-xl"></i>
-        </button>
-    </div>
+            // --- INIT ---
+            async function init() {
+                if ( !window.supabaseClient) return;
 
-    <!-- Sidebar -->
-    <aside id="sidebar"
-        class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-100 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 shadow-xl md:shadow-none pt-20 md:pt-0">
-        <div class="h-full flex flex-col p-6">
-            <div class="hidden md:flex items-center gap-2 mb-10 px-2">
-                <i class="fa-solid fa-atom text-primary-600 text-2xl"></i>
-                <span class="font-extrabold text-xl text-slate-900 tracking-tight">FisikaLab</span>
-            </div>
+                // Stats (Quick Counts)
+                try {
+                    const {
+                        count: studentCount
+                    }
 
-            <nav class="space-y-1 overflow-y-auto max-h-[calc(100vh-150px)]">
-                <button onclick="showSection('dashboard')" id="nav-dashboard"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-                </button>
-                <button onclick="showSection('tasks')" id="nav-tasks"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-list-check w-5 text-center"></i> Tugas
-                </button>
-                <button onclick="showSection('modules')" id="nav-modules"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-book w-5 text-center"></i> Modul
-                </button>
-                <button onclick="showSection('news')" id="nav-news"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-bullhorn w-5 text-center"></i> Berita
-                </button>
-                <button onclick="showSection('students')" id="nav-students"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-users w-5 text-center"></i> Mahasiswa
-                </button>
-                <button onclick="showSection('points')" id="nav-points"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-star w-5 text-center"></i> Poin
-                </button>
-                <button onclick="showSection('presence')" id="nav-presence"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-clipboard-user w-5 text-center"></i> Presensi
-                </button>
-                <button onclick="showSection('progress')" id="nav-progress"
-                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium">
-                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Progress
-                    <button onclick="showSection('points')"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-white/5 hover:text-white"
-                        id="nav-points">
-                        <i class="fa-solid fa-plus-circle"></i>
-                        <span>Input Poin</span>
-                    </button>
+                    =await supabaseClient.from('profiles').select('*', {
+                        count: 'exact', head: true
+                    }).eq('role', 'student');
+                document.getElementById('stat-students').innerText=studentCount || 0;
 
-                    <div class="my-4 border-t border-white/10"></div>
+                const {
+                    count: taskCount
+                }
 
-                    <button onclick="showSection('settings')"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-white/5 hover:text-white"
-                        id="nav-settings">
-                        <i class="fa-solid fa-gears"></i>
-                        <span>Pengaturan</span>
-                    </button>
-            </nav>
+                =await supabaseClient.from('assignments').select('*', {
+                    count: 'exact', head: true
+                }).eq('is_active', true);
+            document.getElementById('stat-active').innerText=taskCount || 0;
+        }
 
-            <div class="mt-auto border-t border-slate-100 pt-6">
-                <a href="index.html"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-primary-600 font-medium transition-colors">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke App
-                </a>
-            </div>
-        </div>
-    </aside>
+        catch (e) {
+            console.error("Quick stats failed", e);
+        }
 
-    <!-- Main Content -->
-    <main class="flex-1 md:ml-64 p-6 pt-24 md:pt-8 bg-slate-50/50 min-h-screen">
+        // Parallel Load (Ensure Students loaded FIRST for name lookups)
+        await loadStudents();
 
-        <!-- SEC: Dashboard -->
-        <section id="sec-dashboard" class="space-y-6 animate-fade-in">
-            <header class="mb-8 flex justify-between items-end">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
-                    <p class="text-slate-500">Ringkasan aktivitas pembelajaran.</p>
-                </div>
+        // Now load dependent features
+        loadTasks();
+        loadModules();
+        loadNews();
+        initPresenceOptions();
 
-                <!-- Maintenance Toggle -->
-                <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold uppercase text-slate-400">Maintenance Mode</p>
-                        <p id="mt-status" class="text-xs font-bold text-slate-700">OFF</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="mt-toggle" class="sr-only peer" onchange="toggleMaintenance()">
-                        <div
-                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500">
-                        </div>
-                    </label>
-                </div>
-            </header>
+        // New Dashboard Features
+        initChart();
+        loadPointsLog();
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <h3 class="text-3xl font-black text-slate-900" id="stat-students">0</h3>
-                    <p class="text-xs text-slate-400 uppercase font-bold">Mahasiswa</p>
-                </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div
-                        class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-check-circle"></i>
-                    </div>
-                    <h3 class="text-3xl font-black text-slate-900" id="stat-active">0</h3>
-                    <p class="text-xs text-slate-400 uppercase font-bold">Tugas Aktif</p>
-                </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div
-                        class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-clipboard-check"></i>
-                    </div>
-                    <h3 class="text-3xl font-black text-slate-900" id="stat-attendance">0%</h3>
-                    <p class="text-xs text-slate-400 uppercase font-bold">Kehadiran (Angkatan)</p>
-                </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div
-                        class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <h3 class="text-3xl font-black text-slate-900" id="stat-avg-score">0</h3>
-                    <p class="text-xs text-slate-400 uppercase font-bold">Rata-rata Poin</p>
-                </div>
-            </div>
-        </section>
+        showSection('dashboard');
+        }
 
-        <!-- SEC: Tasks -->
-        <section id="sec-tasks" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Tugas</h2>
+        // --- CHART ---
+        async function initChart() {
+            try {
 
-            <!-- Form -->
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-slate-700" id="task-form-title">Buat Tugas Baru</h3>
-                    <button type="button" onclick="resetTaskForm()"
-                        class="text-xs text-slate-400 hover:text-primary-600">Reset Form</button>
-                </div>
-                <form onsubmit="handleTaskSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="t-id">
-                    <div>
-                        <input id="t-title" type="text" placeholder="Judul Tugas"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            required>
-                    </div>
-                    <div>
-                        <textarea id="t-desc" placeholder="Deskripsi Tugas"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-24 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            required></textarea>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input id="t-deadline" type="datetime-local"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            required>
-                        <input id="t-points" type="number" placeholder="Poin (Default: 10)" value="10"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                    </div>
-                    <div>
-                        <input id="t-link" type="text" placeholder="Link (Opsional)"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                    </div>
+                // Fetch ALL logs to client for aggregation (small scale assumption)
+                const {
+                    data: logs
+                }
 
-                    <!-- Module Linkage -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hubungkan dengan Modul
-                            (Auto-Selesai)</label>
-                        <select id="t-module-id"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                            <option value="">-- Tidak Terhubung --</option>
-                            <!-- Populated JS -->
-                        </select>
-                    </div>
+                =await supabaseClient.from('participation_logs').select('student_nim, points');
 
-                    <div class="flex gap-2">
-                        <button type="submit" id="btn-save-task"
-                            class="flex-1 bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Simpan
-                            Tugas</button>
-                    </div>
-                </form>
-            </div>
+                if ( !logs) return;
 
-            <!-- List -->
-            <div id="task-list" class="space-y-3">
-                <!-- JS Injected -->
-            </div>
-        </section>
+                // Aggregate
+                const studentPoints= {}
 
-        <!-- SEC: Modules -->
-        <section id="sec-modules" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Modul</h2>
+                ;
 
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-slate-700" id="modul-form-title">Tambah Modul</h3>
-                    <button type="button" onclick="resetModuleForm()"
-                        class="text-xs text-slate-400 hover:text-primary-600">Reset</button>
-                </div>
-                <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="m-id">
-                    <div class="grid grid-cols-4 gap-4">
-                        <input id="m-week" type="number" placeholder="Minggu Ke-"
-                            class="col-span-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            required>
-                        <input id="m-topic" type="text" placeholder="Topik / Judul"
-                            class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            required>
-                    </div>
-                    <textarea id="m-desc" placeholder="Deskripsi Singkat"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-20 focus:outline-none focus:ring-2 focus:ring-primary-500/20"></textarea>
+                logs.forEach(log=> {
+                        studentPoints[log.student_nim]=(studentPoints[log.student_nim] || 0) + (log.points || 0);
+                    });
 
-                    <!-- Legacy Simple Links (Optional / Backward Compat) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input id="m-file" type="text" placeholder="Link Materi (PDF/Drive)"
-                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                        <input id="m-video" type="text" placeholder="ID Video YouTube (e.g. dQw4w9MgXcQ)"
-                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20">
-                    </div>
+                // Convert to Array & Sort
+                const sorted=Object.entries(studentPoints) .map(([nim, points])=> ({
+                        name: allStudents.find(s=> s.nim===nim)?.name || nim,
+                        points: points
+                    })) .sort((a, b)=> b.points - a.points) .slice(0, 10); // Top 10
 
-                    <!-- Steps Builder (New Feature) -->
-                    <div class="border-t border-slate-100 pt-4">
-                        <h4 class="font-bold text-slate-700 mb-2">Langkah-Langkah (Steps)</h4>
-                        <div id="steps-container" class="space-y-2 mb-3">
-                            <!-- Helper Text -->
-                            <p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>
-                        </div>
-                        <button type="button" onclick="addStepInput()"
-                            class="text-xs font-bold text-primary-600 hover:text-primary-500 border border-primary-200 px-3 py-1 rounded-lg">
-                            <i class="fa-solid fa-plus mr-1"></i> Tambah Langkah
-                        </button>
-                    </div>
+            // Render Chart
+            const ctx=document.getElementById('activityChart').getContext('2d');
 
-                    <div class="flex gap-2">
-                        <button type="submit" id="btn-save-modul"
-                            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/20">Simpan
-                            Modul</button>
-                    </div>
-                </form>
-            </div>
+            new Chart(ctx, {
 
-            <div id="module-list" class="space-y-3">
-                <!-- JS Injected -->
-            </div>
-        </section>
+                type: 'bar',
+                data: {
 
-        <!-- SEC: News -->
-        <section id="sec-news" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Manajemen Berita</h2>
+                    labels: sorted.map(s=> s.name),
+                    datasets: [ {
+                        label: 'Total Poin',
+                        data: sorted.map(s=> s.points),
+                        backgroundColor: '#3B82F6',
+                        borderRadius: 6
+                    }
 
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-700 mb-4">Buat Pengumuman</h3>
-                <form onsubmit="handleNewsSubmit(event)" class="space-y-4">
-                    <div class="grid grid-cols-3 gap-4">
-                        <input id="n-title" type="text" placeholder="Judul Berita"
-                            class="col-span-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
-                            required>
-                        <select id="n-type"
-                            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                            <option value="info">Info (Biru)</option>
-                            <option value="warning">Penting (Kuning)</option>
-                            <option value="urgent">Mendesak (Merah)</option>
-                        </select>
-                    </div>
-                    <textarea id="n-content" placeholder="Isi Pengumuman..."
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-24 focus:outline-none"
-                        required></textarea>
-                    <button type="submit"
-                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20">Posting
-                        Berita</button>
-                </form>
-            </div>
+                    ]
+                }
 
-            <div id="news-list" class="space-y-3">
-                <!-- JS Injected -->
-            </div>
-        </section>
+                ,
+                options: {
 
-        <!-- SEC: Students -->
-        <section id="sec-students" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Kelola Mahasiswa</h2>
-
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <form onsubmit="addStudent(event)" class="flex flex-col md:flex-row gap-4">
-                    <input id="new-nim" type="text" placeholder="NIM"
-                        class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                        required>
-                    <input id="new-name" type="text" placeholder="Nama Lengkap"
-                        class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                        required>
-                    <button
-                        class="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20">Tambah</button>
-                </form>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                        <tr>
-                            <th class="px-6 py-4 font-bold">NIM</th>
-                            <th class="px-6 py-4 font-bold">Nama</th>
-                            <th class="px-6 py-4 font-bold text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-list" class="divide-y divide-slate-100">
-                        <!-- Filled by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- SEC: Points -->
-        <section id="sec-points" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Poin Keaktifan</h2>
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 max-w-lg">
-                <form onsubmit="addPoints(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label>
-                        <select id="p-student"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                            <option>-- Loading --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah Poin</label>
-                        <input id="p-amount" type="number" value="10"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Catatan</label>
-                        <input id="p-note" type="text" placeholder="e.g. Menjawab kuis"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                    </div>
-                    <button
-                        class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20">Berikan
-                        Poin</button>
-                </form>
-            </div>
-        </section>
-
-        <!-- SEC: Presence -->
-        <section id="sec-presence" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Input Presensi Massal</h2>
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div class="flex items-center gap-4 mb-6">
-                    <label class="font-bold text-slate-700">Pertemuan Ke:</label>
-                    <select id="a-meet-code" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                        <!-- 1-1 to 16-2 -->
-                    </select>
-                </div>
-
-                <div class="max-h-[60vh] overflow-y-auto border border-slate-100 rounded-xl">
-                    <table class="w-full text-sm">
-                        <thead class="bg-slate-50 text-slate-500 sticky top-0">
-                            <tr>
-                                <th class="p-4 text-left">Nama</th>
-                                <th class="p-4 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="presence-list" class="divide-y divide-slate-100">
-                            <!-- JS filled -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button onclick="saveAttendanceBatch()"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Simpan
-                        Presensi</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- SEC: Student Progress -->
-        <section id="sec-progress" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6">Progress Mahasiswa</h2>
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Mahasiswa</label>
-                <select id="prog-student-select" onchange="loadStudentStats(this.value)"
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none">
-                    <option value="">-- Pilih --</option>
-                </select>
-            </div>
-
-            <div id="prog-details" class="hidden space-y-6">
-                <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p>
-                        <h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3>
-                    </div>
-                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                        <p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p>
-                        <h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3>
-                    </div>
-                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                        <p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                                <p class="text-xs text-blue-400 font-bold uppercase">Total Poin</p>
-                                <h3 class="text-2xl font-black text-blue-700" id="prog-points">0</h3>
-                            </div>
-                            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                                <p class="text-xs text-emerald-400 font-bold uppercase">Modul Selesai</p>
-                                <h3 class="text-2xl font-black text-emerald-700" id="prog-modules">0</h3>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                                <p class="text-xs text-purple-400 font-bold uppercase">Tugas Dikumpul</p>
-                                <h3 class="text-2xl font-black text-purple-700" id="prog-tasks">0</h3>
-                            </div>
-                        </div>
-
-                        <!-- Tabs/Tables -->
-                        <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden">
-                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
-                                <h3 class="font-bold text-slate-700">Detail Aktivitas</h3>
-                            </div>
-                            <div class="p-6 space-y-8">
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat
-                                        Tugas
-                                    </h4>
-                                    <div id="prog-task-list" class="space-y-2"></div>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Riwayat
-                                        Modul
-                                    </h4>
-                                    <div id="prog-modul-list" class="space-y-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-        </section>
-
-        </section>
-
-        <!-- SEC: Settings -->
-        <section id="sec-settings" class="hidden space-y-6 animate-fade-in">
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-black text-slate-800">Pengaturan Sistem</h2>
-                        <p class="text-slate-500 text-sm">Kontrol global aplikasi.</p>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Maintenance Mode Toggle -->
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
-                                <i class="fa-solid fa-person-digging"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-sm">Maintenance Mode</h4>
-                                <p class="text-xs text-slate-500">Kunci akses untuk semua user kecuali Admin.</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="maintenance-toggle" class="sr-only peer"
-                                onchange="toggleMaintenance()">
-                            <div
-                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
-                            </div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    </main>
-
-    <!-- Legacy Script Tags Removed (Moved to Head) -->
-    <script>
-        // --- Navigation ---
-        function showSection(id) {
-            ['dashboard', 'tasks', 'modules', 'news', 'students', 'points', 'presence', 'progress', 'settings'].forEach(s => {
-                const sec = document.getElementById('sec-' + s);
-                const nav = document.getElementById('nav-' + s);
-                if (sec) sec.classList.add('hidden');
-                if (nav) {
-                    nav.classList.remove('sidebar-active');
-                    nav.classList.add('sidebar-item');
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
 
-            const target = document.getElementById('sec-' + id) || document.getElementById('tab-' + id);
-            if (target) target.classList.remove('hidden');
-
-            const activeNav = document.getElementById('nav-' + id);
-            if (activeNav) {
-                activeNav.classList.remove('sidebar-item');
-                activeNav.classList.add('sidebar-active');
-            }
-
-            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         }
 
-        // --- INIT ---
-        async function init() {
-            if (!window.supabaseClient) return;
+        catch (e) {
+            console.error("Chart Error", e);
+        }
+        }
 
-            // Stats
-            const { count: studentCount } = await supabaseClient.from('students').select('*', { count: 'exact' });
-            document.getElementById('stat-students').innerText = studentCount || 0;
-            const { count: taskCount } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
-            document.getElementById('stat-active').innerText = taskCount || 0;
+        // --- POINTS LOG ---
+        async function loadPointsLog() {
+            try {
+                const {
+                    data
+                }
 
-            calculateAdvancedStats();
+                =await supabaseClient .from('participation_logs') .select('*') .order('created_at', {
+                    ascending: false
+                }) .limit(10);
 
-            loadStudents();
-            loadTasks();
-            loadModules();
-            loadNews();
-            initPresenceOptions();
-            checkMaintenanceStatus(); // Check Maintenance
+            const list=document.getElementById('points-log-list');
 
-            showSection('dashboard');
+            if (data && list) {
+                list.innerHTML=data.map(log=> {
+                        const sName=allStudents.find(s=> s.nim===log.student_nim)?.name || log.student_nim;
+
+                        return ` <tr class="hover:bg-slate-50" > <td class="px-4 py-3 text-slate-500 font-mono text-xs" >$ {
+                            new Date(log.created_at).toLocaleDateString()
+                        }
+
+                        </td> <td class="px-4 py-3 font-bold text-slate-700" >$ {
+                            sName
+                        }
+
+                        </td> <td class="px-4 py-3 text-emerald-600 font-bold" >+$ {
+                            log.points
+                        }
+
+                        </td> <td class="px-4 py-3 text-slate-500 italic text-xs" >$ {
+                            log.note || '-'
+                        }
+
+                        </td> </tr> `;
+                    }).join('');
+            }
+        }
+
+        catch (e) {
+            console.error("Points Log Error", e);
+        }
         }
 
         // --- MAINTENANCE ---
         async function checkMaintenanceStatus() {
-            const { data } = await supabaseClient.from('announcements').select('*').eq('type', 'system_maintenance').single();
-            const toggle = document.getElementById('mt-toggle');
-            const status = document.getElementById('mt-status');
+            const {
+                data
+            }
 
-            if (data && data.content === 'true') {
-                toggle.checked = true;
-                status.innerText = 'ACTIVE';
-                status.className = 'text-xs font-bold text-red-500';
-            } else {
-                toggle.checked = false;
-                status.innerText = 'OFF';
-                status.className = 'text-xs font-bold text-emerald-500';
+            =await supabaseClient.from('announcements').select('*').eq('type', 'system_maintenance').single();
+            const toggle=document.getElementById('mt-toggle');
+            const status=document.getElementById('mt-status');
+
+            if (data && data.content==='true') {
+                toggle.checked=true;
+                status.innerText='ACTIVE';
+                status.className='text-xs font-bold text-red-500';
+            }
+
+            else {
+                toggle.checked=false;
+                status.innerText='OFF';
+                status.className='text-xs font-bold text-emerald-500';
             }
         }
 
         async function toggleMaintenance() {
-            const toggle = document.getElementById('mt-toggle');
-            const isActive = toggle.checked;
-            const status = document.getElementById('mt-status');
+            const toggle=document.getElementById('mt-toggle');
+            const isActive=toggle.checked;
+            const status=document.getElementById('mt-status');
 
-            status.innerText = isActive ? 'UPDATING...' : 'UPDATING...';
+            status.innerText=isActive ? 'UPDATING...': 'UPDATING...';
 
             // Upsert special row
             // We use a fixed ID or assume unique constraint on type? 
             // Better to use a specific Title or ID if possible. 
             // Since we can't guarantee ID, we'll Query first.
 
-            const { data: existing } = await supabaseClient.from('announcements').select('id').eq('type', 'system_maintenance').single();
+            const {
+                data: existing
+            }
+
+            =await supabaseClient.from('announcements').select('id').eq('type', 'system_maintenance').single();
 
             let error;
+
             if (existing) {
-                const { error: err } = await supabaseClient.from('announcements').update({ content: isActive ? 'true' : 'false' }).eq('id', existing.id);
-                error = err;
-            } else {
-                const { error: err } = await supabaseClient.from('announcements').insert([{
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('announcements').update({
+                    content: isActive ? 'true' : 'false'
+                }).eq('id', existing.id);
+            error=err;
+        }
+
+        else {
+            const {
+                error: err
+            }
+
+            =await supabaseClient.from('announcements').insert([ {
                     title: 'System Maintenance Flag',
                     type: 'system_maintenance',
                     content: isActive ? 'true' : 'false',
                     author: 'SYSTEM'
-                }]);
-                error = err;
-            }
+                }
 
-            if (!error) {
-                status.innerText = isActive ? 'ACTIVE' : 'OFF';
-                status.className = isActive ? 'text-xs font-bold text-red-500' : 'text-xs font-bold text-emerald-500';
-            } else {
-                VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
-                toggle.checked = !isActive; // Revert
-            }
+                ]);
+            error=err;
+        }
+
+        if ( !error) {
+            status.innerText=isActive ? 'ACTIVE': 'OFF';
+            status.className=isActive ? 'text-xs font-bold text-red-500': 'text-xs font-bold text-emerald-500';
+        }
+
+        else {
+            VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
+            toggle.checked= !isActive; // Revert
+        }
         }
 
         // --- STUDENTS ---
-        let allStudents = [];
+        let allStudents=[];
+
         async function loadStudents() {
-            const { data } = await supabaseClient.from('students').select('*').order('name');
-            allStudents = data || [];
 
-            // Render Table
-            const tbody = document.getElementById('student-list');
-            tbody.innerHTML = allStudents.map(s => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 text-slate-500 font-mono text-xs">${s.nim}</td>
-                    <td class="px-6 py-4 font-bold text-slate-700">${s.name}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            // Using 'profiles' table which is more modern/consistent if available, fallback to students
+            // Wait, existing code used 'students' table. Let's stick to existing pattern or check schema?
+            // Existing code at line 666 used 'students'.
+            const {
+                data
+            }
 
-            // Render Select Options (Points & Progress)
-            const pSelect = document.getElementById('p-student');
-            const progSelect = document.getElementById('prog-student-select');
+            =await supabaseClient.from('profiles').select('*').eq('role', 'student').order('nama');
 
-            const optionsHtml = '<option value="">-- Pilih Mahasiswa --</option>' + allStudents.map(s => `<option value="${s.nim}">${s.name}</option>`).join('');
-            pSelect.innerHTML = optionsHtml;
-            if (progSelect) progSelect.innerHTML = optionsHtml;
+            // Map to standardize format if schema changed (profiles uses 'nama', students uses 'name'?)
+            // Let's assume consistent mapping or adapt.
+            // If data is empty, maybe fallback to 'students' table?
+            if ( !data || data.length===0) {
+                const {
+                    data: specific
+                }
 
-            // Render Presence Table
-            renderPresenceTable();
+                =await supabaseClient.from('students').select('*').order('name');
+                allStudents=specific || [];
+            }
+
+            else {
+                allStudents=data.map(p=> ({
+                        nim: p.nim, name: p.nama
+                    }));
+        }
+
+        // Render Table
+        const tbody=document.getElementById('student-list');
+
+        if(tbody) {
+            tbody.innerHTML=allStudents.map(s=> ` <tr class="hover:bg-slate-50 transition-colors" > <td class="px-6 py-4 text-slate-500 font-mono text-xs" >$ {
+                    s.nim
+                }
+
+                </td> <td class="px-6 py-4 font-bold text-slate-700" >$ {
+                    s.name
+                }
+
+                </td> <td class="px-6 py-4 text-right" > <button onclick="deleteStudent('${s.nim}')" class="text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg transition-colors" ><i class="fa-solid fa-trash" ></i></button> </td> </tr> `).join('');
+        }
+
+        // Render Select Options (Points & Progress)
+        const pSelect=document.getElementById('p-student');
+        const progSelect=document.getElementById('prog-student-select');
+
+        const optionsHtml='<option value="">-- Pilih Mahasiswa --</option>'+allStudents.map(s=> `<option value="${s.nim}" >$ {
+                s.name
+            }
+
+            </option>`).join('');
+        if(pSelect) pSelect.innerHTML=optionsHtml;
+        if(progSelect) progSelect.innerHTML=optionsHtml;
+
+        // Render Presence Table (UPDATED to default 'Hadir')
+        renderPresenceTable();
+        }
+
+        // --- PRESENCE --- (Updated Default)
+        function renderPresenceTable() {
+            const tbody=document.getElementById('presence-list');
+            if( !tbody) return;
+
+            tbody.innerHTML=allStudents.map(s=> ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
+                    s.name
+                }
+
+                </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1 focus:ring-2 focus:ring-primary-500" data-nim="${s.nim}" > <option value="Hadir" selected>Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
         }
 
         async function addStudent(e) {
             e.preventDefault();
-            const nim = document.getElementById('new-nim').value;
-            const name = document.getElementById('new-name').value;
-            const { error } = await supabaseClient.from('students').insert([{ nim, name, access_code: nim }]);
-            if (!error) { e.target.reset(); loadStudents(); updateStats(); VisualModal.alert('Mahasiswa ditambahkan', 'Sukses', 'success'); }
+            const nim=document.getElementById('new-nim').value;
+            const name=document.getElementById('new-name').value;
+
+            const {
+                error
+            }
+
+            =await supabaseClient.from('students').insert([ {
+                    nim, name, access_code: nim
+                }
+
+                ]);
+
+            if ( !error) {
+                e.target.reset();
+                loadStudents();
+                updateStats();
+                VisualModal.alert('Mahasiswa ditambahkan', 'Sukses', 'success');
+            }
+
             else VisualModal.alert(error.message, 'Error', 'error');
         }
 
         async function deleteStudent(nim) {
-            if (!await VisualModal.confirm('Hapus users?')) return;
+            if ( !await VisualModal.confirm('Hapus users?')) return;
             await supabaseClient.from('students').delete().eq('nim', nim);
             loadStudents();
         }
 
         // --- TASKS ---
         async function loadTasks() {
-            const { data } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
-            const list = document.getElementById('task-list');
-            list.innerHTML = data.map(t => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                             <h4 class="font-bold text-slate-700">${t.title}</h4>
-                             <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}">${t.is_active ? 'Active' : 'Draft'}</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mb-2 line-clamp-1">${t.description}</p>
-                        <p class="text-[10px] font-mono text-slate-500"><i class="fa-regular fa-clock mr-1"></i> ${new Date(t.deadline).toLocaleString()}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editTask('${t.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>
-                        <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
-                    </div>
-                </div>
-            `).join('');
+            const {
+                data
+            }
+
+            =await supabaseClient.from('assignments').select('*').order('deadline', {
+                ascending: false
+            });
+        const list=document.getElementById('task-list');
+
+        list.innerHTML=data.map(t=> ` <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-start group hover:border-blue-200 transition-colors shadow-sm" > <div> <div class="flex items-center gap-2 mb-1" > <h4 class="font-bold text-slate-700" >$ {
+                t.title
+            }
+
+            </h4> <span class="text-[10px] px-2 py-0.5 rounded ${t.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}" >$ {
+                t.is_active ? 'Active' : 'Draft'
+            }
+
+            </span> </div> <p class="text-xs text-slate-400 mb-2 line-clamp-1" >$ {
+                t.description
+            }
+
+            </p> <p class="text-[10px] font-mono text-slate-500" ><i class="fa-regular fa-clock mr-1" ></i> $ {
+                new Date(t.deadline).toLocaleString()
+            }
+
+            </p> </div> <div class="flex gap-2" > <button onclick="editTask('${t.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `).join('');
         }
 
         async function handleTaskSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('t-id').value;
-            const payload = {
+            const id=document.getElementById('t-id').value;
+
+            const payload= {
                 title: document.getElementById('t-title').value,
-                description: document.getElementById('t-desc').value,
-                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
-                submission_link: document.getElementById('t-link').value,
-                points: parseInt(document.getElementById('t-points').value) || 10,
-                module_id: document.getElementById('t-module-id').value || null,
-                is_active: true
-            };
+                    description: document.getElementById('t-desc').value,
+                    deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                    submission_link: document.getElementById('t-link').value,
+                    points: parseInt(document.getElementById('t-points').value) || 10,
+                    module_id: document.getElementById('t-module-id').value || null,
+                    is_active: true
+            }
+
+            ;
 
             let error;
-            if (id) { const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id); error = err; }
-            else { const { error: err } = await supabaseClient.from('assignments').insert([payload]); error = err; }
 
-            if (!error) { resetTaskForm(); loadTasks(); updateStats(); }
+            if (id) {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('assignments').update(payload).eq('id', id);
+                error=err;
+            }
+
+            else {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('assignments').insert([payload]);
+                error=err;
+            }
+
+            if ( !error) {
+                resetTaskForm();
+                loadTasks();
+                updateStats();
+            }
+
             else alert(error.message);
         }
 
         async function editTask(id) {
-            const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+            const {
+                data
+            }
+
+            =await supabaseClient.from('assignments').select('*').eq('id', id).single();
+
             if (data) {
-                document.getElementById('t-id').value = data.id;
-                document.getElementById('t-title').value = data.title;
-                document.getElementById('t-desc').value = data.description;
-                document.getElementById('t-link').value = data.submission_link || '';
-                document.getElementById('t-points').value = data.points || 10;
-                document.getElementById('t-module-id').value = data.module_id || '';
+                document.getElementById('t-id').value=data.id;
+                document.getElementById('t-title').value=data.title;
+                document.getElementById('t-desc').value=data.description;
+                document.getElementById('t-link').value=data.submission_link || '';
+                document.getElementById('t-points').value=data.points || 10;
+                document.getElementById('t-module-id').value=data.module_id || '';
 
-                const d = new Date(data.deadline);
+                const d=new Date(data.deadline);
                 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+                document.getElementById('t-deadline').value=d.toISOString().slice(0, 16);
 
-                document.getElementById('task-form-title').innerText = 'Edit Tugas';
-                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('task-form-title').innerText='Edit Tugas';
+                document.getElementById('btn-save-task').innerText='Update Tugas';
                 document.getElementById('sec-tasks').scrollIntoView();
             }
         }
@@ -777,250 +526,329 @@
 
         function resetTaskForm() {
             document.querySelector('#sec-tasks form').reset();
-            document.getElementById('t-id').value = '';
-            document.getElementById('task-form-title').innerText = 'Buat Tugas Baru';
-            document.getElementById('btn-save-task').innerText = 'Simpan Tugas';
+            document.getElementById('t-id').value='';
+            document.getElementById('task-form-title').innerText='Buat Tugas Baru';
+            document.getElementById('btn-save-task').innerText='Simpan Tugas';
         }
 
         // --- MODULE STEPS HELPER ---
-        const LOCAL_MODULE_FILES = [
-            'matriks.pdf', 'matrikss.pdf'
-            // Tambahkan file lain manual di sini jika ada
+        const LOCAL_MODULE_FILES=[ 'matriks.pdf',
+        'matrikss.pdf'
+        // Tambahkan file lain manual di sini jika ada
         ];
 
-        function addStepInput(data = {}) {
-            const container = document.getElementById('steps-container');
-            const noMsg = document.getElementById('no-steps-msg');
+        function addStepInput(data= {}) {
+            const container=document.getElementById('steps-container');
+            const noMsg=document.getElementById('no-steps-msg');
             if (noMsg) noMsg.remove();
 
             // Build Options for Local Files
-            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}">sumbermodul/${f}</option>`).join('');
+            const fileOptions=LOCAL_MODULE_FILES.map(f=> `<option value="sumbermodul/${f}" >sumbermodul/$ {
+                    f
+                }
 
-            const div = document.createElement('div');
-            div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
-            div.innerHTML = `
-                <div class="grid grid-cols-3 gap-2">
-                    <input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}">
-                    <select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)">
-                        <option value="ppt" ${data.type === 'ppt' ? 'selected' : ''}>PPT</option>
-                        <option value="pdf" ${data.type === 'pdf' ? 'selected' : ''}>PDF</option>
-                        <option value="video" ${data.type === 'video' ? 'selected' : ''}>Video</option>
-                        <option value="link" ${data.type === 'link' ? 'selected' : ''}>Link</option>
-                    </select>
-                    <div class="col-span-1 flex gap-1">
-                        <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
+                </option>`).join('');
 
-                <!-- Page Range (Only for PDF/PPT) -->
-                <div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}">
-                    <input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}">
-                    <input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}">
-                </div>
+            const div=document.createElement('div');
+            div.className='step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
 
-                <!-- Local File Selection (Only for PDF/PPT) -->
-                 <div class="step-local-file ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pilih dari SumberModul (Recommended)</label>
-                    <select class="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="this.parentElement.nextElementSibling.querySelector('.step-url').value = this.value">
-                        <option value="">-- Pilih File --</option>
-                        ${fileOptions}
-                    </select>
-                </div>
+            div.innerHTML=` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"$ {
+                data.type==='ppt' ? 'selected': ''
+            }
 
-                <!-- URL / Upload -->
-                <div class="flex gap-2 items-center">
-                    <input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link / Path..." value="${data.url || ''}">
-                    <span class="text-[10px] text-slate-400 font-bold">OR</span>
-                    <label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap">
-                        <i class="fa-solid fa-upload"></i> Upload
-                        <input type="file" class="hidden" onchange="uploadStepFile(this)">
-                    </label>
-                </div>
+            >PPT</option><option value="pdf"$ {
+                data.type==='pdf' ? 'selected': ''
+            }
 
-                <!-- Additional Instructions (Optional) -->
-                <div>
-                    <textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">${data.instruction || ''}</textarea>
-                </div>
+            >PDF</option><option value="video"$ {
+                data.type==='video' ? 'selected': ''
+            }
 
-                <!-- Question (Optional) -->
-                <div class="border-t border-slate-200 pt-2 mt-2">
-                    <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2">
-                        <input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)" ${data.question ? 'checked' : ''}>
-                        <span>Tambahkan Pertanyaan (Kuis Singkat)</span>
-                    </label>
-                    <div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}">
-                        <input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}">
-                        <input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}">
-                        <input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}">
-                    </div>
-                </div>
-            `;
+            >Video</option><option value="link"$ {
+                data.type==='link' ? 'selected': ''
+            }
+
+            >Link</option></select><div class="col-span-1 flex gap-1"><button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button></div></div>< !-- Page Range (Only for PDF/PPT) --><div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}"><input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}"></div>< !-- Local File Selection (Only for PDF/PPT) --><div class="step-local-file ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pilih dari SumberModul (Recommended)</label><select class="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="this.parentElement.nextElementSibling.querySelector('.step-url').value = this.value"><option value="">-- Pilih File --</option>$ {
+                fileOptions
+            }
+
+            </select></div>< !-- URL / Upload --><div class="flex gap-2 items-center"><input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link / Path..." value="${data.url || ''}"><span class="text-[10px] text-slate-400 font-bold">OR</span><label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-upload"></i>Upload <input type="file" class="hidden" onchange="uploadStepFile(this)"></label></div>< !-- Additional Instructions (Optional) --><div><textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">$ {
+                data.instruction || ''
+            }
+
+            </textarea></div>< !-- Question (Optional) --><div class="border-t border-slate-200 pt-2 mt-2"><label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2"><input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)"$ {
+                data.question ? 'checked': ''
+            }
+
+            ><span>Tambahkan Pertanyaan (Kuis Singkat)</span></label><div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}"><input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}"><input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}"><input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}"></div></div>`;
             container.appendChild(div);
         }
 
         function togglePageInputs(select) {
-            const pagesDiv = select.parentElement.nextElementSibling;
-            const fileSelectDiv = pagesDiv.nextElementSibling;
+            const pagesDiv=select.parentElement.nextElementSibling;
+            const fileSelectDiv=pagesDiv.nextElementSibling;
 
             if (['pdf', 'ppt'].includes(select.value)) {
                 pagesDiv.classList.remove('hidden');
                 fileSelectDiv.classList.remove('hidden');
-            } else {
+            }
+
+            else {
                 pagesDiv.classList.add('hidden');
                 fileSelectDiv.classList.add('hidden');
             }
         }
 
         function toggleStepQuestion(cb) {
-            const box = cb.parentElement.nextElementSibling;
+            const box=cb.parentElement.nextElementSibling;
             if (cb.checked) box.classList.remove('hidden');
             else box.classList.add('hidden');
         }
 
         async function uploadStepFile(input) {
-            const file = input.files[0];
-            if (!file) return;
+            const file=input.files[0];
+            if ( !file) return;
 
-            const btn = input.parentElement; // Label
+            const btn=input.parentElement; // Label
+
             // Robust traversal: Input -> Label -> Container -> TextInput
-            if (!btn || !btn.parentElement) {
+            if ( !btn || !btn.parentElement) {
                 await VisualModal.alert('Error: Structure mismatch (parent not found)', 'Error', 'error');
                 return;
             }
 
-            const textInput = btn.parentElement.querySelector('.step-url');
-            if (!textInput) {
+            const textInput=btn.parentElement.querySelector('.step-url');
+
+            if ( !textInput) {
                 await VisualModal.alert('Error: URL Input field not found related to this button', 'Error', 'error');
                 return;
             }
 
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            const originalText=btn.innerHTML;
+            btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
             btn.classList.add('cursor-not-allowed', 'opacity-50');
 
             try {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                const filePath = `uploads/${fileName}`;
+                const fileExt=file.name.split('.').pop();
 
-                const { data, error } = await supabaseClient.storage.from('materials').upload(filePath, file);
+                const fileName=`$ {
+                    Date.now()
+                }
+
+                _$ {
+                    Math.random().toString(36).substring(7)
+                }
+
+                .$ {
+                    fileExt
+                }
+
+                `;
+
+                const filePath=`uploads/$ {
+                    fileName
+                }
+
+                `;
+
+                const {
+                    data,
+                    error
+                }
+
+                =await supabaseClient.storage.from('materials').upload(filePath, file);
                 if (error) throw error;
 
                 // const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
 
-                textInput.value = publicUrl;
+                textInput.value=publicUrl;
                 await VisualModal.alert('Upload Sukses!', 'Sukses', 'success');
-            } catch (e) {
+            }
+
+            catch (e) {
                 console.error(e);
                 await VisualModal.alert('Gagal Upload: ' + e.message, 'Error', 'error');
-            } finally {
-                btn.innerHTML = originalText;
+            }
+
+            finally {
+                btn.innerHTML=originalText;
                 btn.classList.remove('cursor-not-allowed', 'opacity-50');
             }
         }
 
         function getStepsPayload() {
-            const items = document.querySelectorAll('.step-item');
-            const steps = [];
-            items.forEach(div => {
-                const hasQ = div.querySelector('.step-has-q').checked;
-                const type = div.querySelector('.step-type').value;
-                steps.push({
-                    title: div.querySelector('.step-title').value,
-                    type: type,
-                    url: div.querySelector('.step-url').value,
-                    instruction: div.querySelector('.step-instruction').value,
-                    start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
-                    end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
-                    question: hasQ ? div.querySelector('.step-q-text').value : null,
-                    hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
-                    answer_key: hasQ ? div.querySelector('.step-q-key').value : null
-                });
+            const items=document.querySelectorAll('.step-item');
+            const steps=[];
+
+            items.forEach(div=> {
+                    const hasQ=div.querySelector('.step-has-q').checked;
+                    const type=div.querySelector('.step-type').value;
+
+                    steps.push({
+                        title: div.querySelector('.step-title').value,
+                        type: type,
+                        url: div.querySelector('.step-url').value,
+                        instruction: div.querySelector('.step-instruction').value,
+                        start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
+                        end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
+                        question: hasQ ? div.querySelector('.step-q-text').value : null,
+                        hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
+                        answer_key: hasQ ? div.querySelector('.step-q-key').value : null
+                    });
             });
-            return steps;
+        return steps;
         }
 
         // --- MODULES ---
         async function loadModules() {
-            const { data } = await supabaseClient.from('modules').select('*').order('week');
-            const list = document.getElementById('module-list');
-            list.innerHTML = data.map(m => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <div>
-                        <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded">Minggu ${m.week}</span>
-                        <h4 class="font-bold text-slate-700 mt-2">${m.topic}</h4>
-                        <p class="text-xs text-slate-400 mt-1 line-clamp-1">${m.description || ''}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editModule('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>
-                        <button onclick="deleteModule('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
-                    </div>
-                </div>
-             `).join('');
+            const {
+                data
+            }
+
+            =await supabaseClient.from('modules').select('*').order('week');
+            const list=document.getElementById('module-list');
+
+            list.innerHTML=data.map(m=> {
+                    const isLocked=m.is_locked;
+
+                    return ` <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-orange-100 bg-orange-50/30' : 'border-slate-100'} flex justify-between items-center shadow-sm" > <div class="flex-1 min-w-0 pr-4" > <div class="flex items-center gap-2" > <span class="text-[10px] font-bold uppercase text-primary-500 bg-primary-50 px-2 py-1 rounded" >Minggu $ {
+                        m.week
+                    }
+
+                    </span> $ {
+                        isLocked ? '<span class="text-[10px] font-bold uppercase text-orange-500 bg-orange-100 px-2 py-1 rounded"><i class="fa-solid fa-lock mr-1"></i> LOCKED</span>' : ''
+                    }
+
+                    </div> <h4 class="font-bold text-slate-700 mt-2 truncate" >$ {
+                        m.topic
+                    }
+
+                    </h4> <p class="text-xs text-slate-400 mt-1 line-clamp-1" >$ {
+                        m.description || ''
+                    }
+
+                    </p> </div> <div class="flex gap-2 shrink-0" > <button onclick="toggleModuleLock('${m.id}', ${isLocked})" class="w-8 h-8 rounded-lg ${isLocked ? 'bg-orange-100 text-orange-500' : 'bg-slate-100 text-slate-400'} hover:bg-orange-200 flex items-center justify-center transition-colors" title="${isLocked ? 'Buka Kunci' : 'Kunci Modul'}" > <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'} text-xs" ></i> </button> <button onclick="editModule('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-pen text-xs" ></i></button> <button onclick="deleteModule('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors" ><i class="fa-solid fa-trash text-xs" ></i></button> </div> </div> `
+                }).join('');
 
             // Also update Task Dropdown
-            const taskSel = document.getElementById('t-module-id');
+            const taskSel=document.getElementById('t-module-id');
+
             if (taskSel) {
-                taskSel.innerHTML = '<option value="">-- Tidak Terhubung --</option>' +
-                    data.map(m => `<option value="${m.id}">Minggu ${m.week}: ${m.topic}</option>`).join('');
+                taskSel.innerHTML='<option value="">-- Tidak Terhubung --</option>'+data.map(m=> `<option value="${m.id}" >Minggu $ {
+                        m.week
+                    }
+
+                    : $ {
+                        m.topic
+                    }
+
+                    </option>`).join('');
             }
+        }
+
+        async function toggleModuleLock(id, currentStatus) {
+            const newStatus= !currentStatus;
+
+            // Optimistic UI Update (optional, but let's stick to reload for safety)
+            const {
+                error
+            }
+
+            =await supabaseClient.from('modules').update({
+                is_locked: newStatus
+            }).eq('id', id);
+
+        if (error) {
+            VisualModal.alert('Gagal update status: ' + error.message, 'Error', 'error');
+        }
+
+        else {
+            // await VisualModal.alert(newStatus ? 'Modul dikunci' : 'Modul dibuka', 'Sukses', 'success');
+            // Skip alert for speed, just reload
+            loadModules();
+        }
         }
 
         async function handleModuleSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('m-id').value;
-            const payload = {
-                week: document.getElementById('m-week').value,
-                topic: document.getElementById('m-topic').value,
-                description: document.getElementById('m-desc').value,
-                file_url: document.getElementById('m-file').value,
-                video_url: document.getElementById('m-video').value,
-                steps: getStepsPayload(), // Add JSON
-                is_visible: true // Ensure module is visible by default
-            };
+            const id=document.getElementById('m-id').value;
 
-            let error;
-            if (id) {
-                const { error: err } = await supabaseClient.from('modules').update(payload).eq('id', id);
-                error = err;
-            } else {
-                const { error: err } = await supabaseClient.from('modules').insert([payload]);
-                error = err;
+            const payload= {
+                week: document.getElementById('m-week').value,
+                    topic: document.getElementById('m-topic').value,
+                    description: document.getElementById('m-desc').value,
+                    file_url: document.getElementById('m-file').value,
+                    video_url: document.getElementById('m-video').value,
+                    steps: getStepsPayload(), // Add JSON
+                    is_visible: true // Ensure module is visible by default
             }
 
-            if (!error) { resetModuleForm(); loadModules(); VisualModal.alert('Modul disimpan', 'Sukses', 'success'); }
+            ;
+
+            let error;
+
+            if (id) {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('modules').update(payload).eq('id', id);
+                error=err;
+            }
+
+            else {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('modules').insert([payload]);
+                error=err;
+            }
+
+            if ( !error) {
+                resetModuleForm();
+                loadModules();
+                VisualModal.alert('Modul disimpan', 'Sukses', 'success');
+            }
+
             else VisualModal.alert(error.message, 'Error', 'error');
         }
 
         async function editModule(id) {
-            const { data } = await supabaseClient.from('modules').select('*').eq('id', id).single();
+            const {
+                data
+            }
+
+            =await supabaseClient.from('modules').select('*').eq('id', id).single();
+
             if (data) {
-                document.getElementById('m-id').value = data.id;
-                document.getElementById('m-week').value = data.week;
-                document.getElementById('m-topic').value = data.topic;
-                document.getElementById('m-desc').value = data.description || '';
-                document.getElementById('m-file').value = data.file_url || '';
-                document.getElementById('m-video').value = data.video_url || '';
+                document.getElementById('m-id').value=data.id;
+                document.getElementById('m-week').value=data.week;
+                document.getElementById('m-topic').value=data.topic;
+                document.getElementById('m-desc').value=data.description || '';
+                document.getElementById('m-file').value=data.file_url || '';
+                document.getElementById('m-video').value=data.video_url || '';
 
                 // Populate Steps
-                const container = document.getElementById('steps-container');
-                container.innerHTML = '';
+                const container=document.getElementById('steps-container');
+                container.innerHTML='';
+
                 if (data.steps && Array.isArray(data.steps)) {
-                    data.steps.forEach(step => addStepInput(step));
+                    data.steps.forEach(step=> addStepInput(step));
                 }
 
-                document.getElementById('modul-form-title').innerText = 'Edit Modul';
-                document.getElementById('btn-save-modul').innerText = 'Update Modul';
+                document.getElementById('modul-form-title').innerText='Edit Modul';
+                document.getElementById('btn-save-modul').innerText='Update Modul';
                 document.getElementById('sec-modules').scrollIntoView();
             }
         }
 
         function resetModuleForm() {
             document.querySelector('#sec-modules form').reset();
-            document.getElementById('m-id').value = '';
-            document.getElementById('steps-container').innerHTML = '<p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>';
-            document.getElementById('modul-form-title').innerText = 'Tambah Modul';
-            document.getElementById('btn-save-modul').innerText = 'Simpan Modul';
+            document.getElementById('m-id').value='';
+            document.getElementById('steps-container').innerHTML='<p id="no-steps-msg" class="text-xs text-slate-400 italic">Belum ada langkah.</p>';
+            document.getElementById('modul-form-title').innerText='Tambah Modul';
+            document.getElementById('btn-save-modul').innerText='Simpan Modul';
         }
 
         async function deleteModule(id) {
@@ -1033,64 +861,108 @@
         // --- TASKS UPDATE ---
         async function handleTaskSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('t-id').value;
-            const payload = {
+            const id=document.getElementById('t-id').value;
+
+            const payload= {
                 title: document.getElementById('t-title').value,
-                description: document.getElementById('t-desc').value,
-                deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
-                submission_link: document.getElementById('t-link').value,
-                module_id: document.getElementById('t-module-id').value || null, // Capture Module ID
-                is_active: true
-            };
+                    description: document.getElementById('t-desc').value,
+                    deadline: new Date(document.getElementById('t-deadline').value).toISOString(),
+                    submission_link: document.getElementById('t-link').value,
+                    module_id: document.getElementById('t-module-id').value || null, // Capture Module ID
+                    is_active: true
+            }
+
+            ;
 
             let error;
-            if (id) { const { error: err } = await supabaseClient.from('assignments').update(payload).eq('id', id); error = err; }
-            else { const { error: err } = await supabaseClient.from('assignments').insert([payload]); error = err; }
 
-            if (!error) { resetTaskForm(); loadTasks(); updateStats(); }
+            if (id) {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('assignments').update(payload).eq('id', id);
+                error=err;
+            }
+
+            else {
+                const {
+                    error: err
+                }
+
+                =await supabaseClient.from('assignments').insert([payload]);
+                error=err;
+            }
+
+            if ( !error) {
+                resetTaskForm();
+                loadTasks();
+                updateStats();
+            }
+
             else alert(error.message);
         }
 
         async function editTask(id) {
-            const { data } = await supabaseClient.from('assignments').select('*').eq('id', id).single();
+            const {
+                data
+            }
+
+            =await supabaseClient.from('assignments').select('*').eq('id', id).single();
+
             if (data) {
-                document.getElementById('t-id').value = data.id;
-                document.getElementById('t-title').value = data.title;
-                document.getElementById('t-desc').value = data.description;
-                document.getElementById('t-link').value = data.submission_link || '';
-                if (data.module_id) document.getElementById('t-module-id').value = data.module_id; // Set selected
+                document.getElementById('t-id').value=data.id;
+                document.getElementById('t-title').value=data.title;
+                document.getElementById('t-desc').value=data.description;
+                document.getElementById('t-link').value=data.submission_link || '';
+                if (data.module_id) document.getElementById('t-module-id').value=data.module_id; // Set selected
 
-                const d = new Date(data.deadline);
+                const d=new Date(data.deadline);
                 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                document.getElementById('t-deadline').value = d.toISOString().slice(0, 16);
+                document.getElementById('t-deadline').value=d.toISOString().slice(0, 16);
 
-                document.getElementById('task-form-title').innerText = 'Edit Tugas';
-                document.getElementById('btn-save-task').innerText = 'Update Tugas';
+                document.getElementById('task-form-title').innerText='Edit Tugas';
+                document.getElementById('btn-save-task').innerText='Update Tugas';
                 document.getElementById('sec-tasks').scrollIntoView();
             }
         }
 
         // --- NEWS ---
         async function loadNews() {
-            const { data } = await supabaseClient.from('announcements').select('*').order('created_at', { ascending: false });
-            document.getElementById('news-list').innerHTML = data.map(n => `
-                 <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group">
-                     <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                     <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500">${n.type}</span>
-                     <h4 class="font-bold text-slate-800 mt-2">${n.title}</h4>
-                     <p class="text-xs text-slate-500 mt-1">${n.content}</p>
-                 </div>
-            `).join('');
+            const {
+                data
+            }
+
+            =await supabaseClient.from('announcements').select('*').order('created_at', {
+                ascending: false
+            });
+
+        document.getElementById('news-list').innerHTML=data.map(n=> ` <div class="bg-white p-4 rounded-2xl border border-slate-100 relative group" > <button onclick="deleteNews('${n.id}')" class="absolute top-2 right-2 p-2 text-slate-300 hover:text-red-500" ><i class="fa-solid fa-trash" ></i></button> <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" >$ {
+                n.type
+            }
+
+            </span> <h4 class="font-bold text-slate-800 mt-2" >$ {
+                n.title
+            }
+
+            </h4> <p class="text-xs text-slate-500 mt-1" >$ {
+                n.content
+            }
+
+            </p> </div> `).join('');
         }
 
         async function handleNewsSubmit(e) {
             e.preventDefault();
-            const payload = {
+
+            const payload= {
                 title: document.getElementById('n-title').value,
-                type: document.getElementById('n-type').value,
-                content: document.getElementById('n-content').value,
-                author: 'Admin'
-            };
+                    type: document.getElementById('n-type').value,
+                    content: document.getElementById('n-content').value,
+                    author: 'Admin'
+            }
+
+            ;
             await supabaseClient.from('announcements').insert([payload]);
             e.target.reset();
             loadNews();
@@ -1106,30 +978,43 @@
 
         async function loadOverviewStats() {
             try {
+
                 // Students count
-                const { count: studentCount } = await supabaseClient
-                    .from('profiles')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('role', 'student');
-                document.getElementById('stat-students').innerText = studentCount || 0;
+                const {
+                    count: studentCount
+                }
 
-                // Active Assignments count
-                const { count: assignmentCount } = await supabaseClient
-                    .from('assignments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('is_active', true);
-                document.getElementById('stat-active').innerText = assignmentCount || 0;
+                =await supabaseClient .from('profiles') .select('*', {
+                    count: 'exact', head: true
+                }) .eq('role', 'student');
+            document.getElementById('stat-students').innerText=studentCount || 0;
 
-                // Attendance (average of latest session or just total log count for now)
-                // For simplicity, let's show total attendance logs
-                const { count: attendanceCount } = await supabaseClient
-                    .from('attendance_log')
-                    .select('*', { count: 'exact', head: true });
-                document.getElementById('stat-attendance').innerText = attendanceCount || 0;
-
-            } catch (error) {
-                console.error("Error loading stats:", error);
+            // Active Assignments count
+            const {
+                count: assignmentCount
             }
+
+            =await supabaseClient .from('assignments') .select('*', {
+                count: 'exact', head: true
+            }) .eq('is_active', true);
+        document.getElementById('stat-active').innerText=assignmentCount || 0;
+
+        // Attendance (average of latest session or just total log count for now)
+        // For simplicity, let's show total attendance logs
+        const {
+            count: attendanceCount
+        }
+
+        =await supabaseClient .from('attendance_log') .select('*', {
+            count: 'exact', head: true
+        });
+        document.getElementById('stat-attendance').innerText=attendanceCount || 0;
+
+        }
+
+        catch (error) {
+            console.error("Error loading stats:", error);
+        }
         }
 
         // Initial Load
@@ -1140,57 +1025,71 @@
 
         async function checkMaintenanceStatus() {
             try {
-                const { data } = await supabaseClient
-                    .from('announcements')
-                    .select('content')
-                    .eq('type', 'system_maintenance')
-                    .single();
+                const {
+                    data
+                }
 
-                const isMaintenance = data && data.content === 'true';
-                document.getElementById('maintenance-toggle').checked = isMaintenance;
-            } catch (e) {
+                =await supabaseClient .from('announcements') .select('content') .eq('type', 'system_maintenance') .single();
+
+                const isMaintenance=data && data.content==='true';
+                document.getElementById('maintenance-toggle').checked=isMaintenance;
+            }
+
+            catch (e) {
                 console.error("Maint Check Fail", e);
             }
         }
 
         async function toggleMaintenance() {
-            const isActive = document.getElementById('maintenance-toggle').checked;
+            const isActive=document.getElementById('maintenance-toggle').checked;
 
-            if (!await VisualModal.confirm(isActive ? 'Aktifkan Mode Maintenance? User lain tidak akan bisa akses.' : 'Matikan Mode Maintenance? User bisa akses kembali.', 'Konfirmasi Sistem', 'warning')) {
-                document.getElementById('maintenance-toggle').checked = !isActive; // Revert UI
+            if ( !await VisualModal.confirm(isActive ? 'Aktifkan Mode Maintenance? User lain tidak akan bisa akses.' : 'Matikan Mode Maintenance? User bisa akses kembali.', 'Konfirmasi Sistem', 'warning')) {
+                document.getElementById('maintenance-toggle').checked= !isActive; // Revert UI
                 return;
             }
 
             try {
-                // Upsert logic for maintenance row
-                const { error } = await supabaseClient
-                    .from('announcements')
-                    .upsert({
-                        type: 'system_maintenance',
-                        title: 'System Maintenance',
-                        content: isActive ? 'true' : 'false',
-                        is_active: isActive
-                    }, { onConflict: 'type' });
 
-                if (error) throw error;
-                await VisualModal.alert(isActive ? "Maintenance Mode: AKTIF" : "Maintenance Mode: NON-AKTIF", "Sukses", "success");
-            } catch (e) {
-                console.error(e);
-                await VisualModal.alert("Gagal mengubah status: " + e.message, "Error", "error");
-                document.getElementById('maintenance-toggle').checked = !isActive; // Revert
-            }
+                // Upsert logic for maintenance row
+                const {
+                    error
+                }
+
+                =await supabaseClient .from('announcements') .upsert({
+                    type: 'system_maintenance',
+                    title: 'System Maintenance',
+                    content: isActive ? 'true' : 'false',
+                    is_active: isActive
+                }
+
+                , {
+                onConflict: 'type'
+            });
+
+        if (error) throw error;
+        await VisualModal.alert(isActive ? "Maintenance Mode: AKTIF" : "Maintenance Mode: NON-AKTIF", "Sukses", "success");
+        }
+
+        catch (e) {
+            console.error(e);
+            await VisualModal.alert("Gagal mengubah status: " + e.message, "Error", "error");
+            document.getElementById('maintenance-toggle').checked= !isActive; // Revert
+        }
         }
 
         // --- POINTS ---
         async function addPoints(e) {
             e.preventDefault();
-            const nim = document.getElementById('p-student').value;
-            if (!nim) return VisualModal.alert('Pilih mahasiswa', 'Warning', 'warning');
-            const payload = {
+            const nim=document.getElementById('p-student').value;
+            if ( !nim) return VisualModal.alert('Pilih mahasiswa', 'Warning', 'warning');
+
+            const payload= {
                 student_nim: nim,
-                points: document.getElementById('p-amount').value,
-                note: document.getElementById('p-note').value
-            };
+                    points: document.getElementById('p-amount').value,
+                    note: document.getElementById('p-note').value
+            }
+
+            ;
             await supabaseClient.from('participation_logs').insert([payload]);
             e.target.reset();
             VisualModal.alert('Poin ditambahkan', 'Sukses', 'success');
@@ -1198,153 +1097,230 @@
 
         // --- PRESENCE ---
         function initPresenceOptions() {
-            const sel = document.getElementById('a-meet-code');
-            for (let w = 1; w <= 16; w++) {
-                sel.innerHTML += `<option value="${w}-1">Minggu ${w} - Sesi 1</option>`;
-                sel.innerHTML += `<option value="${w}-2">Minggu ${w} - Sesi 2</option>`;
+            const sel=document.getElementById('a-meet-code');
+
+            for (let w=1; w <=16; w++) {
+                sel.innerHTML+=`<option value="${w}-1">Minggu $ {
+                    w
+                }
+
+                - Sesi 1</option>`;
+
+                sel.innerHTML+=`<option value="${w}-2">Minggu $ {
+                    w
+                }
+
+                - Sesi 2</option>`;
             }
         }
 
         function renderPresenceTable() {
-            const tbody = document.getElementById('presence-list');
-            tbody.innerHTML = allStudents.map(s => `
-                <tr>
-                    <td class="p-3 border-b border-slate-50 text-slate-700">${s.name}</td>
-                    <td class="p-3 border-b border-slate-50 text-center">
-                         <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1" data-nim="${s.nim}">
-                            <option value="">-</option>
-                            <option value="Hadir">Hadir</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Alfa">Alfa</option>
-                         </select>
-                    </td>
-                </tr>
-            `).join('');
+            const tbody=document.getElementById('presence-list');
+
+            tbody.innerHTML=allStudents.map(s=> ` <tr> <td class="p-3 border-b border-slate-50 text-slate-700" >$ {
+                    s.name
+                }
+
+                </td> <td class="p-3 border-b border-slate-50 text-center" > <select class="absen-input bg-slate-50 border border-slate-200 rounded text-xs px-2 py-1" data-nim="${s.nim}" > <option value="" >-</option> <option value="Hadir" >Hadir</option> <option value="Sakit" >Sakit</option> <option value="Izin" >Izin</option> <option value="Alfa" >Alfa</option> </select> </td> </tr> `).join('');
         }
 
         async function saveAttendanceBatch() {
-            const code = document.getElementById('a-meet-code').value;
-            const inputs = document.querySelectorAll('.absen-input');
-            const upserts = [];
-            inputs.forEach(i => {
-                if (i.value) {
-                    upserts.push({ student_nim: i.dataset.nim, meeting_code: code, status: i.value });
+            const code=document.getElementById('a-meet-code').value;
+            const inputs=document.querySelectorAll('.absen-input');
+            const upserts=[];
+
+            inputs.forEach(i=> {
+                    if (i.value) {
+                        upserts.push({
+                            student_nim: i.dataset.nim, meeting_code: code, status: i.value
+                        });
                 }
             });
-            if (upserts.length > 0) {
-                const { error } = await supabaseClient.from('attendance_logs').upsert(upserts, { onConflict: 'student_nim, meeting_code' });
-                if (!error) VisualModal.alert('Presensi disimpan!', 'Sukses', 'success'); else VisualModal.alert(error.message, 'Error', 'error');
-            } else {
-                VisualModal.alert('Tidak ada data yang dipilih', 'Info');
+
+        if (upserts.length > 0) {
+            const {
+                error
             }
+
+            =await supabaseClient.from('attendance_logs').upsert(upserts, {
+                onConflict: 'student_nim, meeting_code'
+            });
+        if ( !error) VisualModal.alert('Presensi disimpan!', 'Sukses', 'success');
+        else VisualModal.alert(error.message, 'Error', 'error');
+        }
+
+        else {
+            VisualModal.alert('Tidak ada data yang dipilih', 'Info');
+        }
         }
 
         async function updateStats() {
-            const { count: taskCount } = await supabaseClient.from('assignments').select('*', { count: 'exact' }).eq('is_active', true);
-            document.getElementById('stat-active').innerText = taskCount || 0;
-            const { count: studentCount } = await supabaseClient.from('students').select('*', { count: 'exact' });
-            document.getElementById('stat-students').innerText = studentCount || 0;
+            const {
+                count: taskCount
+            }
+
+            =await supabaseClient.from('assignments').select('*', {
+                count: 'exact'
+            }).eq('is_active', true);
+        document.getElementById('stat-active').innerText=taskCount || 0;
+
+        const {
+            count: studentCount
+        }
+
+        =await supabaseClient.from('students').select('*', {
+            count: 'exact'
+        });
+        document.getElementById('stat-students').innerText=studentCount || 0;
         }
 
         async function calculateAdvancedStats() {
+
             // Avg Stats (Expensive, do carefully)
             try {
+
                 // 1. Attendance Rate
-                const { data: att } = await supabaseClient.from('attendance_logs').select('status');
+                const {
+                    data: att
+                }
+
+                =await supabaseClient.from('attendance_logs').select('status');
+
                 if (att && att.length > 0) {
-                    const present = att.filter(a => a.status === 'Hadir').length;
-                    const rate = Math.round((present / att.length) * 100);
-                    document.getElementById('stat-attendance').innerText = rate + '%';
+                    const present=att.filter(a=> a.status==='Hadir').length;
+                    const rate=Math.round((present / att.length) * 100);
+                    document.getElementById('stat-attendance').innerText=rate+'%';
                 }
 
                 // 2. Avg Points
-                const users = allStudents.length;
+                const users=allStudents.length;
+
                 // We need sum of points. Complex query, or simple fetch all logs?
                 // Let's fetch all logs for now (small scale)
-                const { data: points } = await supabaseClient.from('participation_logs').select('points');
-                if (points && users > 0) {
-                    const total = points.reduce((acc, curr) => acc + (curr.points || 0), 0);
-                    const avg = Math.round(total / users);
-                    document.getElementById('stat-avg-score').innerText = avg;
+                const {
+                    data: points
                 }
-            } catch (e) { console.error(e); }
+
+                =await supabaseClient.from('participation_logs').select('points');
+
+                if (points && users > 0) {
+                    const total=points.reduce((acc, curr)=> acc + (curr.points || 0), 0);
+                    const avg=Math.round(total / users);
+                    document.getElementById('stat-avg-score').innerText=avg;
+                }
+            }
+
+            catch (e) {
+                console.error(e);
+            }
         }
 
         async function loadStudentStats(nim) {
-            if (!nim) {
+            if ( !nim) {
                 document.getElementById('prog-details').classList.add('hidden');
                 return;
             }
 
             try {
+
                 // 1. Points
-                const { data: pLogs } = await supabaseClient.from('participation_logs').select('points').eq('student_nim', nim);
-                const totalPoints = pLogs ? pLogs.reduce((a, b) => a + b.points, 0) : 0;
-                document.getElementById('prog-points').innerText = totalPoints;
+                const {
+                    data: pLogs
+                }
+
+                =await supabaseClient.from('participation_logs').select('points').eq('student_nim', nim);
+                const totalPoints=pLogs ? pLogs.reduce((a, b)=> a + b.points, 0) : 0;
+                document.getElementById('prog-points').innerText=totalPoints;
 
                 // 2. Modules
-                const { data: mLog } = await supabaseClient.from('module_progress').select('module_id, is_completed').eq('student_nim', nim);
-                const completedMods = new Set(mLog ? mLog.filter(m => m.is_completed).map(m => m.module_id) : []);
-                document.getElementById('prog-modules').innerText = completedMods.size;
+                const {
+                    data: mLog
+                }
+
+                =await supabaseClient.from('module_progress').select('module_id, is_completed').eq('student_nim', nim);
+                const completedMods=new Set(mLog ? mLog.filter(m=> m.is_completed).map(m=> m.module_id) : []);
+                document.getElementById('prog-modules').innerText=completedMods.size;
 
                 // 3. Tasks
-                const { data: tLog } = await supabaseClient.from('assignment_submissions').select('assignment_id').eq('student_nim', nim);
-                const submittedTasks = new Set(tLog ? tLog.map(t => t.assignment_id) : []);
-                document.getElementById('prog-tasks').innerText = submittedTasks.size;
+                const {
+                    data: tLog
+                }
+
+                =await supabaseClient.from('assignment_submissions').select('assignment_id').eq('student_nim', nim);
+                const submittedTasks=new Set(tLog ? tLog.map(t=> t.assignment_id) : []);
+                document.getElementById('prog-tasks').innerText=submittedTasks.size;
 
                 document.getElementById('prog-details').classList.remove('hidden');
 
                 // DETAILS LIST
                 // Tasks
-                const { data: assignments } = await supabaseClient.from('assignments').select('*').order('deadline', { ascending: false });
-                const taskContainer = document.getElementById('prog-task-list');
-                taskContainer.innerHTML = assignments.map(a => {
-                    const isDone = submittedTasks.has(a.id);
-                    return `
-                        <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}">
-                             <div>
-                                <p class="text-sm font-bold text-slate-700">${a.title}</p>
-                                <p class="text-[10px] text-slate-400">Deadline: ${new Date(a.deadline).toLocaleDateString()}</p>
-                             </div>
-                             <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}">
-                                ${isDone ? 'SELESAI' : 'BELUM'}
-                             </span>
-                        </div>
-                    `;
+                const {
+                    data: assignments
+                }
+
+                =await supabaseClient.from('assignments').select('*').order('deadline', {
+                    ascending: false
+                });
+            const taskContainer=document.getElementById('prog-task-list');
+
+            taskContainer.innerHTML=assignments.map(a=> {
+                    const isDone=submittedTasks.has(a.id);
+
+                    return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}" > <div> <p class="text-sm font-bold text-slate-700" >$ {
+                        a.title
+                    }
+
+                    </p> <p class="text-[10px] text-slate-400" >Deadline: $ {
+                        new Date(a.deadline).toLocaleDateString()
+                    }
+
+                    </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}" > $ {
+                        isDone ? 'SELESAI' : 'BELUM'
+                    }
+
+                    </span> </div> `;
                 }).join('');
 
-                // Modules
-                const { data: modules } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
-                const modulContainer = document.getElementById('prog-modul-list');
-                modulContainer.innerHTML = modules.map(m => {
-                    const isDone = completedMods.has(m.id);
-                    return `
-                        <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}">
-                             <div class="flex items-center gap-3">
-                                <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200">M${m.week}</span>
-                                <p class="text-sm font-bold text-slate-700 line-clamp-1">${m.topic}</p>
-                             </div>
-                             <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-blue-200 text-blue-700' : 'bg-slate-200 text-slate-500'}">
-                                ${isDone ? 'COMPLETED' : 'PENDING'}
-                             </span>
-                        </div>
-                    `;
-                }).join('');
-
-
-            } catch (e) {
-                console.error(e);
-                VisualModal.alert("Gagal load data mahasiswa", 'Error', 'error');
+            // Modules
+            const {
+                data: modules
             }
+
+            =await supabaseClient.from('modules').select('*').order('week', {
+                ascending: true
+            });
+        const modulContainer=document.getElementById('prog-modul-list');
+
+        modulContainer.innerHTML=modules.map(m=> {
+                const isDone=completedMods.has(m.id);
+
+                return ` <div class="flex items-center justify-between p-3 rounded-xl border ${isDone ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}" > <div class="flex items-center gap-3" > <span class="bg-white px-2 py-1 rounded text-[10px] font-bold border border-slate-200" >M$ {
+                    m.week
+                }
+
+                </span> <p class="text-sm font-bold text-slate-700 line-clamp-1" >$ {
+                    m.topic
+                }
+
+                </p> </div> <span class="text-[10px] font-bold px-2 py-1 rounded ${isDone ? 'bg-blue-200 text-blue-700' : 'bg-slate-200 text-slate-500'}" > $ {
+                    isDone ? 'COMPLETED' : 'PENDING'
+                }
+
+                </span> </div> `;
+            }).join('');
+
+
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (await window.ensureSupabase()) {
-                init();
-            }
-        });
-    </script>
-</body>
+        catch (e) {
+            console.error(e);
+            VisualModal.alert("Gagal load data mahasiswa", 'Error', 'error');
+        }
+        }
 
-</html>
+        document.addEventListener('DOMContentLoaded', async ()=> {
+                if (await window.ensureSupabase()) {
+                    init();
+                }
+            });
+        </script></body></html>
