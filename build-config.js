@@ -199,7 +199,7 @@ function tryInitSupabase() {
 
 // Try immediately (Normal case)
 if (!tryInitSupabase()) {
-    console.warn("Supabase SDK not ready immediately. Will poll...");
+    // SDK will be polled by ensureSupabase() when pages need it
 }
 
 // Global Promise for Pages to Wait
