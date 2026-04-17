@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz | Kawan Fismat</title>
+    <title>Quiz | RekaFisika</title>
     <link rel="icon" type="image/png" href="logo.png">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -87,7 +87,7 @@
                 </div>
                 <h1 class="text-2xl font-black mb-3 text-slate-900">AI Random Quiz</h1>
                 <p class="text-slate-500 mb-8 text-sm leading-relaxed">
-                    Uji pemahamanmu tentang Fisika Matematika I. Soal dibuat otomatis oleh AI.
+                    Uji pemahamanmu tentang Fisika. Soal dibuat otomatis oleh AI.
                 </p>
                 <button onclick="startQuiz()"
                     class="w-full py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-2xl font-bold text-lg shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
@@ -180,7 +180,7 @@
 
     <script>
         // --- Same Logic as Original Quiz, but tailored for new UI classes ---
-        const QUIZ_TOPIC = "Konsep Dasar Fisika Matematika, Kalkulus, dan Fisika Modern (Level Kuliah)";
+        const QUIZ_TOPIC = "Konsep Dasar Fisika, Kalkulus, dan Fisika Modern (Level Kuliah)";
         let questions = [];
         let currentQIndex = 0;
         let score = 0;
@@ -259,7 +259,7 @@
             // Reusing the same AI Prompt Logic but simplified for speed in reading code
             // Assuming extractPDFContent is same
             const prompt = `
-             Buatlah 5 soal pilihan ganda Cerdas Cermat tentang topik Fisika Matematika (Matriks, Vector, Deret).
+             Buatlah 5 soal pilihan ganda Cerdas Cermat tentang topik Fisika (Matriks, Vector, Deret).
              Output HANYA JSON Array: [{"q": "...", "opts": ["A","B","C","D"], "a": 0, "expl": "..."}]
              `;
 
