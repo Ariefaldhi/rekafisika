@@ -60,13 +60,7 @@
                         <input type="text" id="reg-name" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="Contoh: Budi Santoso">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">NIM / NISN</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-id-card"></i></span>
-                        <input type="text" id="reg-nim" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="Contoh: 2101234">
-                    </div>
-                </div>
+                <!-- Removed NIM/NISN field -->
             </div>
 
             <!-- Common Fields -->
@@ -106,7 +100,6 @@
         const errorMsg = document.getElementById('error-msg');
         
         const regName = document.getElementById('reg-name');
-        const regNim = document.getElementById('reg-nim');
 
         function toggleMode(loginMode) {
             isLoginMode = loginMode;
@@ -118,7 +111,6 @@
                 
                 registerFields.classList.add('hidden');
                 regName.removeAttribute('required');
-                regNim.removeAttribute('required');
                 
                 authTitle.innerText = "Masuk";
                 authSubtitle.innerText = "Akses akun RekaFisika Anda";
@@ -129,7 +121,6 @@
                 
                 registerFields.classList.remove('hidden');
                 regName.setAttribute('required', 'true');
-                regNim.setAttribute('required', 'true');
                 
                 authTitle.innerText = "Daftar";
                 authSubtitle.innerText = "Buat akun baru untuk mulai belajar";
@@ -177,7 +168,7 @@
                     localStorage.setItem('user_session', JSON.stringify({
                         role: meta.role || 'student',
                         nama: meta.nama || 'Pengguna',
-                        nim: meta.nim || 'N/A', // Critical for existing app queries
+                        nim: data.user.email, // Use email automatically as the identifier
                         email: data.user.email
                     }));
 
@@ -186,7 +177,6 @@
                 } else {
                     // --- FLOW REGISTER ---
                     const nameUser = regName.value.trim();
-                    const nimUser = regNim.value.trim();
 
                     const { data, error } = await supabaseClient.auth.signUp({
                         email: email,
@@ -194,7 +184,6 @@
                         options: {
                             data: {
                                 nama: nameUser,
-                                nim: nimUser,
                                 role: 'student'
                             }
                         }
@@ -211,7 +200,7 @@
                     localStorage.setItem('user_session', JSON.stringify({
                         role: meta.role || 'student',
                         nama: meta.nama || nameUser,
-                        nim: meta.nim || nimUser,
+                        nim: data.user.email, // Use email as identifier
                         email: data.user.email
                     }));
 
