@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <script src="auth-guard.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Materi | RekaFisika</title>
     <link rel="icon" type="image/png" href="logo.png">
@@ -78,13 +79,16 @@
 
         @media (min-width: 1024px) {
             body.lkpd-open #page-container {
-                margin-left: 24rem; /* Match sidebar width lg:w-96 */
-                width: calc(100% - 24rem);
+                margin-left: 28rem; /* Match sidebar width lg:w-[28rem] */
+                width: calc(100% - 28rem);
             }
             #page-container {
                 transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
         }
+
+        .sidebar-tab-active { @apply bg-white text-primary-600 shadow-sm }
+        .sidebar-tab-inactive { @apply text-slate-400 hover:text-slate-600 }
     </style>
     <!-- Supabase SDK MUST load before config.js -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -181,21 +185,75 @@
         </div>
     </header>
 
-    <!-- LKPD Sidebar -->
-    <aside id="lkpd-sidebar" class="fixed top-[73px] left-0 bottom-0 w-full lg:w-96 bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col">
-        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-file-lines"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-sm">Lembar Kerja (LKPD)</h3>
+    <!-- LKPD & Tools Sidebar -->
+    <aside id="lkpd-sidebar" class="fixed top-[73px] left-0 bottom-0 w-full lg:w-[28rem] bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col">
+        <!-- Sidebar Header with Tabs -->
+        <div class="p-3 bg-slate-50 border-b border-slate-200">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tools Pembelajaran</span>
+                <button onclick="toggleLKPD()" class="w-6 h-6 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <button onclick="toggleLKPD()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <div class="flex bg-slate-200/50 p-1 rounded-xl gap-1">
+                <button onclick="switchTab('lkpd')" id="tab-btn-lkpd" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white text-primary-600 shadow-sm">LKPD</button>
+                <button onclick="switchTab('notes')" id="tab-btn-notes" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600">Catatan</button>
+                <button onclick="switchTab('table')" id="tab-btn-table" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600">Tabel Data</button>
+            </div>
         </div>
-        <div class="flex-1 overflow-auto bg-slate-100 relative" id="lkpd-content-wrapper">
-             <iframe id="lkpd-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+
+        <!-- Sidebar Content Areas -->
+        <div class="flex-1 overflow-hidden flex flex-col relative">
+            <!-- LKPD Tab -->
+            <div id="tab-content-lkpd" class="tab-pane flex-1">
+                <iframe id="lkpd-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+            </div>
+
+            <!-- Notes Tab -->
+            <div id="tab-content-notes" class="tab-pane flex-1 hidden flex flex-col p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-slate-800 text-sm">Catatan Observasi</h4>
+                    <span id="notes-status" class="text-[9px] uppercase font-bold text-emerald-500 opacity-0 transition-opacity">Tersimpan</span>
+                </div>
+                <textarea id="student-notes" oninput="autoSaveNotes()" class="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none" placeholder="Ketik hasil pengamatan atau catatan penting di sini..."></textarea>
+            </div>
+
+            <!-- Table Tab -->
+            <div id="tab-content-table" class="tab-pane flex-1 hidden flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+                    <h4 class="font-bold text-slate-800 text-sm">Tabel Hasil Percobaan</h4>
+                    <div class="flex gap-2">
+                        <button onclick="addColumn()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs" title="Tambah Kolom"><i class="fa-solid fa-plus-square"></i></button>
+                        <button onclick="addRow()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs" title="Tambah Baris"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-auto p-4 bg-slate-50">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-w-full inline-block">
+                        <table class="min-w-full text-xs text-left" id="dynamic-table">
+                            <thead class="bg-slate-900 text-white">
+                                <tr id="table-header">
+                                    <th class="px-4 py-3 border-r border-slate-800 font-bold w-12 text-center">No</th>
+                                    <th class="px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative">
+                                        <span contenteditable="true" onblur="saveTableData()">Variabel X</span>
+                                        <button onclick="removeCol(1)" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>
+                                    </th>
+                                    <th class="px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative">
+                                        <span contenteditable="true" onblur="saveTableData()">Variabel Y</span>
+                                        <button onclick="removeCol(2)" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                    <span id="table-status" class="text-[9px] uppercase font-bold text-emerald-500 opacity-0">Tersimpan</span>
+                    <button onclick="saveTableData(true)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Simpan Tabel</button>
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -233,6 +291,8 @@
         let currentPageIndex = 0;
         let totalPages = 0;
         let moduleData = null;
+
+        let groupData = { kodeAjar: '', namaKelompok: '', anggotaKelompok: '' };
 
         async function loadDetail() {
             if (!id) return;
@@ -283,21 +343,49 @@
                 </div>` : '';
 
             coverPage.innerHTML = `
-                <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 lg:items-center py-8">
-                    <div class="flex-1 space-y-6">
+                <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:items-center py-8">
+                    <div class="space-y-6">
                         <div class="space-y-2">
-                             <span class="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-widest">Materi Inti</span>
+                             <span class="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-widest">Langkah Persiapan</span>
                              <h2 class="text-4xl lg:text-5xl font-black text-slate-900 leading-tight">${modul.topic}</h2>
                         </div>
-                        <div class="prose prose-slate lg:prose-lg max-w-none text-slate-600">
+                        <div class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed">
                             ${marked.parse(modul.description || 'Tidak ada deskripsi.')}
                         </div>
-                        <div class="flex items-center gap-6 pt-4 border-t border-slate-100 lg:hidden">
-                            ${lkpdSection}
+                        
+                        <div class="p-6 bg-orange-50 rounded-3xl border border-orange-100 space-y-4">
+                            <div class="flex items-center gap-3 text-orange-600 mb-2">
+                                <i class="fa-solid fa-users-gear text-xl"></i>
+                                <h4 class="font-bold text-sm uppercase tracking-wide">Pendaftaran Kelompok</h4>
+                            </div>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="sm:col-span-1">
+                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Kode Pengajaran Guru</label>
+                                    <input type="text" id="reg-kode-ajar" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none uppercase tracking-widest" placeholder="CONTOH: FISIKA-A1">
+                                </div>
+                                <div class="sm:col-span-1">
+                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Nama Kelompok</label>
+                                    <input type="text" id="reg-group-name" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Misal: Kelompok 1 / Archimedes">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Anggota Kelompok</label>
+                                    <textarea id="reg-members" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-medium placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none resize-none" rows="2" placeholder="Sebutkan nama lengkap anggota kelompok..."></textarea>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-orange-400 italic font-medium leading-relaxed">Pastikan Kode Pengajaran sesuai dengan yang diberikan oleh Guru agar hasil belajar terekam di dashboard Guru.</p>
                         </div>
                     </div>
-                    <div class="hidden lg:block">
+                    
+                    <div class="space-y-6">
                         ${lkpdSection}
+                        <div class="p-6 bg-slate-900 rounded-3xl text-white shadow-xl shadow-slate-900/20 relative overflow-hidden group">
+                             <div class="relative z-10">
+                                <h4 class="font-bold text-lg mb-2">Siap untuk mulai?</h4>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-6">Klik tombol di bawah setelah mengisi data kelompok dengan benar.</p>
+                                <button onclick="changePage(1)" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all">Mulai Petualangan</button>
+                             </div>
+                             <i class="fa-solid fa-rocket absolute -right-4 -bottom-4 text-8xl text-white/5 -rotate-12 group-hover:rotate-0 transition-transform duration-700"></i>
+                        </div>
                     </div>
                 </div>
             `;
@@ -375,10 +463,43 @@
                     });
                 }
 
+                // Sync paging UI
                 totalPages = pageContainer.querySelectorAll('.module-page').length;
                 updatePaging();
                 
-                if (user) loadRefleksiAnswers(id, user);
+                // Load Group Data from Session if exists
+                const savedGroup = sessionStorage.getItem(`group_${id}`);
+                if (savedGroup) {
+                    groupData = JSON.parse(savedGroup);
+                }
+                
+                // Guest Auto-fill
+                if (user && user.is_guest) {
+                    groupData.kodeAjar = user.teaching_code;
+                }
+
+                // Pre-fill form if on step 0
+                setTimeout(() => {
+                    const kodeInput = document.getElementById('reg-kode-ajar');
+                    if (kodeInput) {
+                        kodeInput.value = groupData.kodeAjar || '';
+                        if (user && user.is_guest) {
+                            kodeInput.readOnly = true;
+                            kodeInput.classList.add('bg-slate-100', 'text-slate-400');
+                            kodeInput.title = "Terkunci: Anda masuk menggunakan kode ini.";
+                        }
+                        document.getElementById('reg-group-name').value = groupData.namaKelompok || '';
+                        document.getElementById('reg-members').value = groupData.anggotaKelompok || '';
+                    }
+                }, 500);
+
+                // Load existing notes/table if session exists
+                if (user) {
+                    loadRefleksiAnswers(id, user);
+                    loadNotes(id, user);
+                    loadTableData(id, user);
+                }
+                
                 if (window.MathJax) MathJax.typesetPromise();
             } catch (e) {
                 console.error("Load Detail Error:", e);
@@ -455,11 +576,21 @@
         }
 
         async function changePage(dir) {
-            if (dir === 1 && currentPageIndex === totalPages - 1) {
-                const user = checkAuth();
-                completeModule(moduleData.id, user);
-                return;
+            // STEP 0 VALIDATION (Group Registration)
+            if (currentPageIndex === 0 && dir === 1) {
+                const kode = document.getElementById('reg-kode-ajar').value.trim().toUpperCase();
+                const nama = document.getElementById('reg-group-name').value.trim();
+                const members = document.getElementById('reg-members').value.trim();
+
+                if (!kode || !nama || !members) {
+                    return VisualModal.alert('Silakan lengkapi data kelompok dan Kode Pengajaran Guru sebelum memulai.', 'Data Belum Lengkap', 'warning');
+                }
+                
+                groupData = { kodeAjar: kode, namaKelompok: nama, anggotaKelompok: members };
+                sessionStorage.setItem(`group_${id}`, JSON.stringify(groupData));
             }
+
+            if (dir === 1 && currentPageIndex === totalPages - 1) {
 
             const nextIdx = currentPageIndex + dir;
             if (nextIdx >= 0 && nextIdx < totalPages) {
@@ -622,7 +753,184 @@
             });
         }
 
-        // --- Save Refleksi Answers ---
+        // --- TOOLS SIDEBAR LOGIC ---
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
+            });
+            document.getElementById(`tab-btn-${tab}`).className = "tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white text-primary-600 shadow-sm";
+            
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+
+            if (tab === 'lkpd' && moduleData && moduleData.lkpd_url) {
+                const iframe = document.getElementById('lkpd-iframe');
+                if (iframe.src === 'about:blank') iframe.src = moduleData.lkpd_url;
+            }
+        }
+
+        // --- NOTES LOGIC ---
+        let notesTimer;
+        function autoSaveNotes() {
+            clearTimeout(notesTimer);
+            const status = document.getElementById('notes-status');
+            status.innerText = 'Mengetik...';
+            status.style.opacity = '1';
+
+            notesTimer = setTimeout(async () => {
+                const user = checkAuth();
+                const content = document.getElementById('student-notes').value;
+                if (!user || !moduleData) return;
+
+                try {
+                    await supabaseClient.from('student_notes').upsert({
+                        student_nim: user.nim,
+                        module_id: moduleData.id,
+                        teacher_email: groupData.kodeAjar || 'LEGACY', // We use kodeAjar as the link
+                        teaching_code: groupData.kodeAjar,
+                        group_name: groupData.namaKelompok,
+                        group_members: groupData.anggotaKelompok,
+                        content: content,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'student_nim, module_id' });
+                    
+                    status.innerText = 'Tersimpan';
+                    setTimeout(() => { if (status.innerText === 'Tersimpan') status.style.opacity = '0'; }, 2000);
+                } catch (e) {
+                    status.innerText = 'Gagal Simpan';
+                    console.error(e);
+                }
+            }, 1000);
+        }
+
+        async function loadNotes(moduleId, user) {
+            const { data } = await supabaseClient.from('student_notes').select('content').eq('student_nim', user.nim).eq('module_id', moduleId).single();
+            if (data) document.getElementById('student-notes').value = data.content || '';
+        }
+
+        // --- TABLE LOGIC ---
+        function addRow() {
+            const tbody = document.getElementById('table-body');
+            const rowCount = tbody.rows.length + 1;
+            const colCount = document.getElementById('table-header').cells.length;
+            
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+            
+            let html = `<td class="px-4 py-3 border-r border-slate-100 text-slate-400 font-bold text-center">${rowCount}</td>`;
+            for (let i = 1; i < colCount; i++) {
+                html += `<td class="px-4 py-3 border-r border-slate-100"><input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" placeholder="..."></td>`;
+            }
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+            saveTableData();
+        }
+
+        function addColumn() {
+            const header = document.getElementById('table-header');
+            const colIdx = header.cells.length;
+            const th = document.createElement('th');
+            th.className = "px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative";
+            th.innerHTML = `<span contenteditable="true" onblur="saveTableData()">Variabel Baru</span><button onclick="removeCol(${colIdx})" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>`;
+            header.appendChild(th);
+
+            const rows = document.getElementById('table-body').rows;
+            for (let i = 0; i < rows.length; i++) {
+                const td = document.createElement('td');
+                td.className = "px-4 py-3 border-r border-slate-100";
+                td.innerHTML = `<input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" placeholder="...">`;
+                rows[i].appendChild(td);
+            }
+            saveTableData();
+        }
+
+        function removeCol(idx) {
+            const header = document.getElementById('table-header');
+            if (header.cells.length <= 2) return; // Keep at least No + 1 Col
+            header.deleteCell(idx);
+            const rows = document.getElementById('table-body').rows;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].deleteCell(idx);
+            }
+            // Re-index remaining delete buttons
+            const ths = header.getElementsByTagName('th');
+            for (let i = 1; i < ths.length; i++) {
+                const btn = ths[i].querySelector('button');
+                if (btn) btn.setAttribute('onclick', `removeCol(${i})`);
+            }
+            saveTableData();
+        }
+
+        async function saveTableData(showPopup = false) {
+            const status = document.getElementById('table-status');
+            status.style.opacity = '1';
+            status.innerText = 'Menyimpan...';
+
+            const header = document.getElementById('table-header');
+            const columns = Array.from(header.cells).slice(1).map(th => th.querySelector('span').innerText);
+            
+            const rows = Array.from(document.getElementById('table-body').rows).map(tr => {
+                return Array.from(tr.cells).slice(1).map(td => td.querySelector('input').value);
+            });
+
+            const user = checkAuth();
+            if (!user || !moduleData) return;
+
+            try {
+                await supabaseClient.from('student_data_tables').upsert({
+                    student_nim: user.nim,
+                    module_id: moduleData.id,
+                    teacher_email: groupData.kodeAjar || 'LEGACY',
+                    teaching_code: groupData.kodeAjar,
+                    group_name: groupData.namaKelompok,
+                    group_members: groupData.anggotaKelompok,
+                    table_data: { columns, rows },
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'student_nim, module_id' });
+
+                status.innerText = 'Tersimpan';
+                setTimeout(() => { status.style.opacity = '0'; }, 2000);
+                if (showPopup) VisualModal.alert('Data tabel berhasil disimpan!', 'Sukses', 'success');
+            } catch (e) {
+                status.innerText = 'Gagal';
+                console.error(e);
+            }
+        }
+
+        async function loadTableData(moduleId, user) {
+            const { data } = await supabaseClient.from('student_data_tables').select('table_data').eq('student_nim', user.nim).eq('module_id', moduleId).single();
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (data && data.table_data) {
+                const { columns, rows } = data.table_data;
+                // Re-init Headers (skip first 'No')
+                const header = document.getElementById('table-header');
+                while (header.cells.length > 1) header.deleteCell(1);
+                columns.forEach((col, idx) => {
+                    const th = document.createElement('th');
+                    th.className = "px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative";
+                    th.innerHTML = `<span contenteditable="true" onblur="saveTableData()">${col}</span><button onclick="removeCol(${idx+1})" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>`;
+                    header.appendChild(th);
+                });
+
+                rows.forEach((row, ri) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                    let html = `<td class="px-4 py-3 border-r border-slate-100 text-slate-400 font-bold text-center">${ri+1}</td>`;
+                    row.forEach(val => {
+                        html += `<td class="px-4 py-3 border-r border-slate-100"><input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" value="${val}" placeholder="..."></td>`;
+                    });
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                // Default rows if empty
+                for (let i = 0; i < 3; i++) addRow();
+            }
+        }
+
+        // --- UPDATED REFLEKSI SAVING ---
         async function saveRefleksiAnswers(btn, moduleId, stepIdx) {
             const user = checkAuth();
             if (!user) { await VisualModal.alert('Silakan login terlebih dahulu.', 'Login', 'error'); return; }
@@ -644,6 +952,9 @@
                     student_nim: user.nim,
                     module_id: moduleId,
                     step_index: stepIdx,
+                    teaching_code: groupData.kodeAjar,
+                    group_name: groupData.namaKelompok,
+                    group_members: groupData.anggotaKelompok,
                     answers: answers,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'student_nim, module_id, step_index' });

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Hasil Ajar | RekaFisika</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { 500: '#3B82F6', 600: '#2563EB' },
+                        ui: { bg: '#F8FAFC', text: '#1E293B', sub: '#64748B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js?v=2.5"></script>
+    <script src="modal.js"></script>
+    <style>
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .result-card::-webkit-scrollbar { width: 4px; }
+        .result-card::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+    </style>
+</head>
+
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="lainnya.html" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <p class="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">Monitoring Guru</p>
+                <h1 class="text-sm font-bold text-slate-800">Dashboard Hasil Ajar</h1>
+            </div>
+        </div>
+        <div id="t-code-badge" class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+            --
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <!-- Stats summary -->
+        <div class="grid grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-1">
+                <span class="text-2xl font-black text-slate-800" id="total-groups">0</span>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Kelompok</p>
+            </div>
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-1">
+                <span class="text-2xl font-black text-slate-800" id="total-reflections">0</span>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Refleksi</p>
+            </div>
+             <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center space-y-1">
+                <span class="text-2xl font-black text-slate-800" id="total-data">0</span>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Data Tabel</p>
+            </div>
+        </div>
+
+        <!-- Filter / Tabs -->
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-black text-slate-800">Daftar Hasil Belajar</h2>
+            <button onclick="loadAllData()" class="text-xs text-primary-500 font-bold hover:underline">
+                <i class="fa-solid fa-rotate mr-1"></i> Refresh
+            </button>
+        </div>
+
+        <div id="loading-state" class="flex flex-col items-center justify-center py-20 gap-4">
+            <div class="w-12 h-12 border-4 border-slate-100 border-t-primary-500 rounded-full animate-spin"></div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Mengambil Data Kelompok...</p>
+        </div>
+
+        <div id="results-container" class="space-y-6 hidden">
+            <!-- Results will be injected here -->
+        </div>
+
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center space-y-4">
+            <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 text-4xl">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-800">Belum ada data masuk</h4>
+                <p class="text-xs text-slate-400 max-w-xs mx-auto mt-1 leading-relaxed">Pastikan siswa menggunakan Kode Pengajaran <span class="font-bold text-primary-500" id="empty-code">--</span> saat memulai modul.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detail Group -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 p-4 hidden flex items-center justify-center">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-primary-600 text-white flex items-center justify-center text-xl shadow-lg">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800" id="modal-group-name">Nama Kelompok</h3>
+                        <p class="text-xs text-slate-400" id="modal-module-name">Nama Modul</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-200/50 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-6 space-y-8" id="modal-content">
+                <!-- Data will be injected -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allResults = [];
+        let teacherCode = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth();
+            if (!user || user.role !== 'teacher') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            teacherCode = user.teaching_code || '';
+            document.getElementById('t-code-badge').innerText = teacherCode || 'KODE BELUM DISET';
+            if (document.getElementById('empty-code')) document.getElementById('empty-code').innerText = teacherCode;
+
+            if (!teacherCode) {
+                 VisualModal.alert('Silakan set Kode Pengajaran Anda di menu Profil terlebih dahulu.', 'Kode Belum Diset', 'warning');
+                 window.location.href = 'profil.html';
+                 return;
+            }
+
+            loadAllData();
+        });
+
+        async function loadAllData() {
+            const loading = document.getElementById('loading-state');
+            const container = document.getElementById('results-container');
+            const empty = document.getElementById('empty-state');
+            
+            loading.classList.remove('hidden');
+            container.classList.add('hidden');
+            empty.classList.add('hidden');
+
+            try {
+                // Fetch concurrently
+                const [refRes, notesRes, tableRes] = await Promise.all([
+                    supabaseClient.from('reflection_answers').select('*, modules(topic)').eq('teaching_code', teacherCode),
+                    supabaseClient.from('student_notes').select('*, modules(topic)').eq('teaching_code', teacherCode),
+                    supabaseClient.from('student_data_tables').select('*, modules(topic)').eq('teaching_code', teacherCode)
+                ]);
+
+                // Group combined data by group_name and module_id
+                const grouped = {};
+                
+                const process = (items, type) => {
+                    items.forEach(item => {
+                        const key = `${item.group_name}_${item.module_id}`;
+                        if (!grouped[key]) grouped[key] = { 
+                            group_name: item.group_name, 
+                            group_members: item.group_members,
+                            module_name: item.modules?.topic || 'Modul Tak Dikenal',
+                            reflections: [],
+                            notes: null,
+                            table: null,
+                            last_update: item.updated_at
+                        };
+                        
+                        if (type === 'ref') grouped[key].reflections.push(item);
+                        if (type === 'note') grouped[key].notes = item;
+                        if (type === 'table') grouped[key].table = item;
+                        
+                        if (new Date(item.updated_at) > new Date(grouped[key].last_update)) {
+                            grouped[key].last_update = item.updated_at;
+                        }
+                    });
+                };
+
+                process(refRes.data || [], 'ref');
+                process(notesRes.data || [], 'note');
+                process(tableRes.data || [], 'table');
+
+                const finalData = Object.values(grouped).sort((a,b) => new Date(b.last_update) - new Date(a.last_update));
+                allResults = finalData;
+
+                renderResults(finalData);
+                updateStats(finalData, refRes.data?.length || 0, tableRes.data?.length || 0);
+
+            } catch (e) {
+                console.error(e);
+                VisualModal.alert('Gagal mengambil data: ' + e.message, 'Error', 'error');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function updateStats(groups, refs, tabs) {
+            document.getElementById('total-groups').innerText = groups.length;
+            document.getElementById('total-reflections').innerText = refs;
+            document.getElementById('total-data').innerText = tabs;
+        }
+
+        function renderResults(data) {
+            const container = document.getElementById('results-container');
+            const empty = document.getElementById('empty-state');
+            
+            if (data.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            container.innerHTML = data.map((group, idx) => `
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all animate-fade-in" style="animation-delay: ${idx * 50}ms">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center text-2xl group-hover:bg-primary-50 group-hover:text-primary-500 transition-colors">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 leading-tight">${group.group_name}</h4>
+                            <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-book-open mr-1"></i> ${group.module_name}</p>
+                            <p class="text-[10px] text-slate-300 mt-2 font-mono uppercase">Update: ${new Date(group.last_update).toLocaleTimeString('id-ID')} - ${new Date(group.last_update).toLocaleDateString('id-ID')}</p>
+                        </div>
+                    </div>
+                    <button onclick="showDetail(${idx})" class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function showDetail(index) {
+            const group = allResults[index];
+            document.getElementById('modal-group-name').innerText = group.group_name;
+            document.getElementById('modal-module-name').innerText = group.module_name;
+            
+            const content = document.getElementById('modal-content');
+            
+            let html = `
+                <!-- Group Info -->
+                <div class="bg-primary-50 p-4 rounded-2xl border border-primary-100">
+                    <h5 class="text-[10px] font-black uppercase tracking-widest text-primary-500 mb-1">Anggota Kelompok</h5>
+                    <p class="text-sm text-primary-900 leading-relaxed font-medium">${group.group_members}</p>
+                </div>
+
+                <!-- Reflections -->
+                <div class="space-y-4">
+                    <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-brain"></i> Hasil Refleksi
+                    </h5>
+                    ${group.reflections.length > 0 ? group.reflections.map(r => `
+                        <div class="p-5 bg-white border border-slate-100 rounded-3xl space-y-3 shadow-sm">
+                             <div class="flex items-center justify-between border-b border-slate-50 pb-2">
+                                <span class="text-[10px] font-black text-slate-300 uppercase">Langkah Ke-${r.step_index}</span>
+                                <span class="text-[9px] text-slate-200">${new Date(r.updated_at).toLocaleTimeString()}</span>
+                             </div>
+                             <div class="space-y-4">
+                                ${r.answers.map(ans => `
+                                    <div class="space-y-1">
+                                        <p class="text-xs font-bold text-slate-700">Q: ${ans.question || 'Pertanyaan'}</p>
+                                        <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border-l-4 border-slate-200 italic">"${ans.answer}"</p>
+                                    </div>
+                                `).join('')}
+                             </div>
+                        </div>
+                    `).join('') : '<p class="text-xs text-slate-400 italic">Belum ada refleksi diisi.</p>'}
+                </div>
+
+                <!-- Notes -->
+                <div class="space-y-4">
+                    <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Catatan Group
+                    </h5>
+                    <div class="p-5 bg-amber-50 border border-amber-100 rounded-3xl">
+                        <p class="text-sm text-amber-900 leading-relaxed whitespace-pre-wrap">${group.notes?.content || 'Tidak ada catatan.'}</p>
+                    </div>
+                </div>
+
+                <!-- Experimental Table -->
+                <div class="space-y-4">
+                    <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-table"></i> Data Percobaan
+                    </h5>
+                    ${group.table ? `
+                        <div class="overflow-x-auto rounded-2xl border border-slate-100 shadow-sm">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-900 text-white">
+                                    <tr>
+                                        <th class="px-3 py-2 border-r border-slate-800">No</th>
+                                        ${group.table.table_data.columns.map(c => `<th class="px-3 py-2 border-r border-slate-800">${c}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${group.table.table_data.rows.map((row, ri) => `
+                                        <tr class="border-b border-slate-50">
+                                            <td class="px-3 py-2 border-r border-slate-100 font-bold bg-slate-50 text-slate-400">${ri+1}</td>
+                                            ${row.map(val => `<td class="px-3 py-2 border-r border-slate-100 text-slate-600 bg-white">${val || '-'}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : '<p class="text-xs text-slate-400 italic">Belum ada data tabel.</p>'}
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        // Close modal on click backdrop
+        window.onclick = function(event) {
+            const modal = document.getElementById('detail-modal');
+            if (event.target == modal) closeModal();
+        }
+    </script>
+</body>
+</html>

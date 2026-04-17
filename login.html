@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <script src="auth-guard.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth | RekaFisika</title>
     <link rel="icon" type="image/png" href="logo.png">
@@ -49,8 +50,9 @@
 
         <!-- Tabs -->
         <div class="flex border-b border-slate-200 mb-4">
-            <button id="tab-login" class="flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors">Masuk</button>
-            <button id="tab-register" class="flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800">Daftar</button>
+            <button id="tab-login" class="flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors">Masuk</button>
+            <button id="tab-register" class="flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800">Daftar</button>
+            <button id="tab-code" class="flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800">Kode Guru</button>
         </div>
 
         <form id="auth-form" class="space-y-4">
@@ -66,7 +68,19 @@
                 <!-- Removed NIM/NISN field -->
             </div>
 
+            <!-- Code Mode Field (Hidden by default) -->
+            <div id="code-field" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Kode Masuk Guru (6 Digit)</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-key"></i></span>
+                        <input type="text" id="guest-code" maxlength="6" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700 font-bold tracking-[0.5em] text-center uppercase" placeholder="XXXXXX">
+                    </div>
+                </div>
+            </div>
+
             <!-- Common Fields -->
+            <div id="common-fields" class="space-y-4">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Email</label>
                 <div class="relative">
@@ -96,47 +110,68 @@
 
         const tabLogin = document.getElementById('tab-login');
         const tabRegister = document.getElementById('tab-register');
+        const tabCode = document.getElementById('tab-code');
         const authTitle = document.getElementById('auth-title');
         const authSubtitle = document.getElementById('auth-subtitle');
         const registerFields = document.getElementById('register-fields');
+        const codeField = document.getElementById('code-field');
+        const commonFields = document.getElementById('common-fields');
         const submitBtnText = document.getElementById('btn-text');
         const errorMsg = document.getElementById('error-msg');
         
         const regName = document.getElementById('reg-name');
 
-        function toggleMode(loginMode) {
-            isLoginMode = loginMode;
+        let mode = 'login'; // 'login', 'register', 'code'
+
+        function toggleMode(newMode) {
+            mode = newMode;
             errorMsg.classList.add('hidden');
             
-            if (isLoginMode) {
-                tabLogin.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors";
-                tabRegister.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
-                
+            // Reset Tab UI
+            [tabLogin, tabRegister, tabCode].forEach(t => {
+                t.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
+            });
+
+            // Set Specific UI
+            if (mode === 'login') {
+                tabLogin.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
                 registerFields.classList.add('hidden');
-                regName.removeAttribute('required');
-                
+                codeField.classList.add('hidden');
+                commonFields.classList.remove('hidden');
                 authTitle.innerText = "Masuk";
                 authSubtitle.innerText = "Akses akun RekaFisika Anda";
                 submitBtnText.innerText = "Masuk";
-            } else {
-                tabLogin.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
-                tabRegister.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors";
-                
+            } else if (mode === 'register') {
+                tabRegister.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
                 registerFields.classList.remove('hidden');
-                regName.setAttribute('required', 'true');
-                
+                codeField.classList.add('hidden');
+                commonFields.classList.remove('hidden');
                 authTitle.innerText = "Daftar";
                 authSubtitle.innerText = "Buat akun baru untuk mulai belajar";
                 submitBtnText.innerText = "Daftar Akun";
+            } else if (mode === 'code') {
+                tabCode.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
+                registerFields.classList.add('hidden');
+                codeField.classList.remove('hidden');
+                commonFields.classList.add('hidden');
+                authTitle.innerText = "Siswa Tamu";
+                authSubtitle.innerText = "Masuk menggunakan Kode Guru Anda";
+                submitBtnText.innerText = "Masuk dengan Kode";
             }
         }
 
-        tabLogin.addEventListener('click', () => toggleMode(true));
-        tabRegister.addEventListener('click', () => toggleMode(false));
+        tabLogin.addEventListener('click', () => toggleMode('login'));
+        tabRegister.addEventListener('click', () => toggleMode('register'));
+        tabCode.addEventListener('click', () => toggleMode('code'));
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            if (mode === 'code') {
+                handleCodeLogin();
+                return;
+            }
+
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.getElementById('submit-btn');
@@ -229,15 +264,54 @@
                     alert('Pendaftaran berhasil! Selamat bergabung di RekaFisika.');
                     window.location.href = 'index.html';
                 }
-
             } catch (err) {
                 console.error(err);
                 btn.disabled = false;
-                btn.innerHTML = `<span id="btn-text">${isLoginMode ? 'Masuk' : 'Daftar Akun'}</span> <i class="fa-solid fa-arrow-right"></i>`;
+                btn.innerHTML = `<span id="btn-text">${mode === 'login' ? 'Masuk' : (mode === 'register' ? 'Daftar' : 'Gunakan Kode')}</span> <i class="fa-solid fa-arrow-right"></i>`;
                 errorMsg.textContent = err.message || 'Gagal tersambung. Periksa koneksi internet.';
                 errorMsg.classList.remove('hidden');
             }
         });
+
+        async function handleCodeLogin() {
+            const code = document.getElementById('guest-code').value.trim().toUpperCase();
+            if (code.length < 6) return VisualModal.alert('Masukkan 6 digit kode yang benar.', 'Kode Kurang', 'error');
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
+
+            try {
+                // Find teacher with this code
+                const { data: teacher, error } = await supabaseClient
+                    .from('profiles')
+                    .select('nama, nim, teaching_code')
+                    .eq('teaching_code', code)
+                    .eq('role', 'teacher')
+                    .maybeSingle();
+                
+                if (error) throw error;
+                if (!teacher) throw new Error('Kode tidak ditemukan atau Guru belum mengaktifkan kode ini.');
+
+                // Success - Create Guest Session
+                localStorage.setItem('user_session', JSON.stringify({
+                    is_guest: true,
+                    role: 'student',
+                    teaching_code: code,
+                    nama: 'Tamu (' + code + ')',
+                    nim: 'guest_' + code + '_' + Date.now(),
+                    teacher_name: teacher.nama
+                }));
+
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = 'Masuk dengan Kode <i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
     </script>
 </body>
 

@@ -115,6 +115,15 @@
             <span class="font-bold text-sm text-slate-700">Panduan</span>
         </a>
 
+        <!-- Hasil Ajar (Teacher Only) -->
+        <a href="hasil_ajar.html" id="teacher-link"
+            class="hidden bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <span class="font-bold text-sm text-slate-700">Hasil Ajar</span>
+        </a>
+
         <!-- Admin Panel (Hidden by default) -->
         <a href="admin.html" id="admin-link"
             class="hidden bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-700 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform">
@@ -173,6 +182,11 @@
                 // Check Admin Access (Faldhi or Role Admin)
                 if (user.role === 'admin' || (user.nama && user.nama.toLowerCase().includes('faldhi'))) {
                     document.getElementById('admin-link').classList.remove('hidden');
+                }
+                
+                // Check Teacher Access
+                if (user.role === 'teacher') {
+                    document.getElementById('teacher-link').classList.remove('hidden');
                 }
             }
         });
