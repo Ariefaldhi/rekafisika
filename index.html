@@ -93,6 +93,8 @@
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
+    <div class="max-w-7xl mx-auto relative min-h-screen flex flex-col">
+
     <!-- Header -->
     <header class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm animate-enter flex justify-between items-start">
         <div>
@@ -222,33 +224,34 @@
             <h3 class="font-bold text-lg text-slate-800">📚 Semua Materi</h3>
             <a href="modul.html" class="text-primary-500 text-sm font-medium">Lihat Semua →</a>
         </div>
-        <div id="home-module-list" class="space-y-3">
+        <div id="home-module-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Loading skeleton -->
-            <div class="animate-pulse space-y-3">
-                <div class="bg-white p-5 rounded-2xl h-20"></div>
-                <div class="bg-white p-5 rounded-2xl h-20"></div>
-                <div class="bg-white p-5 rounded-2xl h-20"></div>
-            </div>
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
         </div>
     </div>
     <!-- Bottom Navigation -->
-    <nav
-        class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-        <a href="index.html" class="flex flex-col items-center gap-1 text-primary-500">
-            <i class="fa-solid fa-house text-xl"></i>
-            <span class="text-[10px] font-bold">Beranda</span>
-        </a>
-        <a href="modul.html"
-            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
-            <i class="fa-solid fa-compass text-xl"></i>
-            <span class="text-[10px] font-medium">Jelajah</span>
-        </a>
-        <a href="lainnya.html"
-            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
-            <i class="fa-solid fa-bars text-xl"></i>
-            <span class="text-[10px] font-medium">Lainnya</span>
-        </a>
-    </nav>
+    <div class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+        <nav
+            class="max-w-md mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 py-3 px-8 flex justify-between items-center shadow-2xl rounded-3xl pointer-events-auto">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-primary-500">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[10px] font-bold">Beranda</span>
+            </a>
+            <a href="modul.html"
+                class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="text-[10px] font-medium">Jelajah</span>
+            </a>
+            <a href="lainnya.html"
+                class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+                <i class="fa-solid fa-bars text-xl"></i>
+                <span class="text-[10px] font-medium">Lainnya</span>
+            </a>
+        </nav>
+    </div>
+</div>
 
     <!-- Scripts -->
 
@@ -358,7 +361,7 @@
                             </div>`;
 
                         html += `
-                            <a href="${href}" ${click} class="group flex items-center gap-4 p-4 rounded-2xl border ${cardBg} shadow-sm hover:shadow-md transition-all mb-2 block">
+                            <a href="${href}" ${click} class="group flex items-center gap-4 p-4 rounded-2xl border ${cardBg} shadow-sm hover:shadow-md transition-all block">
                                 <div class="w-10 h-10 rounded-full ${iconBg} flex items-center justify-center shrink-0">
                                     ${iconEl}
                                 </div>

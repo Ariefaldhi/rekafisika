@@ -89,6 +89,8 @@
 
 <body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
 
+    <div class="max-w-7xl mx-auto relative min-h-screen flex flex-col">
+
     <!-- Fake Loader -->
     <div id="fake-loader">
         <div class="w-16 h-16 border-4 border-slate-100 border-t-primary-500 rounded-full animate-spin mb-4"></div>
@@ -121,6 +123,28 @@
         <div id="lkpd-banner" class="hidden"></div>
 
     </main>
+
+    <!-- Step Navigation (Footer) -->
+    <div class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+        <div
+            class="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4">
+            <button onclick="prevStep()" id="btn-prev"
+                class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-chevron-left"></i>
+                <span class="hidden sm:inline">Sebelumnya</span>
+            </button>
+            <div class="flex-1 text-center">
+                <p class="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">Progress</p>
+                <p class="text-sm font-bold text-slate-700" id="step-counter">0 / 0</p>
+            </div>
+            <button onclick="nextStep()" id="btn-next"
+                class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-primary-500 text-white shadow-lg shadow-primary-500/30 hover:bg-primary-600 transition-all disabled:opacity-0 pointer-events-none">
+                <span class="hidden sm:inline">Selanjutnya</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
