@@ -154,11 +154,32 @@ CREATE POLICY "Public Access" ON public.announcements FOR ALL USING (true) WITH 
 CREATE POLICY "Public Access" ON public.reflection_answers FOR ALL USING (true) WITH CHECK (true);
 
 -- ==========================================
--- 3. Storage Bucket (Opsional)
+-- 3. Storage Bucket (PENTING)
 -- ==========================================
--- Catatan: Bucket tidak dapat dibuat via SQL biasa secara langsung, 
--- pastikan Anda punya Bucket Supabase bernama 'materials' secara manual di dashboard.
--- Akses penyimpanan juga di set menjadi Publik secara manual.
+-- Jalankan ini di SQL Editor untuk membuat bucket 'materials' secara otomatis
+-- dan memberikan akses publik.
+
+-- 1. Buat Bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('materials', 'materials', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. Kebijakan Akses (RLS) untuk Storage
+-- Izinkan siapa saja melihat file di bucket 'materials'
+CREATE POLICY "Public Read" ON storage.objects FOR SELECT 
+USING (bucket_id = 'materials');
+
+-- Izinkan siapa saja mengunggah file ke bucket 'materials'
+-- (Bisa diperketat untuk admin saja jika perlu)
+CREATE POLICY "Public Upload" ON storage.objects FOR INSERT 
+WITH CHECK (bucket_id = 'materials');
+
+-- Izinkan update/delete (opsional, untuk admin)
+CREATE POLICY "Public Update" ON storage.objects FOR UPDATE 
+USING (bucket_id = 'materials');
+
+CREATE POLICY "Public Delete" ON storage.objects FOR DELETE 
+USING (bucket_id = 'materials');
 
 -- ==========================================
 -- 4. Trigger Otomatis (WAJIB DIJALANKAN)

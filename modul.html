@@ -161,95 +161,67 @@
                 container.innerHTML = '';
 
                 if (data && data.length > 0) {
-                    // GROUP BY WEEK
-                    const weeklyModules = {};
-                    data.forEach(m => {
-                        if (!weeklyModules[m.week]) weeklyModules[m.week] = [];
-                        weeklyModules[m.week].push(m);
-                    });
+                    let html = '<div class="grid grid-cols-1 gap-4">';
 
-                    // RENDER EACH WEEK
-                    Object.keys(weeklyModules).sort((a, b) => a - b).forEach(week => {
-                        const modules = weeklyModules[week];
+                    data.forEach(item => {
+                        const prog = progressMap[item.id] || { is_completed: false, completed_steps: [] };
+                        const isCompleted = prog.is_completed;
+                        const isLocked = item.is_locked;
 
-                        // Check if ALL modules in this week are complete
-                        const allComplete = modules.every(m => progressMap[m.id]?.is_completed);
+                        let percent = 0;
+                        if (isCompleted) percent = 100;
+                        else {
+                            const totalSteps = item.steps ? item.steps.length : 0;
+                            const doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
+                            if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
+                        }
 
-                        let weekHtml = `
-                            <div class="mb-8 animate-enter">
-                                <div class="flex items-center gap-3 mb-4 px-2">
-                                    <span class="bg-primary-600 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                        Minggu ${week}
-                                    </span>
-                                    ${allComplete ? '<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>' : ''}
-                                </div>
-                                <div class="grid grid-cols-1 gap-4">
-                        `;
+                        let cardClass = isCompleted ? "bg-emerald-50/50 border-emerald-100" : "bg-white border-slate-100";
+                        let iconClass = isCompleted ? "text-emerald-500" : "text-primary-500";
+                        let textClass = isCompleted ? "text-slate-800" : "text-slate-800";
 
-                        // RENDER MODULES IN THIS WEEK
-                        modules.forEach(item => {
-                            const prog = progressMap[item.id] || { is_completed: false, completed_steps: [] };
-                            const isCompleted = prog.is_completed;
-                            const isLocked = item.is_locked; // Check Lock Status
+                        let clickAction = "";
+                        let href = `detail_modul.html?id=${item.id}`;
+                        let iconHtml = isCompleted ? `<i class="fa-solid fa-check ${iconClass}"></i>` : `<i class="fa-solid fa-book-open ${iconClass}"></i>`;
 
-                            // Calculate Percentage
-                            let percent = 0;
-                            if (isCompleted) percent = 100;
-                            else {
-                                const totalSteps = item.steps ? item.steps.length : 0;
-                                const doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
-                                if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
-                            }
+                        if (isLocked) {
+                            cardClass = "bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed";
+                            iconClass = "text-slate-400";
+                            textClass = "text-slate-500";
+                            href = "javascript:void(0)";
+                            clickAction = `onclick="VisualModal.alert('Modul ini belum dibuka oleh Admin.', 'Terkunci', 'lock'); return false;"`;
+                            iconHtml = `<i class="fa-solid fa-lock text-slate-400"></i>`;
+                        }
 
-                            // STYLES
-                            let cardClass = isCompleted ? "bg-emerald-50/50 border-emerald-100" : "bg-white border-slate-100";
-                            let iconClass = isCompleted ? "text-emerald-500" : "text-primary-500";
-                            let textClass = isCompleted ? "text-slate-600" : "text-slate-800";
-
-                            // LOCKED OVERRIDES
-                            let clickAction = "";
-                            let href = `detail_modul.html?id=${item.id}`;
-                            let iconHtml = isCompleted ? `<i class="fa-solid fa-check ${iconClass}"></i>` : `<i class="fa-solid fa-book-open ${iconClass}"></i>`;
-
-                            if (isLocked) {
-                                cardClass = "bg-slate-50 border-slate-200 opacity-80 cursor-not-allowed";
-                                iconClass = "text-slate-400";
-                                textClass = "text-slate-500";
-                                href = "javascript:void(0)";
-                                clickAction = `onclick="VisualModal.alert('Modul ini belum dibuka oleh Admin.', 'Terkunci', 'lock'); return false;"`;
-                                iconHtml = `<i class="fa-solid fa-lock text-slate-400"></i>`;
-                            }
-
-                            weekHtml += `
-                                <a href="${href}" ${clickAction} class="group block p-5 rounded-2xl border ${cardClass} shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-                                    <div class="flex items-start gap-4 relative z-10">
-                                        <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-200' : (isCompleted ? 'bg-emerald-100' : 'bg-primary-50')} flex items-center justify-center shrink-0">
-                                            ${iconHtml}
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between">
-                                                <h3 class="font-bold ${textClass} text-lg leading-tight mb-1 group-hover:text-primary-600 transition-colors">${item.topic}</h3>
-                                                ${isLocked ? '<span class="text-[10px] font-bold uppercase bg-slate-200 text-slate-500 px-2 py-0.5 rounded">LOCKED</span>' : ''}
-                                            </div>
-                                            <p class="text-xs text-slate-500 line-clamp-2">${item.description || 'Pelajari materi ini.'}</p>
-                                            
-                                            ${!isLocked ? `
-                                            <div class="mt-3 flex items-center gap-3">
-                                                 <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                                    <div class="h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-primary-500'}" style="width: ${percent}%"></div>
-                                                </div>
-                                                <span class="text-[10px] font-bold text-slate-400">${percent}%</span>
-                                            </div>` : '<div class="mt-3 h-1.5 w-full bg-slate-200 rounded-full"></div>'}
-                                        </div>
-                                        ${!isLocked ? `<i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors self-center"></i>` : ''}
+                        html += `
+                            <a href="${href}" ${clickAction} class="group block p-5 rounded-2xl border ${cardClass} shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                                <div class="flex items-start gap-4 relative z-10">
+                                    <div class="w-10 h-10 rounded-full ${isLocked ? 'bg-slate-200' : (isCompleted ? 'bg-emerald-100' : 'bg-primary-50')} flex items-center justify-center shrink-0">
+                                        ${iconHtml}
                                     </div>
-                                </a>
-                            `;
-                        });
-
-                        weekHtml += `</div></div>`; // Close grid & wrapper
-                        container.innerHTML += weekHtml;
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="font-bold ${textClass} text-lg leading-tight mb-1 group-hover:text-primary-600 transition-colors">${item.topic}</h3>
+                                            ${isLocked ? '<span class="text-[10px] font-bold uppercase bg-slate-200 text-slate-500 px-2 py-0.5 rounded">LOCKED</span>' : ''}
+                                        </div>
+                                        <p class="text-xs text-slate-500 line-clamp-2">${item.description || 'Pelajari materi ini.'}</p>
+                                        
+                                        ${!isLocked ? `
+                                        <div class="mt-3 flex items-center gap-3">
+                                             <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                <div class="h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-primary-500'}" style="width: ${percent}%"></div>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-slate-400">${percent}%</span>
+                                        </div>` : '<div class="mt-3 h-1.5 w-full bg-slate-200 rounded-full"></div>'}
+                                    </div>
+                                    ${!isLocked ? `<i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors self-center"></i>` : ''}
+                                </div>
+                            </a>
+                        `;
                     });
+
+                    html += '</div>';
+                    container.innerHTML = html;
 
                 } else {
                     container.innerHTML = `
