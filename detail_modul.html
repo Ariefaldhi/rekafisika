@@ -262,6 +262,10 @@
             
             if (user) loadRefleksiAnswers(id, user);
             if (window.MathJax) MathJax.typesetPromise();
+
+            // HIDE LOADER
+            document.getElementById('fake-loader').style.opacity = '0';
+            setTimeout(() => { document.getElementById('fake-loader').style.display = 'none'; }, 500);
         }
 
         function updatePaging() {
@@ -323,10 +327,12 @@
                 setTimeout(() => input.classList.remove('animate-shake', 'border-red-300', 'bg-red-50'), 500);
             }
         };
-                    const canvas = document.getElementById(canvasId);
-                    const loader = document.getElementById(canvasId + '-loader');
-                    const controls = document.getElementById(controlId);
-                    if (!canvas) return;
+
+        async function renderEmbeddedPDF(url, canvasId, controlId, startPage, endPage) {
+            const canvas = document.getElementById(canvasId);
+            const loader = document.getElementById(canvasId + '-loader');
+            const controls = document.getElementById(controlId);
+            if (!canvas) return;
 
                     const ctx = canvas.getContext('2d');
                     let pdfDoc = null;
@@ -559,9 +565,9 @@
                 btn.className = btn.className.replace('bg-purple-600 hover:bg-purple-700', 'bg-emerald-500 hover:bg-emerald-600');
                 if (statusEl) statusEl.textContent = 'Jawaban tersimpan pada ' + new Date().toLocaleTimeString('id-ID');
 
-                // Auto-check the step
-                const cb = stepCard.querySelector('.step-check');
-                if (cb && !cb.checked) { cb.checked = true; toggleStep(parseInt(cb.dataset.idx)); }
+                // Auto-check the step (Disabled in paging mode)
+                // const cb = stepCard.querySelector('.step-check');
+                // if (cb && !cb.checked) { cb.checked = true; toggleStep(parseInt(cb.dataset.idx)); }
 
             } catch (e) {
                 btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jawaban Refleksi';
