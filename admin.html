@@ -107,6 +107,10 @@
                     class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors">
                     <i class="fa-solid fa-chart-line w-5 text-center"></i>Progress
                 </button>
+                <button onclick="showSection('users')" id="nav-users"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors">
+                    <i class="fa-solid fa-user-shield w-5 text-center"></i>Manajemen User
+                </button>
 
                 <div class="my-4 border-t border-slate-50"></div>
                 <button onclick="showSection('settings')" id="nav-settings"
@@ -626,6 +630,37 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- SEC: User Management -->
+                <section id="sec-users" class="hidden space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Manajemen User</h2>
+                            <p class="text-sm text-slate-500">Kelola role dan hak akses semua pengguna.</p>
+                        </div>
+                        <button onclick="loadProfiles()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-colors">
+                            <i class="fa-solid fa-rotate mr-2"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+                                    <tr>
+                                        <th class="px-6 py-4 rounded-l-2xl">Nama & NIM</th>
+                                        <th class="px-6 py-4">Role Saat Ini</th>
+                                        <th class="px-6 py-4">Berikan Role Baru</th>
+                                        <th class="px-6 py-4 rounded-r-2xl text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-management-list" class="divide-y divide-slate-50">
+                                    <tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Memuat data user...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -642,6 +677,7 @@
                 'points',
                 'presence',
                 'progress',
+                'users',
                 'settings'].forEach(s => {
                     const sec = document.getElementById('sec-' + s);
                     const nav = document.getElementById('nav-' + s);
@@ -707,6 +743,7 @@
             // New Dashboard Features
             initChart();
             loadPointsLog();
+            loadProfiles();
 
             showSection('dashboard');
         }
@@ -747,6 +784,79 @@
 
             catch (e) {
                 console.error("Points Log Error", e);
+            }
+        }
+
+        // --- USER MANAGEMENT ---
+        let allProfiles = [];
+        async function loadProfiles() {
+            const list = document.getElementById('user-management-list');
+            if (list) list.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Memuat data user...</td></tr>`;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .order('nama', { ascending: true });
+
+                if (error) throw error;
+                allProfiles = data || [];
+
+                if (list) {
+                    list.innerHTML = allProfiles.map(u => `
+                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-slate-800">${u.nama || '-'}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${u.nim || '-'}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 
+                                    (u.role === 'teacher' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500')
+                                }">
+                                    ${u.role}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <select onchange="updateUserRole('${u.id}', this.value)" 
+                                    class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-primary-500 outline-none transition-all">
+                                    <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+                                    <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-right" id="role-status-${u.id}">
+                                <span class="text-[10px] text-slate-300">Ready</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Load Profiles Error:", err);
+            }
+        }
+
+        async function updateUserRole(userId, newRole) {
+            const statusEl = document.getElementById(`role-status-${userId}`);
+            statusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-primary-500"></i>`;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('profiles')
+                    .update({ role: newRole })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                statusEl.innerHTML = `<i class="fa-solid fa-check-circle text-emerald-500 animate-bounce"></i>`;
+                setTimeout(() => {
+                    statusEl.innerHTML = `<span class="text-[10px] text-emerald-500 font-bold uppercase">Updated</span>`;
+                }, 2000);
+
+            } catch (err) {
+                console.error("Update Role Error:", err);
+                statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500"></i>`;
+                alert("Gagal update role: " + err.message);
             }
         }
 
