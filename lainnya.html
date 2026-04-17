@@ -183,13 +183,13 @@
                     document.getElementById('user-avatar').innerText = initials;
                 }
 
-                // Check Admin Access (Faldhi or Role Admin)
-                if (user.role === 'admin' || (user.nama && user.nama.toLowerCase().includes('faldhi'))) {
+                // Check Admin Access
+                if (user.role === 'admin') {
                     document.getElementById('admin-link').classList.remove('hidden');
                 }
                 
-                // Check Teacher Access
-                if (user.role === 'teacher') {
+                // Check Teacher/Admin Access for Hasil Ajar
+                if (user.role === 'teacher' || user.role === 'admin') {
                     document.getElementById('teacher-link').classList.remove('hidden');
                 }
             }

@@ -85,7 +85,7 @@
                         // Silent fail for sync
                     }
                 }
-            }, 1500); // 1.5s delay to ensure config.js/Supabase initialized
+            }, 500); // 0.5s delay to ensure config.js/Supabase initialized
         });
     }
 })();
