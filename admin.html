@@ -691,73 +691,6 @@
             showSection('dashboard');
         }
 
-        // --- CHART ---
-        async function initChart() {
-            try {
-
-                // Fetch ALL logs to client for aggregation (small scale assumption)
-                const {
-                    data: logs
-                }
-
-                    = await supabaseClient.from('participation_logs').select('student_nim, points');
-
-                if (!logs) return;
-
-                // Aggregate
-                const studentPoints = {}
-
-                    ;
-
-                logs.forEach(log => {
-                    studentPoints[log.student_nim] = (studentPoints[log.student_nim] || 0) + (log.points || 0);
-                });
-
-                // Convert to Array & Sort
-                const sorted = Object.entries(studentPoints).map(([nim, points]) => ({
-                    name: allStudents.find(s => s.nim === nim)?.name || nim,
-                    points: points
-                })).sort((a, b) => b.points - a.points).slice(0, 10); // Top 10
-
-                // Render Chart
-                const ctx = document.getElementById('activityChart').getContext('2d');
-
-                new Chart(ctx, {
-
-                    type: 'bar',
-                    data: {
-
-                        labels: sorted.map(s => s.name),
-                        datasets: [{
-                            label: 'Total Poin',
-                            data: sorted.map(s => s.points),
-                            backgroundColor: '#3B82F6',
-                            borderRadius: 6
-                        }
-
-                        ]
-                    }
-
-                    ,
-                    options: {
-
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-
-            }
-
-            catch (e) {
-                console.error("Chart Error", e);
-            }
-        }
-
         // --- POINTS LOG ---
         async function loadPointsLog() {
             try {
@@ -897,17 +830,12 @@
             // If data is empty, maybe fallback to 'students' table?
             if (!data || data.length === 0) {
                 const {
-                    data: specific
+                    data, error
                 }
 
                     = await supabaseClient.from('students').select('*').order('name');
-                allStudents = specific || [];
-            }
-
-            else {
-                allStudents = data.map(p => ({
-                    nim: p.nim, name: p.nama
-                }));
+                if (error) throw error;
+                allStudents = data || [];
             }
 
             // Render Table
@@ -1517,14 +1445,14 @@
         async function loadOverviewStats() {
             try {
 
-                // Students count
+                // Students count (Use 'students' table directly if 'profiles' is failing)
                 const {
                     count: studentCount
                 }
 
-                    = await supabaseClient.from('profiles').select('*', {
+                    = await supabaseClient.from('students').select('*', {
                         count: 'exact', head: true
-                    }).eq('role', 'student');
+                    });
                 document.getElementById('stat-students').innerText = studentCount || 0;
 
                 // Active Assignments count
@@ -1537,13 +1465,12 @@
                     }).eq('is_active', true);
                 document.getElementById('stat-active').innerText = assignmentCount || 0;
 
-                // Attendance (average of latest session or just total log count for now)
-                // For simplicity, let's show total attendance logs
+                // Attendance (use 'attendance_logs' plural)
                 const {
                     count: attendanceCount
                 }
 
-                    = await supabaseClient.from('attendance_log').select('*', {
+                    = await supabaseClient.from('attendance_logs').select('*', {
                         count: 'exact', head: true
                     });
                 document.getElementById('stat-attendance').innerText = attendanceCount || 0;
