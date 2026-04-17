@@ -184,13 +184,13 @@
                 if (!window.supabaseClient) throw new Error('Koneksi Supabase gagal. Silakan muat ulang halaman.');
 
                 // Admin Static Bypass
-                if (email === 'admin@rekafisika.com' && password === 'reka2025' && isLoginMode) {
+                if (email === 'admin@rekafisika.com' && password === 'reka2025' && mode === 'login') {
                     localStorage.setItem('user_session', JSON.stringify({ role: 'admin', nama: 'Admin Fisika', nim: 'admin' }));
                     window.location.href = 'admin.html';
                     return;
                 }
 
-                if (isLoginMode) {
+                if (mode === 'login') {
                     // --- FLOW LOGIN ---
                     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     
