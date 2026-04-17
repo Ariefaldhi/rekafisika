@@ -200,11 +200,30 @@
                     
                     // Since email confirm is OFF, signUp generally logs the user in and returns session immediately
                     const meta = data.user.user_metadata || {};
+                    const userEmail = data.user.email;
+                    const userId = data.user.id;
+
+                    // --- Insert ke tabel students agar semua fitur yang bergantung pada nim bisa berfungsi ---
+                    await supabaseClient.from('students').upsert([{
+                        nim: userEmail,          // email dipakai sebagai identifier utama
+                        name: nameUser,
+                        role: 'student',
+                        access_code: null
+                    }], { onConflict: 'nim' });
+
+                    // --- Insert ke tabel profiles agar terhubung dengan auth ---
+                    await supabaseClient.from('profiles').upsert([{
+                        id: userId,
+                        nim: userEmail,
+                        nama: nameUser,
+                        role: 'student'
+                    }], { onConflict: 'id' });
+
                     localStorage.setItem('user_session', JSON.stringify({
                         role: meta.role || 'student',
                         nama: meta.nama || nameUser,
-                        nim: data.user.email, // Use email as identifier
-                        email: data.user.email
+                        nim: userEmail, // Use email as identifier
+                        email: userEmail
                     }));
 
                     alert('Pendaftaran berhasil! Selamat bergabung di RekaFisika.');

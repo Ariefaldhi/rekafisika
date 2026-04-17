@@ -266,31 +266,51 @@
                         <h3 class="font-bold text-slate-700 mb-4" id="module-form-title">Tambah / Edit Modul</h3>
                         <form onsubmit="handleModuleSubmit(event)" class="space-y-4">
                             <input type="hidden" id="m-id">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div class="md:col-span-1">
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Minggu
-                                        Ke-</label>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="hidden">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Urutan (Opsional)</label>
                                     <input id="m-week" type="number"
                                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
-                                        required placeholder="1">
+                                        placeholder="1" value="1">
                                 </div>
-                                <div class="md:col-span-3">
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Topik</label>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Topik / Judul Modul</label>
                                     <input id="m-topic" type="text"
                                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
                                         required placeholder="Judul Materi">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Deskripsi
-                                    Singkat</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Deskripsi Singkat</label>
                                 <textarea id="m-desc" rows="2"
                                     class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none"
                                     placeholder="Ringkasan..."></textarea>
                             </div>
 
-                            <!-- Legacy Fields (Hidden or kept for compat) -->
+                            <!-- LKPD Section -->
+                            <div class="border border-amber-200 bg-amber-50 rounded-2xl p-4 space-y-3">
+                                <label class="block text-xs font-bold text-amber-700 uppercase">📄 LKPD (Lembar Kerja Peserta Didik)</label>
+                                <div>
+                                    <label class="block text-xs text-slate-500 mb-1">Judul LKPD (Opsional)</label>
+                                    <input id="m-lkpd-title" type="text"
+                                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none"
+                                        placeholder="Contoh: LKPD Hukum Ohm">
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <input id="m-lkpd-url" type="text"
+                                        class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none"
+                                        placeholder="Link Google Drive / URL PDF...">
+                                    <label class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 whitespace-nowrap transition-colors">
+                                        <i class="fa-solid fa-upload"></i> Upload
+                                        <input type="file" accept=".pdf,.doc,.docx" class="hidden" onchange="uploadLKPD(this)">
+                                    </label>
+                                </div>
+                                <p class="text-[10px] text-amber-600">📌 LKPD akan tampil di paling atas modul sebagai tombol download. Tidak wajib untuk menyelesaikan modul.</p>
+                            </div>
+
+                            <!-- Legacy Fields (Hidden) -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">File URL
                                         (PDF/PPT)</label>
@@ -1029,54 +1049,124 @@
             const noMsg = document.getElementById('no-steps-msg');
             if (noMsg) noMsg.remove();
 
-            // Build Options for Local Files
-            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}" >sumbermodul/${f
-                }
-
-                </option>`).join('');
+            const fileOptions = LOCAL_MODULE_FILES.map(f => `<option value="sumbermodul/${f}">${f}</option>`).join('');
+            const stepType = data.type || 'ppt';
 
             const div = document.createElement('div');
-            div.className = 'step-item bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2';
+            div.className = 'step-item bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3 mb-2';
 
-            div.innerHTML = ` <div class="grid grid-cols-3 gap-2"><input type="text" class="step-title col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Judul (e.g. Baca PPT)" value="${data.title || ''}"><select class="step-type col-span-1 text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="togglePageInputs(this)"><option value="ppt"${data.type === 'ppt' ? 'selected' : ''
-                }
+            div.innerHTML = `
+                <div class="grid grid-cols-3 gap-2 items-center">
+                    <input type="text" class="step-title col-span-2 text-xs bg-white border border-slate-200 rounded-lg px-3 py-2" placeholder="Judul Step" value="${data.title || ''}">
+                    <div class="flex gap-1">
+                        <select class="step-type flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" onchange="handleStepTypeChange(this)">
+                            <option value="ppt"${stepType==='ppt'?' selected':''}>PPT</option>
+                            <option value="pdf"${stepType==='pdf'?' selected':''}>PDF</option>
+                            <option value="video"${stepType==='video'?' selected':''}>Video YT</option>
+                            <option value="phet"${stepType==='phet'?' selected':''}>🔬 PhET</option>
+                            <option value="refleksi"${stepType==='refleksi'?' selected':''}>🧠 Refleksi</option>
+                            <option value="link"${stepType==='link'?' selected':''}>Link</option>
+                        </select>
+                        <button type="button" onclick="this.closest('.step-item').remove()" class="text-red-400 hover:text-red-600 px-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
 
-            >PPT</option><option value="pdf"${data.type === 'pdf' ? 'selected' : ''
-                }
+                <!-- PDF/PPT Fields -->
+                <div class="step-pdf-fields ${['pdf','ppt'].includes(stepType)?'':'hidden'} space-y-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" class="step-start text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="Hal Awal" value="${data.start_page||''}">
+                        <input type="number" class="step-end text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="Hal Akhir" value="${data.end_page||''}">
+                    </div>
+                    <select class="w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" onchange="this.closest('.step-item').querySelector('.step-url').value=this.value">
+                        <option value="">-- Pilih dari SumberModul --</option>${fileOptions}
+                    </select>
+                </div>
 
-            >PDF</option><option value="video"${data.type === 'video' ? 'selected' : ''
-                }
+                <!-- Video Fields -->
+                <div class="step-video-fields ${stepType==='video'?'':'hidden'} space-y-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Mulai (detik)</label>
+                            <input type="number" class="step-video-start w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="0" value="${data.start_time||''}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Sampai (detik)</label>
+                            <input type="number" class="step-video-end w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="kosong=akhir" value="${data.end_time||''}">
+                        </div>
+                    </div>
+                </div>
 
-            >Video</option><option value="link"${data.type === 'link' ? 'selected' : ''
-                }
+                <!-- PhET Fields -->
+                <div class="step-phet-fields ${stepType==='phet'?'':'hidden'} space-y-1">
+                    <p class="text-[10px] text-slate-400">Masukkan URL simulasi PhET (embed URL)</p>
+                </div>
 
-            >Link</option></select><div class="col-span-1 flex gap-1"><button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-500 ml-auto"><i class="fa-solid fa-trash"></i></button></div></div><!-- Page Range (Only for PDF/PPT) --><div class="step-pages grid grid-cols-2 gap-2 ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><input type="number" class="step-start text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Awal (Opsional)" value="${data.start_page || ''}"><input type="number" class="step-end text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Hal Akhir (Opsional)" value="${data.end_page || ''}"></div><!-- Local File Selection (Only for PDF/PPT) --><div class="step-local-file ${['pdf', 'ppt'].includes(data.type || 'ppt') ? '' : 'hidden'}"><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pilih dari SumberModul (Recommended)</label><select class="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" onchange="this.parentElement.nextElementSibling.querySelector('.step-url').value = this.value"><option value="">-- Pilih File --</option>$fileOptions
-                }
+                <!-- Refleksi Fields -->
+                <div class="step-refleksi-fields ${stepType==='refleksi'?'':'hidden'} space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-purple-600 uppercase">Pertanyaan Refleksi</span>
+                        <button type="button" onclick="addRefleksiQuestion(this)" class="text-xs text-purple-500 bg-purple-50 px-2 py-1 rounded hover:bg-purple-100"><i class="fa-solid fa-plus"></i> Tambah</button>
+                    </div>
+                    <div class="refleksi-questions space-y-1">
+                        ${(data.questions||['Apa yang kamu pelajari dari eksperimen ini?']).map((q,qi)=>`
+                        <div class="flex gap-1">
+                            <input type="text" class="refleksi-q flex-1 text-xs bg-white border border-purple-200 rounded-lg px-2 py-2" placeholder="Pertanyaan ${qi+1}" value="${q}">
+                            <button type="button" onclick="this.closest('div').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-times"></i></button>
+                        </div>`).join('')}
+                    </div>
+                </div>
 
-            </select></div><!-- URL / Upload --><div class="flex gap-2 items-center"><input type="text" class="step-url w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="URL Link / Path..." value="${data.url || ''}"><span class="text-[10px] text-slate-400 font-bold">OR</span><label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-upload"></i>Upload <input type="file" class="hidden" onchange="uploadStepFile(this)"></label></div><!-- Additional Instructions (Optional) --><div><textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" rows="2" placeholder="Instruksi Tambahan (Opsional)...">${data.instruction || ''
-                }
+                <!-- URL / Upload (hidden for refleksi) -->
+                <div class="step-url-row ${stepType==='refleksi'?'hidden':''} flex gap-2 items-center">
+                    <input type="text" class="step-url flex-1 text-xs bg-white border border-slate-200 rounded-lg px-3 py-2" placeholder="URL / Link..." value="${data.url||''}">
+                    <label class="cursor-pointer bg-blue-50 text-blue-500 px-2 py-2 rounded-lg text-xs font-bold hover:bg-blue-100 flex items-center gap-1 whitespace-nowrap">
+                        <i class="fa-solid fa-upload"></i> Upload
+                        <input type="file" class="hidden" onchange="uploadStepFile(this)">
+                    </label>
+                </div>
 
-            </textarea></div><!-- Question (Optional) --><div class="border-t border-slate-200 pt-2 mt-2"><label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2"><input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)"${data.question ? 'checked' : ''
-                }
+                <!-- Instruksi -->
+                <textarea class="step-instruction w-full text-xs bg-white border border-slate-200 rounded-lg px-3 py-2" rows="1" placeholder="Instruksi Tambahan (Opsional)">${data.instruction||''}</textarea>
 
-            ><span>Tambahkan Pertanyaan (Kuis Singkat)</span></label><div class="step-q-box space-y-2 ${data.question ? '' : 'hidden'}"><input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Pertanyaan..." value="${data.question || ''}"><input type="text" class="step-q-text-hint w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Penjelasan / Hint (Opsional)" value="${data.hint || ''}"><input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded px-2 py-1" placeholder="Kunci Jawaban (Benar)" value="${data.answer_key || ''}"></div></div>`;
+                <!-- Pertanyaan Kuis (hidden untuk refleksi & phet) -->
+                <div class="step-quiz-section ${['refleksi','phet'].includes(stepType)?'hidden':''} border-t border-slate-100 pt-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer mb-2">
+                        <input type="checkbox" class="step-has-q" onchange="toggleStepQuestion(this)" ${data.question?'checked':''}>
+                        <span>Tambahkan Pertanyaan Kuis Singkat</span>
+                    </label>
+                    <div class="step-q-box space-y-1 ${data.question?'':'hidden'}">
+                        <input type="text" class="step-q-text w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="Pertanyaan..." value="${data.question||''}">
+                        <input type="text" class="step-q-key w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-2" placeholder="Kunci Jawaban" value="${data.answer_key||''}">
+                    </div>
+                </div>`;
+
             container.appendChild(div);
         }
 
-        function togglePageInputs(select) {
-            const pagesDiv = select.parentElement.nextElementSibling;
-            const fileSelectDiv = pagesDiv.nextElementSibling;
-
-            if (['pdf', 'ppt'].includes(select.value)) {
-                pagesDiv.classList.remove('hidden');
-                fileSelectDiv.classList.remove('hidden');
-            }
-
-            else {
-                pagesDiv.classList.add('hidden');
-                fileSelectDiv.classList.add('hidden');
-            }
+        function addRefleksiQuestion(btn) {
+            const container = btn.closest('.step-refleksi-fields').querySelector('.refleksi-questions');
+            const idx = container.querySelectorAll('.refleksi-q').length + 1;
+            const div = document.createElement('div');
+            div.className = 'flex gap-1';
+            div.innerHTML = `<input type="text" class="refleksi-q flex-1 text-xs bg-white border border-purple-200 rounded-lg px-2 py-2" placeholder="Pertanyaan ${idx}">
+                <button type="button" onclick="this.closest('div').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-times"></i></button>`;
+            container.appendChild(div);
         }
+
+        function handleStepTypeChange(select) {
+            const item = select.closest('.step-item');
+            const type = select.value;
+
+            item.querySelector('.step-pdf-fields').classList.toggle('hidden', !['pdf','ppt'].includes(type));
+            item.querySelector('.step-video-fields').classList.toggle('hidden', type !== 'video');
+            item.querySelector('.step-phet-fields').classList.toggle('hidden', type !== 'phet');
+            item.querySelector('.step-refleksi-fields').classList.toggle('hidden', type !== 'refleksi');
+            item.querySelector('.step-url-row').classList.toggle('hidden', type === 'refleksi');
+            item.querySelector('.step-quiz-section').classList.toggle('hidden', ['refleksi','phet'].includes(type));
+        }
+
+        // Legacy toggle kept for backwards compatibility
+        function togglePageInputs(select) { handleStepTypeChange(select); }
 
         function toggleStepQuestion(cb) {
             const box = cb.parentElement.nextElementSibling;
@@ -1131,11 +1221,10 @@
                     error
                 }
 
-                    = await supabaseClient.storage.from('materials').upload(filePath, file);
-                if (error) throw error;
+                const { error: upErr } = await supabaseClient.storage.from('materials').upload(filePath, file);
+                if (upErr) throw upErr;
 
-                // const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
-
+                const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(filePath);
                 textInput.value = publicUrl;
                 await VisualModal.alert('Upload Sukses!', 'Sukses', 'success');
             }
@@ -1151,25 +1240,65 @@
             }
         }
 
+        async function uploadLKPD(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const label = input.parentElement;
+            const originalHTML = label.innerHTML;
+            label.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Upload...';
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `lkpd_${Date.now()}.${fileExt}`;
+                const { error: upErr } = await supabaseClient.storage.from('materials').upload(`lkpd/${fileName}`, file);
+                if (upErr) throw upErr;
+                const { data: { publicUrl } } = supabaseClient.storage.from('materials').getPublicUrl(`lkpd/${fileName}`);
+                document.getElementById('m-lkpd-url').value = publicUrl;
+                await VisualModal.alert('LKPD berhasil diupload!', 'Sukses', 'success');
+            } catch (e) {
+                await VisualModal.alert('Gagal upload LKPD: ' + e.message, 'Error', 'error');
+            } finally {
+                label.innerHTML = originalHTML;
+            }
+        }
+
         function getStepsPayload() {
             const items = document.querySelectorAll('.step-item');
             const steps = [];
 
             items.forEach(div => {
-                const hasQ = div.querySelector('.step-has-q').checked;
                 const type = div.querySelector('.step-type').value;
+                const hasQ = div.querySelector('.step-has-q') ? div.querySelector('.step-has-q').checked : false;
+                const stepUrlEl = div.querySelector('.step-url');
 
-                steps.push({
+                let stepData = {
                     title: div.querySelector('.step-title').value,
                     type: type,
-                    url: div.querySelector('.step-url').value,
-                    instruction: div.querySelector('.step-instruction').value,
-                    start_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-start').value) || null : null,
-                    end_page: ['pdf', 'ppt'].includes(type) ? parseInt(div.querySelector('.step-end').value) || null : null,
-                    question: hasQ ? div.querySelector('.step-q-text').value : null,
-                    hint: hasQ ? (div.querySelector('.step-q-text-hint') ? div.querySelector('.step-q-text-hint').value : null) : null,
-                    answer_key: hasQ ? div.querySelector('.step-q-key').value : null
-                });
+                    instruction: div.querySelector('.step-instruction') ? div.querySelector('.step-instruction').value : '',
+                    url: stepUrlEl ? stepUrlEl.value : null,
+                };
+
+                if (['pdf','ppt'].includes(type)) {
+                    stepData.start_page = parseInt(div.querySelector('.step-start').value) || null;
+                    stepData.end_page = parseInt(div.querySelector('.step-end').value) || null;
+                }
+
+                if (type === 'video') {
+                    stepData.start_time = parseInt(div.querySelector('.step-video-start').value) || null;
+                    stepData.end_time = parseInt(div.querySelector('.step-video-end').value) || null;
+                }
+
+                if (type === 'refleksi') {
+                    const qs = div.querySelectorAll('.refleksi-q');
+                    stepData.questions = Array.from(qs).map(q => q.value).filter(q => q.trim());
+                    stepData.url = null;
+                }
+
+                if (hasQ && type !== 'refleksi' && type !== 'phet') {
+                    stepData.question = div.querySelector('.step-q-text').value;
+                    stepData.answer_key = div.querySelector('.step-q-key').value;
+                }
+
+                steps.push(stepData);
             });
             return steps;
         }
@@ -1243,16 +1372,16 @@
             const id = document.getElementById('m-id').value;
 
             const payload = {
-                week: document.getElementById('m-week').value,
+                week: parseInt(document.getElementById('m-week').value) || 1,
                 topic: document.getElementById('m-topic').value,
                 description: document.getElementById('m-desc').value,
                 file_url: document.getElementById('m-file').value,
                 video_url: document.getElementById('m-video').value,
-                steps: getStepsPayload(), // Add JSON
-                is_visible: true // Ensure module is visible by default
-            }
-
-                ;
+                lkpd_url: document.getElementById('m-lkpd-url').value || null,
+                lkpd_title: document.getElementById('m-lkpd-title').value || null,
+                steps: getStepsPayload(),
+                is_visible: true
+            };
 
             let error;
 
@@ -1292,11 +1421,13 @@
 
             if (data) {
                 document.getElementById('m-id').value = data.id;
-                document.getElementById('m-week').value = data.week;
+                document.getElementById('m-week').value = data.week || 1;
                 document.getElementById('m-topic').value = data.topic;
                 document.getElementById('m-desc').value = data.description || '';
                 document.getElementById('m-file').value = data.file_url || '';
                 document.getElementById('m-video').value = data.video_url || '';
+                document.getElementById('m-lkpd-url').value = data.lkpd_url || '';
+                document.getElementById('m-lkpd-title').value = data.lkpd_title || '';
 
                 // Populate Steps
                 const container = document.getElementById('steps-container');

@@ -331,10 +331,8 @@
                 });
 
                 let html = '';
-                Object.keys(byWeek).sort((a, b) => a - b).forEach(week => {
-                    html += `<div class="mb-2"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Minggu ${week}</span></div>`;
-                    byWeek[week].forEach(item => {
-                        const prog = progressMap[item.id] || {};
+                modules.forEach(item => {
+                    const prog = progressMap[item.id] || {};
                         const isCompleted = prog.is_completed;
                         const isLocked = item.is_locked;
 
@@ -371,7 +369,6 @@
                                 </div>
                                 <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors shrink-0"></i>
                             </a>`;
-                    });
                 });
 
                 container.innerHTML = html;

@@ -39,6 +39,8 @@
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         .pdf-page-enter {
             animation: slideInRight 0.3s ease-out;
@@ -109,43 +111,26 @@
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-10 rounded-full blur-2xl -mr-10 -mt-10">
             </div>
-
-            <span id="m-week"
-                class="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-bold mb-4">Minggu
-                --</span>
             <h2 id="m-topic" class="text-2xl font-black text-slate-900 mb-2">--</h2>
             <div id="m-desc" class="prose prose-slate prose-sm max-w-none text-slate-600">
                 <!-- Markdown Content -->
             </div>
         </div>
 
-        <!-- Video Section (Placeholder / If Exists) -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hidden" id="video-section">
-            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <i class="fa-brands fa-youtube text-red-500"></i> Video Pembelajaran
-            </h3>
-            <div class="aspect-video bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center">
-                <i class="fa-solid fa-play-circle text-6xl text-slate-300"></i>
-            </div>
-        </div>
-
-        <!-- Resources (Removed) -->
-
-        <!-- Navigation Buttons -->
-        <!-- Navigation Buttons (Removed) -->
+        <!-- LKPD Banner (injected by JS if lkpd_url exists) -->
+        <div id="lkpd-banner" class="hidden"></div>
 
     </main>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
+        let ytPlayers = {}; // Store youtube player instances
 
         async function loadDetail() {
             if (!id) return;
-            // Wait for Supabase
             if (!await window.ensureSupabase()) return;
 
-            // Fetch Current Module
             const { data: modul } = await supabaseClient.from('modules').select('*').eq('id', id).single();
 
             if (modul && modul.is_locked) {
@@ -154,28 +139,44 @@
                 return;
             }
 
-            const user = checkAuth(); // Need user for progress
+            const user = checkAuth();
 
             if (modul) {
-                document.title = `${modul.topic} | FisikaLab`;
+                document.title = `${modul.topic} | RekaFisika`;
                 document.getElementById('m-title').innerText = modul.topic;
                 document.getElementById('m-topic').innerText = modul.topic;
-                document.getElementById('m-week').innerText = `Minggu ${modul.week}`;
                 document.getElementById('m-desc').innerHTML = marked.parse(modul.description || '');
 
-                const vidSec = document.getElementById('video-section');
+                // --- LKPD Banner ---
+                if (modul.lkpd_url) {
+                    const lkpdBanner = document.getElementById('lkpd-banner');
+                    const lkpdTitle = modul.lkpd_title || `LKPD - ${modul.topic}`;
+                    lkpdBanner.classList.remove('hidden');
+                    lkpdBanner.innerHTML = `
+                        <a href="${modul.lkpd_url}" target="_blank"
+                            class="flex items-center gap-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl hover:bg-amber-100 transition-all group">
+                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
+                                <i class="fa-solid fa-file-download text-amber-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-0.5">📄 LKPD</p>
+                                <h4 class="font-bold text-amber-900 text-sm truncate">${lkpdTitle}</h4>
+                                <p class="text-xs text-amber-600">Klik untuk membuka / mengunduh</p>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-amber-400 group-hover:text-amber-600 transition-colors"></i>
+                        </a>`;
+                }
 
-                // --- RENDER STEPS (JSON) ---
-                // --- RENDER STEPS (JSON) ---
+                // --- RENDER STEPS ---
                 const stepsContainer = document.createElement('div');
-                stepsContainer.className = 'space-y-8 mb-8';
+                stepsContainer.className = 'space-y-6 mb-8';
 
                 if (modul.steps && Array.isArray(modul.steps) && modul.steps.length > 0) {
-                    // Remove legacy video section if steps exist (to avoid duplicate/confusion)
+                    // Remove legacy video section
+                    const vidSec = document.getElementById('video-section');
                     if (vidSec) vidSec.remove();
 
-                    // Insert AFTER the Hero Card (Topic/Description)
-                    const heroCard = document.querySelector('.bg-white.p-6.rounded-3xl.shadow-sm.border.border-slate-100.relative');
+                    const heroCard = document.querySelector('#lkpd-banner');
                     heroCard.insertAdjacentElement('afterend', stepsContainer);
 
                     stepsContainer.innerHTML = '<h3 class="font-bold text-slate-800 text-lg mb-4">Langkah Pembelajaran</h3>';
@@ -183,23 +184,15 @@
                     modul.steps.forEach((step, idx) => {
                         let contentHtml = '';
 
-                        // 1. PDF / PPT (Embedded Canvas Slide)
+                        // 1. PDF / PPT
                         if (['pdf', 'ppt'].includes(step.type)) {
                             const canvasId = `pdf-canvas-${idx}`;
                             const controlId = `pdf-controls-${idx}`;
-
-                            // Initial render call after DOM insertion
-                            setTimeout(() => {
-                                renderEmbeddedPDF(step.url, canvasId, controlId, step.start_page, step.end_page);
-                            }, 100);
-
+                            setTimeout(() => { renderEmbeddedPDF(step.url, canvasId, controlId, step.start_page, step.end_page); }, 100);
                             contentHtml = `
                                 <div class="w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200 mt-2 relative group isolate">
-                                    <!-- Canvas Wrapper -->
                                     <div class="flex justify-center items-center min-h-[300px] md:min-h-[400px] bg-slate-500 overflow-hidden relative">
                                         <canvas id="${canvasId}" class="max-w-full shadow-2xl transition-transform duration-300"></canvas>
-                                        
-                                        <!-- Loading Spinner -->
                                         <div id="${canvasId}-loader" class="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
                                             <div class="flex flex-col items-center gap-2">
                                                 <i class="fa-solid fa-circle-notch fa-spin text-3xl text-primary-500"></i>
@@ -207,71 +200,108 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Controls (Mobile Optimized) -->
                                     <div id="${controlId}" class="bg-white border-t border-slate-200 p-3 flex justify-between items-center gap-4 sticky bottom-0 z-20">
-                                        <button class="prev-btn w-12 h-12 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-                                            <i class="fa-solid fa-arrow-left text-lg"></i>
-                                        </button>
-                                        
-                                        <div class="flex-1 flex flex-col items-center justify-center">
-                                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Halaman</span>
+                                        <button class="prev-btn w-12 h-12 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all disabled:opacity-30"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+                                        <div class="flex-1 flex flex-col items-center">
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase">Halaman</span>
                                             <div class="flex items-baseline gap-1">
                                                 <span class="curr-page text-xl font-black text-slate-800">-</span>
                                                 <span class="text-slate-400 text-sm font-bold">/</span>
                                                 <span class="total-page text-sm font-bold text-slate-500">-</span>
                                             </div>
                                         </div>
-
-                                        <button class="next-btn w-12 h-12 flex items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/20 hover:bg-primary-500 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                            <i class="fa-solid fa-arrow-right text-lg"></i>
-                                        </button>
+                                        <button class="next-btn w-12 h-12 flex items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg hover:bg-primary-500 active:scale-95 transition-all disabled:opacity-50"><i class="fa-solid fa-arrow-right text-lg"></i></button>
                                     </div>
-                                </div>
-                             `;
-                        } else if (step.type === 'video') {
-                            // 2. Video (YouTube Embed)
-                            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                            const match = step.url.match(regExp);
-                            const ytId = (match && match[2].length === 11) ? match[2] : null;
-                            const embedUrl = ytId ? `https://www.youtube.com/embed/${ytId}` : step.url;
+                                </div>`;
 
+                        // 2. Video YouTube terrestriksi
+                        } else if (step.type === 'video') {
+                            const playerId = `yt-player-${idx}`;
+                            const startSec = step.start_time || 0;
+                            const endSec = step.end_time || null;
                             contentHtml = `
-                                <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-lg mt-2">
-                                     <iframe class="w-full h-full" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                </div>
-                             `;
+                                <div class="mt-2 relative">
+                                    <div id="${playerId}" class="aspect-video rounded-xl overflow-hidden shadow-lg bg-slate-900"></div>
+                                    ${ endSec ? `<p class="text-[10px] text-slate-400 mt-1 text-center">⏱ Video dibatasi: ${formatTime(startSec)} — ${formatTime(endSec)}</p>` : '' }
+                                </div>`;
+                            // Init after DOM inserted
+                            setTimeout(() => initRestrictedYT(playerId, step.url, startSec, endSec), 300);
+
+                        // 3. PhET Simulation
+                        } else if (step.type === 'phet') {
+                            const lkpdRef = modul.lkpd_url ? `<a href="${modul.lkpd_url}" target="_blank" class="underline font-bold">Buka LKPD</a>` : 'LKPD';
+                            contentHtml = `
+                                <div class="mt-2 space-y-3">
+                                    <div class="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                        <i class="fa-solid fa-triangle-exclamation text-yellow-500 mt-0.5"></i>
+                                        <p class="text-sm text-yellow-800">Sebelum memulai, <strong>${lkpdRef}</strong> untuk instruksi menggunakan simulasi PhET ini.</p>
+                                    </div>
+                                    <div class="w-full rounded-xl overflow-hidden border border-slate-200 shadow" style="height:520px">
+                                        <iframe src="${step.url}" class="w-full h-full" allowfullscreen sandbox="allow-scripts allow-same-origin allow-pointer-lock"></iframe>
+                                    </div>
+                                </div>`;
+
+                        // 4. Refleksi
+                        } else if (step.type === 'refleksi') {
+                            const questions = step.questions || [];
+                            const qHtml = questions.map((q, qi) => `
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-purple-800">${qi + 1}. ${q}</p>
+                                    <textarea class="refleksi-answer w-full bg-white border border-purple-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none" rows="3" data-qi="${qi}" placeholder="Tulis kesimpulanmu di sini..."></textarea>
+                                </div>`).join('');
+                            contentHtml = `
+                                <div class="mt-2 space-y-4">
+                                    ${qHtml}
+                                    <button onclick="saveRefleksiAnswers(this, '${id}', ${idx})" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-colors">
+                                        <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jawaban Refleksi
+                                    </button>
+                                    <div class="refleksi-status text-xs text-center text-slate-400"></div>
+                                </div>`;
+
+                        // 5. Link / Other
                         } else {
-                            // 3. Link / Other
                             contentHtml = `
                                 <div class="mt-2 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-3">
                                     <i class="fa-solid fa-link text-slate-400"></i>
                                     <a href="${step.url}" target="_blank" class="text-blue-600 hover:underline break-all">${step.url}</a>
-                                </div>
-                             `;
+                                </div>`;
                         }
 
+                        // Step type icons/colors
+                        const typeConfig = {
+                            ppt: { icon: 'fa-file-powerpoint', color: 'text-orange-500 bg-orange-50', label: 'PPT' },
+                            pdf: { icon: 'fa-file-pdf', color: 'text-red-500 bg-red-50', label: 'PDF' },
+                            video: { icon: 'fa-play-circle', color: 'text-red-500 bg-red-50', label: 'Video' },
+                            phet: { icon: 'fa-flask', color: 'text-green-600 bg-green-50', label: 'PhET' },
+                            refleksi: { icon: 'fa-brain', color: 'text-purple-600 bg-purple-50', label: 'Refleksi' },
+                            link: { icon: 'fa-link', color: 'text-blue-500 bg-blue-50', label: 'Link' }
+                        };
+                        const tc = typeConfig[step.type] || typeConfig.link;
+
                         // Wrapper Card
+                        const isRefleksi = step.type === 'refleksi';
                         const wrapper = `
-                           <div class="step-card bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative">
-                               <div class="flex justify-between items-start gap-4 mb-2">
+                           <div class="step-card ${ isRefleksi ? 'bg-purple-50 border-purple-100' : 'bg-white border-slate-100'} p-6 rounded-3xl shadow-sm border relative">
+                               <div class="flex justify-between items-start gap-4 mb-3">
                                    <div class="flex items-center gap-3">
-                                       <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm border border-slate-200">${idx + 1}</span>
+                                       <span class="w-9 h-9 rounded-full ${tc.color} font-bold flex items-center justify-center text-sm">
+                                           <i class="fa-solid ${tc.icon}"></i>
+                                       </span>
                                        <div>
                                            <h4 class="font-bold text-slate-800">${step.title}</h4>
-                                           <div class="flex gap-2 text-xs">
-                                              <span class="uppercase text-slate-400 font-bold tracking-wider">${step.type}</span>
-                                           </div>
+                                           <span class="text-[10px] uppercase ${ isRefleksi ? 'text-purple-500' : 'text-slate-400'} font-bold tracking-wider">${tc.label}</span>
                                        </div>
                                    </div>
-                                    <label class="flex items-center gap-3 cursor-pointer select-none">
-                                        <input type="checkbox" data-idx="${idx}" class="step-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 cursor-pointer" onchange="toggleStep(${idx})">
+                                    ${ step.type !== 'refleksi' ? `<label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" data-idx="${idx}" class="step-check w-5 h-5 text-emerald-500 rounded cursor-pointer" onchange="toggleStep(${idx})">
                                         <span class="text-sm font-bold text-slate-500">Selesai</span>
-                                    </label>
+                                    </label>` : `<label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" data-idx="${idx}" class="step-check w-5 h-5 text-purple-500 rounded cursor-pointer" onchange="toggleStep(${idx})">
+                                        <span class="text-sm font-bold text-purple-600">Selesai</span>
+                                    </label>`}
                                </div>
 
                                ${step.instruction ? `<div class="bg-blue-50 text-blue-700 text-sm p-3 rounded-lg mb-3 border border-blue-100"><i class="fa-solid fa-circle-info mr-2"></i>${step.instruction}</div>` : ''}
-
                                ${contentHtml}
                                ${step.question ? `
                                    <div class="mt-4 pt-4 border-t border-slate-100">
@@ -280,15 +310,13 @@
                                            <input type="text" placeholder="Jawaban Anda..." class="quiz-input w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm">
                                            <button onclick="checkQuiz(this, '${step.answer_key}')" class="bg-primary-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Cek</button>
                                        </div>
-                                   </div>
-                               ` : ''}
-                           </div>
-                        `;
+                                   </div>` : ''}
+                           </div>`;
                         stepsContainer.innerHTML += wrapper;
                     });
 
-                    // LOAD PROGRESS
                     loadStepProgress(modul.id, user);
+                    loadRefleksiAnswers(modul.id, user);
                 }
 
                 // --- PROGRESS ACTION ---
@@ -502,15 +530,125 @@
                 // MathJax
                 if (window.MathJax) MathJax.typesetPromise();
 
-                // Check Prev/Next
-                // Check Prev/Next (Removed)
             } else {
                 document.querySelector('main').innerHTML = '<div class="text-center p-10 text-red-500">Materi tidak ditemukan.</div>';
             }
         }
 
-        // Siblings check function removed
+        // --- YouTube Restricted Player ---
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const m = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+            return (m && m[2].length === 11) ? m[2] : url;
+        }
 
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function initRestrictedYT(containerId, url, startSec, endSec) {
+            const ytId = getYouTubeId(url);
+            if (!ytId) return;
+
+            const player = new YT.Player(containerId, {
+                videoId: ytId,
+                playerVars: {
+                    start: startSec,
+                    autoplay: 0,
+                    rel: 0,
+                    modestbranding: 1,
+                    disablekb: 1,
+                    fs: 1,
+                    iv_load_policy: 3,
+                },
+                events: {
+                    onReady: (e) => {
+                        ytPlayers[containerId] = e.target;
+                        if (endSec) {
+                            setInterval(() => {
+                                const p = ytPlayers[containerId];
+                                if (!p) return;
+                                const cur = p.getCurrentTime();
+                                if (cur < startSec) p.seekTo(startSec, true);
+                                if (cur > endSec) {
+                                    p.pauseVideo();
+                                    p.seekTo(endSec, true);
+                                }
+                            }, 500);
+                        }
+                    },
+                    onStateChange: (e) => {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            const p = ytPlayers[containerId];
+                            if (!p) return;
+                            const cur = p.getCurrentTime();
+                            if (cur < startSec) p.seekTo(startSec, true);
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Save Refleksi Answers ---
+        async function saveRefleksiAnswers(btn, moduleId, stepIdx) {
+            const user = checkAuth();
+            if (!user) { await VisualModal.alert('Silakan login terlebih dahulu.', 'Login', 'error'); return; }
+
+            const stepCard = btn.closest('.step-card');
+            const textareas = stepCard.querySelectorAll('.refleksi-answer');
+            const statusEl = stepCard.querySelector('.refleksi-status');
+
+            const answers = Array.from(textareas).map(ta => ({
+                question_index: parseInt(ta.dataset.qi),
+                answer: ta.value
+            }));
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+            try {
+                const { error } = await supabaseClient.from('reflection_answers').upsert({
+                    student_nim: user.nim,
+                    module_id: moduleId,
+                    step_index: stepIdx,
+                    answers: answers,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'student_nim, module_id, step_index' });
+
+                if (error) throw error;
+
+                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Tersimpan!';
+                btn.className = btn.className.replace('bg-purple-600 hover:bg-purple-700', 'bg-emerald-500 hover:bg-emerald-600');
+                if (statusEl) statusEl.textContent = 'Jawaban tersimpan pada ' + new Date().toLocaleTimeString('id-ID');
+
+                // Auto-check the step
+                const cb = stepCard.querySelector('.step-check');
+                if (cb && !cb.checked) { cb.checked = true; toggleStep(parseInt(cb.dataset.idx)); }
+
+            } catch (e) {
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Jawaban Refleksi';
+                btn.disabled = false;
+                if (statusEl) statusEl.textContent = 'Gagal: ' + e.message;
+            }
+        }
+
+        // --- Load saved refleksi answers ---
+        async function loadRefleksiAnswers(moduleId, user) {
+            if (!user) return;
+            const { data } = await supabaseClient.from('reflection_answers')
+                .select('*').eq('student_nim', user.nim).eq('module_id', moduleId);
+            if (!data) return;
+            data.forEach(row => {
+                const stepCard = document.querySelectorAll('.step-card')[row.step_index];
+                if (!stepCard) return;
+                row.answers.forEach(a => {
+                    const ta = stepCard.querySelector(`.refleksi-answer[data-qi="${a.question_index}"]`);
+                    if (ta) ta.value = a.answer || '';
+                });
+            });
+        }
         async function completeModule(moduleId, user) {
             if (!user) { await VisualModal.alert('Silakan login terlebih dahulu.', 'Akses Ditolak', 'error'); return; }
             if (!await VisualModal.confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.', 'Konfirmasi Selesai')) return;
