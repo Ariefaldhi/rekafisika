@@ -132,7 +132,10 @@
                 t.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
             });
 
-            // Set Specific UI
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('password');
+            const guestInput = document.getElementById('guest-code');
+
             if (mode === 'login') {
                 tabLogin.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
                 registerFields.classList.add('hidden');
@@ -141,6 +144,10 @@
                 authTitle.innerText = "Masuk";
                 authSubtitle.innerText = "Akses akun RekaFisika Anda";
                 submitBtnText.innerText = "Masuk";
+                
+                emailInput.required = true;
+                passInput.required = true;
+                guestInput.required = false;
             } else if (mode === 'register') {
                 tabRegister.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
                 registerFields.classList.remove('hidden');
@@ -149,6 +156,10 @@
                 authTitle.innerText = "Daftar";
                 authSubtitle.innerText = "Buat akun baru untuk mulai belajar";
                 submitBtnText.innerText = "Daftar Akun";
+
+                emailInput.required = true;
+                passInput.required = true;
+                guestInput.required = false;
             } else if (mode === 'code') {
                 tabCode.className = "flex-1 py-3 text-[10px] uppercase font-bold border-b-2 tab-active transition-colors";
                 registerFields.classList.add('hidden');
@@ -157,6 +168,10 @@
                 authTitle.innerText = "Siswa Tamu";
                 authSubtitle.innerText = "Masuk menggunakan Kode Guru Anda";
                 submitBtnText.innerText = "Masuk dengan Kode";
+
+                emailInput.required = false;
+                passInput.required = false;
+                guestInput.required = true;
             }
         }
 
