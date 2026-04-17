@@ -1216,11 +1216,6 @@
 
                 `;
 
-                const {
-                    data,
-                    error
-                }
-
                 const { error: upErr } = await supabaseClient.storage.from('materials').upload(filePath, file);
                 if (upErr) throw upErr;
 
