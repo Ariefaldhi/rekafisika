@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | RekaFisika</title>
+    <title>Auth | RekaFisika</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,109 +26,204 @@
             document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
         }
     </script>
-    <script src="config.js?v=2.5"></script>
+    <script src="config.js?v=2.6"></script>
     <script src="modal.js"></script>
     <script src="sound-effects.js"></script>
+    <style>
+        .tab-active { border-bottom-color: #3B82F6; color: #2563EB; }
+        .tab-inactive { border-bottom-color: transparent; color: #64748B; }
+    </style>
 </head>
 
 <body class="bg-slate-50 font-inter min-h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-sm bg-white p-8 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
-
         <div class="text-center space-y-2 relative z-10">
             <img src="logo.png" alt="Logo" class="w-16 h-16 mx-auto mb-4 object-contain animate-bounce-slow">
-            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Login</h1>
-            <p class="text-slate-500 text-sm">Masuk untuk mulai belajar</p>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight" id="auth-title">Masuk</h1>
+            <p class="text-slate-500 text-sm" id="auth-subtitle">Akses akun RekaFisika Anda</p>
         </div>
 
-        <form id="login-form" class="space-y-4">
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200 mb-4">
+            <button id="tab-login" class="flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors">Masuk</button>
+            <button id="tab-register" class="flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800">Daftar</button>
+        </div>
+
+        <form id="auth-form" class="space-y-4">
+            <!-- Register Fields (Hidden by default) -->
+            <div id="register-fields" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Nama Lengkap</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="reg-name" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="Contoh: Budi Santoso">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">NIM / NISN</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-id-card"></i></span>
+                        <input type="text" id="reg-nim" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="Contoh: 2101234">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Common Fields -->
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">NIM</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Email</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-id-card"></i></span>
-                    <input type="text" id="nim"
-                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700"
-                        placeholder="Contoh: 2105678" required>
+                    <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-envelope"></i></span>
+                    <input type="email" id="email" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="email@contoh.com" required>
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Kode Akses</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Kata Sandi</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-key"></i></span>
-                    <input type="password" id="access-code"
-                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700"
-                        placeholder="••••••" required>
+                    <span class="absolute left-4 top-3.5 text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" id="password" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-slate-700" placeholder="••••••••" required minlength="6">
                 </div>
             </div>
 
-            <button type="submit" id="login-btn"
-                class="w-full py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold font-lg transition-all shadow-lg shadow-primary-500/30 flex justify-center items-center gap-2">
-                <span>Masuk</span> <i class="fa-solid fa-arrow-right"></i>
+            <button type="submit" id="submit-btn" class="w-full py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-500/30 flex justify-center items-center gap-2 mt-2">
+                <span id="btn-text">Masuk</span> <i class="fa-solid fa-arrow-right"></i>
             </button>
             <p id="error-msg" class="text-center text-red-500 text-sm hidden"></p>
         </form>
 
-
     </div>
 
     <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nim = document.getElementById('nim').value;
-            const code = document.getElementById('access-code').value;
-            const btn = document.getElementById('login-btn');
-            const errorMsg = document.getElementById('error-msg');
+        let isLoginMode = true;
 
-            // Reset UI
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        const registerFields = document.getElementById('register-fields');
+        const submitBtnText = document.getElementById('btn-text');
+        const errorMsg = document.getElementById('error-msg');
+        
+        const regName = document.getElementById('reg-name');
+        const regNim = document.getElementById('reg-nim');
+
+        function toggleMode(loginMode) {
+            isLoginMode = loginMode;
+            errorMsg.classList.add('hidden');
+            
+            if (isLoginMode) {
+                tabLogin.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors";
+                tabRegister.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
+                
+                registerFields.classList.add('hidden');
+                regName.removeAttribute('required');
+                regNim.removeAttribute('required');
+                
+                authTitle.innerText = "Masuk";
+                authSubtitle.innerText = "Akses akun RekaFisika Anda";
+                submitBtnText.innerText = "Masuk";
+            } else {
+                tabLogin.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-inactive transition-colors hover:text-slate-800";
+                tabRegister.className = "flex-1 py-3 text-sm font-bold border-b-2 tab-active transition-colors";
+                
+                registerFields.classList.remove('hidden');
+                regName.setAttribute('required', 'true');
+                regNim.setAttribute('required', 'true');
+                
+                authTitle.innerText = "Daftar";
+                authSubtitle.innerText = "Buat akun baru untuk mulai belajar";
+                submitBtnText.innerText = "Daftar Akun";
+            }
+        }
+
+        tabLogin.addEventListener('click', () => toggleMode(true));
+        tabRegister.addEventListener('click', () => toggleMode(false));
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submit-btn');
+
             errorMsg.classList.add('hidden');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memuat...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
             try {
-                if (!window.supabaseClient) {
-                    const debugInfo = `Supabase SDK: ${typeof window.supabase}, Client: ${typeof window.supabaseClient}`;
-                    throw new Error(`Supabase not configured. (${debugInfo}) - Cek URL/Key di config.js`);
-                }
+                if (!window.supabaseClient) throw new Error('Koneksi Supabase gagal. Silakan muat ulang halaman.');
 
-                // 1. Check Admin Static Login (Legacy)
-                if (nim === 'admin' && code === 'reka2025') {
-                    localStorage.setItem('user_session', JSON.stringify({ role: 'admin', nama: 'Admin Fisika' }));
+                // Admin Static Bypass
+                if (email === 'admin@rekafisika.com' && password === 'reka2025' && isLoginMode) {
+                    localStorage.setItem('user_session', JSON.stringify({ role: 'admin', nama: 'Admin Fisika', nim: 'admin' }));
                     window.location.href = 'admin.html';
                     return;
                 }
 
-                // 2. Check Student Database
-                const { data, error } = await supabaseClient
-                    .from('students')
-                    .select('*')
-                    .eq('nim', nim)
-                    .single();
+                if (isLoginMode) {
+                    // --- FLOW LOGIN ---
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    
+                    if (error) {
+                        if (error.status === 400) throw new Error('Email atau password salah.');
+                        throw error;
+                    }
 
-                if (error || !data) {
-                    throw new Error('NIM tidak ditemukan.');
+                    if (!data.user) throw new Error('Gagal memuat profil pengguna.');
+
+                    // Sync legacy user_session structure
+                    const meta = data.user.user_metadata || {};
+                    localStorage.setItem('user_session', JSON.stringify({
+                        role: meta.role || 'student',
+                        nama: meta.nama || 'Pengguna',
+                        nim: meta.nim || 'N/A', // Critical for existing app queries
+                        email: data.user.email
+                    }));
+
+                    window.location.href = 'index.html';
+
+                } else {
+                    // --- FLOW REGISTER ---
+                    const nameUser = regName.value.trim();
+                    const nimUser = regNim.value.trim();
+
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: {
+                                nama: nameUser,
+                                nim: nimUser,
+                                role: 'student'
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        if (error.status === 422) throw new Error('Password terlalu lemah / Email tidak valid.');
+                        if (error.message.includes('already registered')) throw new Error('Email ini sudah terdaftar.');
+                        throw error;
+                    }
+                    
+                    // Since email confirm is OFF, signUp generally logs the user in and returns session immediately
+                    const meta = data.user.user_metadata || {};
+                    localStorage.setItem('user_session', JSON.stringify({
+                        role: meta.role || 'student',
+                        nama: meta.nama || nameUser,
+                        nim: meta.nim || nimUser,
+                        email: data.user.email
+                    }));
+
+                    alert('Pendaftaran berhasil! Selamat bergabung di RekaFisika.');
+                    window.location.href = 'index.html';
                 }
-
-                // Verify Access Code (assuming stored column is 'access_code')
-                // In a real app this should be hashed, but for restoration we match legacy which might be plain text
-                if (String(data.access_code) !== code) {
-                    throw new Error('Kode akses salah.');
-                }
-
-                // Success
-                localStorage.setItem('user_session', JSON.stringify({
-                    role: 'student',
-                    nama: data.name,
-                    nim: data.nim,
-                    profile_photo_url: data.profile_photo_url
-                }));
-                window.location.href = 'index.html';
 
             } catch (err) {
                 console.error(err);
                 btn.disabled = false;
-                btn.innerHTML = '<span>Masuk</span> <i class="fa-solid fa-arrow-right"></i>';
-                errorMsg.textContent = err.message || 'Gagal masuk. Periksa koneksi.';
+                btn.innerHTML = `<span id="btn-text">${isLoginMode ? 'Masuk' : 'Daftar Akun'}</span> <i class="fa-solid fa-arrow-right"></i>`;
+                errorMsg.textContent = err.message || 'Gagal tersambung. Periksa koneksi internet.';
                 errorMsg.classList.remove('hidden');
             }
         });

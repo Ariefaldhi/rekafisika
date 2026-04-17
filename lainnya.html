@@ -189,6 +189,9 @@
 
         async function logout() {
             if (await VisualModal.confirm('Apakah Anda yakin ingin keluar?')) {
+                if (window.supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
                 localStorage.removeItem('user_session');
                 window.location.href = 'login.html';
             }

@@ -237,8 +237,11 @@
                     document.getElementById('profile-pic').innerHTML = `<img src="${user.profile_photo_url}" class="w-full h-full object-cover">`;
                 }
 
-                document.getElementById('auth-btn').onclick = (e) => {
+                document.getElementById('auth-btn').onclick = async (e) => {
                     e.preventDefault();
+                    if (window.supabaseClient) {
+                        await supabaseClient.auth.signOut();
+                    }
                     localStorage.removeItem('user_session');
                     window.location.href = 'login.html';
                 };
