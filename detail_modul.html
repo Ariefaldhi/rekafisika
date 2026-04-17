@@ -334,83 +334,75 @@
             const controls = document.getElementById(controlId);
             if (!canvas) return;
 
-                    const ctx = canvas.getContext('2d');
-                    let pdfDoc = null;
-                    let pageNum = startPage || 1;
-                    let pageRendering = false;
-                    let pageNumPending = null;
-                    const scale = 1.5; // High quality
+            const ctx = canvas.getContext('2d');
+            let pdfDoc = null;
+            let pageNum = startPage || 1;
+            let pageRendering = false;
+            let pageNumPending = null;
+            const scale = 1.5; // High quality
 
-                    try {
-                        const loadingTask = pdfjsLib.getDocument(url);
-                        pdfDoc = await loadingTask.promise;
+            try {
+                const loadingTask = pdfjsLib.getDocument(url);
+                pdfDoc = await loadingTask.promise;
 
-                        const maxPage = endPage ? Math.min(endPage, pdfDoc.numPages) : pdfDoc.numPages;
-                        const minPage = startPage || 1;
+                const maxPage = endPage ? Math.min(endPage, pdfDoc.numPages) : pdfDoc.numPages;
+                const minPage = startPage || 1;
 
-                        // Update Total Page UI
-                        controls.querySelector('.total-page').textContent = maxPage;
+                // Update Total Page UI
+                controls.querySelector('.total-page').textContent = maxPage;
 
-                        // Render Page Function
-                        const renderPage = async (num) => {
-                            pageRendering = true;
-                            // Update UI State
-                            controls.querySelector('.curr-page').textContent = num;
-                            controls.querySelector('.prev-btn').disabled = num <= minPage;
-                            controls.querySelector('.next-btn').disabled = num >= maxPage;
+                // Render Page Function
+                const renderPage = async (num) => {
+                    pageRendering = true;
+                    // Update UI State
+                    controls.querySelector('.curr-page').textContent = num;
+                    controls.querySelector('.prev-btn').disabled = num <= minPage;
+                    controls.querySelector('.next-btn').disabled = num >= maxPage;
 
-                            const page = await pdfDoc.getPage(num);
+                    const page = await pdfDoc.getPage(num);
 
-                            // Responsive Scale
-                            const viewport = page.getViewport({ scale: scale });
-                            canvas.height = viewport.height;
-                            canvas.width = viewport.width;
+                    // Responsive Scale
+                    const viewport = page.getViewport({ scale: scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                            // Responsive visual scale (CSS) handled by max-w-full
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
 
-                            const renderContext = {
-                                canvasContext: ctx,
-                                viewport: viewport
-                            };
+                    const renderTask = page.render(renderContext);
+                    await renderTask.promise;
+                    pageRendering = false;
 
-                            const renderTask = page.render(renderContext);
+                    if (loader) loader.classList.add('hidden');
 
-                            // Wait for render to finish
-                            await renderTask.promise;
-                            pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                };
 
-                            // Hide Loader
-                            if (loader) loader.classList.add('hidden');
+                const queueRenderPage = (num) => {
+                    if (pageRendering) {
+                        pageNumPending = num;
+                    } else {
+                        renderPage(num);
+                    }
+                };
 
-                            if (pageNumPending !== null) {
-                                renderPage(pageNumPending);
-                                pageNumPending = null;
-                            }
-                        };
+                renderPage(pageNum);
 
-                        // Queue Render
-                        const queueRenderPage = (num) => {
-                            if (pageRendering) {
-                                pageNumPending = num;
-                            } else {
-                                renderPage(num);
-                            }
-                        };
-
-                        // Initial Render
-                        renderPage(pageNum);
-
-                        // Event Listeners
-                        controls.querySelector('.prev-btn').onclick = () => {
-                            if (pageNum <= minPage) return;
-                            pageNum--;
-                            queueRenderPage(pageNum);
-                        };
-                        controls.querySelector('.next-btn').onclick = () => {
-                            if (pageNum >= maxPage) return;
-                            pageNum++;
-                            queueRenderPage(pageNum);
-                        };
+                controls.querySelector('.prev-btn').onclick = () => {
+                    if (pageNum <= minPage) return;
+                    pageNum--;
+                    queueRenderPage(pageNum);
+                };
+                controls.querySelector('.next-btn').onclick = () => {
+                    if (pageNum >= maxPage) return;
+                    pageNum++;
+                    queueRenderPage(pageNum);
+                };
 
                     } catch (e) {
                         console.error("PDF Load Error:", e);
@@ -419,63 +411,6 @@
                         }
                     }
                 }
-
-                // Helper: Get YT ID (Legacy check)
-                const getYouTubeId = (url) => { if (!url) return null; const m = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); return (m && m[2].length === 11) ? m[2] : url; };
-
-                // VIDEO
-                if (modul.video_url) {
-                    const vidSec = document.getElementById('video-section');
-                    const ytId = getYouTubeId(modul.video_url);
-                    // Check if it's likely an ID or URL. If length is small (11 chars), likely ID.
-                    const finalEmbed = ytId.length === 11 ? `https://www.youtube.com/embed/${ytId}` : modul.video_url;
-
-                    vidSec.classList.remove('hidden');
-                    vidSec.innerHTML = `
-                         <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                             <i class="fa-brands fa-youtube text-red-500"></i> Video Pembelajaran
-                         </h3>
-                         <div class="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
-                             <iframe class="w-full h-full" src="${finalEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                         </div>
-                    `;
-                }
-
-                // RESOURCES (FILE)
-                // If file_url exists, show it. Otherwise show default book or nothing.
-                const resContainer = document.querySelector('.bg-white.p-6.rounded-3xl.shadow-sm.border.border-slate-100 .space-y-3');
-                if (modul.file_url) {
-                    resContainer.innerHTML = `
-                        <a href="${modul.file_url}" target="_blank"
-                            class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-md transition-all group">
-                            <div class="w-10 h-10 bg-red-100 text-red-500 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-slate-700 text-sm">Materi Minggu ${modul.week} (PDF)</h4>
-                                <p class="text-xs text-slate-400">Klik untuk melihat/download</p>
-                            </div>
-                            <i class="fa-solid fa-download text-slate-300 group-hover:text-primary-500"></i>
-                        </a>
-                     `;
-                }
-                // We can append the textbook link permanently if desired, but user likely wants SPECIFIC module file 1st.
-                resContainer.innerHTML += `
-                     <a href="buku.html" class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-dashed border-slate-200 hover:border-primary-500 transition-colors mt-2">
-                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                             <i class="fa-solid fa-book"></i>
-                        </div>
-                        <span class="text-xs font-bold text-slate-500">Buku Referensi Utama</span>
-                     </a>
-                `;
-
-                // MathJax
-                if (window.MathJax) MathJax.typesetPromise();
-
-            } else {
-                document.querySelector('main').innerHTML = '<div class="text-center p-10 text-red-500">Materi tidak ditemukan.</div>';
-            }
-        }
 
         // --- YouTube Restricted Player ---
         function getYouTubeId(url) {
