@@ -101,7 +101,6 @@
     <script src="modal.js"></script>
     <script src="sound-effects.js"></script>
     <style>
-    <style>
         .module-page {
             min-height: calc(100vh - 180px);
             display: flex;
@@ -495,9 +494,13 @@
 
                 // Load existing notes/table if session exists
                 if (user) {
-                    loadRefleksiAnswers(id, user);
-                    loadNotes(id, user);
-                    loadTableData(id, user);
+                    try {
+                        loadRefleksiAnswers(id, user);
+                        loadNotes(id, user);
+                        loadTableData(id, user);
+                    } catch (err) {
+                        console.error("Content Load Error:", err);
+                    }
                 }
                 
                 if (window.MathJax) MathJax.typesetPromise();
@@ -786,13 +789,11 @@
                     await supabaseClient.from('student_notes').upsert({
                         student_nim: user.nim,
                         module_id: moduleData.id,
-                        teacher_email: groupData.kodeAjar || 'LEGACY', // We use kodeAjar as the link
                         teaching_code: groupData.kodeAjar,
                         group_name: groupData.namaKelompok,
-                        group_members: groupData.anggotaKelompok,
-                        content: content,
+                        notes: content,
                         updated_at: new Date().toISOString()
-                    }, { onConflict: 'student_nim, module_id' });
+                    }, { onConflict: 'student_nim, module_id, group_name' });
                     
                     status.innerText = 'Tersimpan';
                     setTimeout(() => { if (status.innerText === 'Tersimpan') status.style.opacity = '0'; }, 2000);
@@ -804,8 +805,13 @@
         }
 
         async function loadNotes(moduleId, user) {
-            const { data } = await supabaseClient.from('student_notes').select('content').eq('student_nim', user.nim).eq('module_id', moduleId).single();
-            if (data) document.getElementById('student-notes').value = data.content || '';
+            const { data } = await supabaseClient.from('student_notes')
+                .select('notes')
+                .eq('student_nim', user.nim)
+                .eq('module_id', moduleId)
+                .eq('group_name', groupData.namaKelompok)
+                .maybeSingle();
+            if (data) document.getElementById('student-notes').value = data.notes || '';
         }
 
         // --- TABLE LOGIC ---
@@ -880,13 +886,11 @@
                 await supabaseClient.from('student_data_tables').upsert({
                     student_nim: user.nim,
                     module_id: moduleData.id,
-                    teacher_email: groupData.kodeAjar || 'LEGACY',
                     teaching_code: groupData.kodeAjar,
                     group_name: groupData.namaKelompok,
-                    group_members: groupData.anggotaKelompok,
                     table_data: { columns, rows },
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'student_nim, module_id' });
+                }, { onConflict: 'student_nim, module_id, group_name' });
 
                 status.innerText = 'Tersimpan';
                 setTimeout(() => { status.style.opacity = '0'; }, 2000);
@@ -898,7 +902,12 @@
         }
 
         async function loadTableData(moduleId, user) {
-            const { data } = await supabaseClient.from('student_data_tables').select('table_data').eq('student_nim', user.nim).eq('module_id', moduleId).single();
+            const { data } = await supabaseClient.from('student_data_tables')
+                .select('table_data')
+                .eq('student_nim', user.nim)
+                .eq('module_id', moduleId)
+                .eq('group_name', groupData.namaKelompok)
+                .maybeSingle();
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
 
@@ -954,7 +963,6 @@
                     step_index: stepIdx,
                     teaching_code: groupData.kodeAjar,
                     group_name: groupData.namaKelompok,
-                    group_members: groupData.anggotaKelompok,
                     answers: answers,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'student_nim, module_id, step_index' });
