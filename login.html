@@ -26,7 +26,10 @@
             document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
         }
     </script>
-    <script src="config.js?v=2.6"></script>
+    <script>
+        // Paksa lompati cache browser agar API Key baru terbaca
+        document.write('<script src="config.js?t=' + new Date().getTime() + '"><\/script>');
+    </script>
     <script src="modal.js"></script>
     <script src="sound-effects.js"></script>
     <style>

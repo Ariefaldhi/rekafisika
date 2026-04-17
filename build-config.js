@@ -14,7 +14,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const supabaseUrl = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL_PLACEHOLDER';
-const supabaseKey = process.env.SUPABASE_KEY || 'YOUR_SUPABASE_KEY_PLACEHOLDER';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || 'YOUR_SUPABASE_KEY_PLACEHOLDER';
 const groqApiKey = process.env.GROQ_API_KEY || 'YOUR_GROQ_API_KEY_PLACEHOLDER';
 
 const configContent = `// Konfigurasi Aplikasi (SIMPLIFIED - No VisualModal)
