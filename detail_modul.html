@@ -594,6 +594,8 @@
             }
 
             if (dir === 1 && currentPageIndex === totalPages - 1) {
+                return completeModule(id, user);
+            }
 
             const nextIdx = currentPageIndex + dir;
             if (nextIdx >= 0 && nextIdx < totalPages) {
