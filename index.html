@@ -216,68 +216,21 @@
         </div>
     </div>
 
-    <!-- Main Grid Menu -->
-    <div class="px-6 grid grid-cols-2 gap-4 mb-8">
-        <!-- Simulasi -->
-        <a href="simulasi.html"
-            class="bg-white p-5 rounded-3xl shadow-soft hover:shadow-lg transition-all hover:-translate-y-1 group">
-            <div
-                class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-500 transition-colors duration-300">
-                <i class="fa-solid fa-gamepad text-blue-500 text-xl group-hover:text-white transition-colors"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 text-lg">Simulasi</h3>
-            <p class="text-slate-400 text-xs mt-1">Praktikum Virtual</p>
-        </a>
-
-        <!-- Materi -->
-        <a href="modul.html"
-            class="bg-white p-5 rounded-3xl shadow-soft hover:shadow-lg transition-all hover:-translate-y-1 group">
-            <div
-                class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors duration-300">
-                <i class="fa-solid fa-book-open text-orange-500 text-xl group-hover:text-white transition-colors"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 text-lg">Materi</h3>
-            <p class="text-slate-400 text-xs mt-1">Modul Belajar</p>
-        </a>
-
-        <!-- Tugas (Ex-Kuis) -->
-        <a href="tugas.html"
-            class="bg-white p-5 rounded-3xl shadow-soft hover:shadow-lg transition-all hover:-translate-y-1 group">
-            <div
-                class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-500 transition-colors duration-300">
-                <i
-                    class="fa-solid fa-clipboard-list text-purple-500 text-xl group-hover:text-white transition-colors"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 text-lg">Tugas</h3>
-            <p class="text-slate-400 text-xs mt-1">Latihan & PR</p>
-        </a>
-
-        <!-- Peringkat (Ex-Diskusi) -->
-        <a href="keaktifan.html"
-            class="bg-white p-5 rounded-3xl shadow-soft hover:shadow-lg transition-all hover:-translate-y-1 group">
-            <div
-                class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-emerald-500 transition-colors duration-300">
-                <i class="fa-solid fa-trophy text-emerald-500 text-xl group-hover:text-white transition-colors"></i>
-            </div>
-            <h3 class="font-bold text-slate-800 text-lg">Peringkat</h3>
-            <p class="text-slate-400 text-xs mt-1">Leaderboard</p>
-        </a>
-    </div>
-
-    <!-- Quick Actions / Assignment Widget -->
+    <!-- Materi Section -->
     <div class="px-6 mb-8">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-lg text-slate-800">Tugas Terbaru</h3>
-            <a href="tugas.html" class="text-primary-500 text-sm font-medium">Lihat Semua</a>
+            <h3 class="font-bold text-lg text-slate-800">📚 Semua Materi</h3>
+            <a href="modul.html" class="text-primary-500 text-sm font-medium">Lihat Semua →</a>
         </div>
-        <div id="assignment-preview"
-            class="bg-white p-4 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-4">
-            <!-- JS Injected -->
+        <div id="home-module-list" class="space-y-3">
+            <!-- Loading skeleton -->
+            <div class="animate-pulse space-y-3">
+                <div class="bg-white p-5 rounded-2xl h-20"></div>
+                <div class="bg-white p-5 rounded-2xl h-20"></div>
+                <div class="bg-white p-5 rounded-2xl h-20"></div>
+            </div>
         </div>
     </div>
-
-
-
     <!-- Bottom Navigation -->
     <nav
         class="fixed bottom-0 w-full bg-white border-t border-slate-200 py-3 px-6 z-50 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
@@ -285,20 +238,10 @@
             <i class="fa-solid fa-house text-xl"></i>
             <span class="text-[10px] font-bold">Beranda</span>
         </a>
-        <a href="tugas.html"
-            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
-            <i class="fa-solid fa-list-check text-xl"></i>
-            <span class="text-[10px] font-medium">Tugas</span>
-        </a>
         <a href="modul.html"
             class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
             <i class="fa-solid fa-compass text-xl"></i>
             <span class="text-[10px] font-medium">Jelajah</span>
-        </a>
-        <a href="keaktifan.html"
-            class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
-            <i class="fa-solid fa-trophy text-xl"></i>
-            <span class="text-[10px] font-medium">Peringkat</span>
         </a>
         <a href="lainnya.html"
             class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
@@ -343,75 +286,99 @@
             }
         });
 
-        // Async Init Wrapper
+        // Async Init: Load Modules on Home
         (async function initApp() {
-            // Wait for Supabase (Polling logic handled in config.js)
             const client = await window.ensureSupabase();
+            const container = document.getElementById('home-module-list');
+
             if (!client) {
-                document.getElementById('assignment-preview').innerHTML = `
-                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
-                             <i class="fa-solid fa-wifi"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-slate-800">Offline</p>
-                            <p class="text-xs text-slate-400">Database tidak terhubung.</p>
-                        </div>
-                    `;
+                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm"><i class="fa-solid fa-wifi-slash text-2xl mb-2 block"></i>Database tidak terhubung.</div>`;
                 return;
             }
 
             try {
-                const user = checkAuth();
-                if (!user) return; // Need user for submissions
+                const user = typeof checkAuth === 'function' ? checkAuth() : null;
 
-                const nowISO = new Date().toISOString();
-
-                // 1. Fetch ALL Active Future Tasks
-                const { data: assignments } = await supabaseClient
-                    .from('assignments')
+                const { data: modules, error } = await supabaseClient
+                    .from('modules')
                     .select('*')
-                    .eq('is_active', true)
-                    .gt('deadline', nowISO)
-                    .order('deadline', { ascending: true });
+                    .eq('is_visible', true)
+                    .order('week', { ascending: true })
+                    .order('created_at', { ascending: true });
 
-                // 2. Fetch User Submissions
-                const { data: submissions } = await supabaseClient
-                    .from('assignment_submissions')
-                    .select('assignment_id')
-                    .eq('student_nim', user.nim);
+                if (error) throw error;
 
-                const submittedIds = new Set((submissions || []).map(s => s.assignment_id));
+                // Fetch progress if user is logged in
+                const { data: progressList } = user ? await supabaseClient
+                    .from('module_progress')
+                    .select('*')
+                    .eq('student_nim', user.nim)
+                    : { data: [] };
 
-                // 3. Find First Incomplete
-                const nextTask = (assignments || []).find(t => !submittedIds.has(t.id));
+                const progressMap = {};
+                if (progressList) progressList.forEach(p => progressMap[p.module_id] = p);
 
-                if (nextTask) {
-                    const container = document.getElementById('assignment-preview');
-                    container.innerHTML = `
-                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 text-red-500">
-                                 <i class="fa-solid fa-clock"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 truncate">${nextTask.title}</p>
-                                <p class="text-xs text-slate-400">Deadline: ${new Date(nextTask.deadline).toLocaleDateString('id-ID')}</p>
-                            </div>
-                            <a href="tugas.html" class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-primary-50 hover:text-primary-500 transition-colors">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </a>
-                        `;
-                } else {
-                    document.getElementById('assignment-preview').innerHTML = `
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-500">
-                                 <i class="fa-solid fa-check"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-slate-800">Semua Tugas Selesai</p>
-                                <p class="text-xs text-slate-400">Kerja bagus, tidak ada PR!</p>
-                            </div>
-                        `;
+                if (!modules || modules.length === 0) {
+                    container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>Belum ada materi tersedia.</div>`;
+                    return;
                 }
+
+                // Group by week
+                const byWeek = {};
+                modules.forEach(m => {
+                    if (!byWeek[m.week]) byWeek[m.week] = [];
+                    byWeek[m.week].push(m);
+                });
+
+                let html = '';
+                Object.keys(byWeek).sort((a, b) => a - b).forEach(week => {
+                    html += `<div class="mb-2"><span class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Minggu ${week}</span></div>`;
+                    byWeek[week].forEach(item => {
+                        const prog = progressMap[item.id] || {};
+                        const isCompleted = prog.is_completed;
+                        const isLocked = item.is_locked;
+
+                        let totalSteps = item.steps ? item.steps.length : 0;
+                        let doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
+                        let percent = isCompleted ? 100 : (totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0);
+
+                        const cardBg = isCompleted ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100';
+                        const iconBg = isLocked ? 'bg-slate-100' : (isCompleted ? 'bg-emerald-100' : 'bg-primary-50');
+                        const iconEl = isLocked
+                            ? '<i class="fa-solid fa-lock text-slate-400"></i>'
+                            : (isCompleted
+                                ? '<i class="fa-solid fa-check text-emerald-500"></i>'
+                                : '<i class="fa-solid fa-book-open text-primary-500"></i>');
+                        const href = isLocked ? 'javascript:void(0)' : `detail_modul.html?id=${item.id}`;
+                        const click = isLocked ? `onclick="VisualModal.alert('Modul ini belum dibuka.', 'Terkunci', 'lock');return false;"` : '';
+                        const progressBar = isLocked ? '' : `
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 bg-slate-100 rounded-full h-1 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-primary-500'}" style="width:${percent}%"></div>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400">${percent}%</span>
+                            </div>`;
+
+                        html += `
+                            <a href="${href}" ${click} class="group flex items-center gap-4 p-4 rounded-2xl border ${cardBg} shadow-sm hover:shadow-md transition-all mb-2 block">
+                                <div class="w-10 h-10 rounded-full ${iconBg} flex items-center justify-center shrink-0">
+                                    ${iconEl}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-slate-800 text-sm leading-tight truncate group-hover:text-primary-600 transition-colors">${item.topic}</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5 line-clamp-1">${item.description || 'Pelajari materi ini.'}</p>
+                                    ${progressBar}
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors shrink-0"></i>
+                            </a>`;
+                    });
+                });
+
+                container.innerHTML = html;
+
             } catch (e) {
-                console.error("Assignment fetch error", e);
+                console.error(e);
+                container.innerHTML = `<p class="text-red-500 text-center text-sm">Gagal memuat materi.</p>`;
             }
         })();
 
