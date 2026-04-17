@@ -61,6 +61,30 @@
                 opacity: 1;
             }
         }
+
+        /* LKPD Sidebar Styles */
+        #lkpd-sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 45;
+        }
+        
+        body.lkpd-open #lkpd-sidebar {
+            transform: translateX(0);
+        }
+
+        body:not(.lkpd-open) #lkpd-sidebar {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 1024px) {
+            body.lkpd-open #page-container {
+                margin-left: 24rem; /* Match sidebar width lg:w-96 */
+                width: calc(100% - 24rem);
+            }
+            #page-container {
+                transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
     </style>
     <!-- Supabase SDK MUST load before config.js -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -147,11 +171,33 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <button id="lkpd-toggle-btn" onclick="toggleLKPD()" class="hidden items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-xl font-bold text-xs hover:bg-orange-100 transition-all border border-orange-100">
+                <i class="fa-solid fa-file-contract"></i>
+                <span class="hidden sm:inline">Buka LKPD</span>
+            </button>
             <div class="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-500">
                 <i class="fa-solid fa-book-open text-xs"></i>
             </div>
         </div>
     </header>
+
+    <!-- LKPD Sidebar -->
+    <aside id="lkpd-sidebar" class="fixed top-[73px] left-0 bottom-0 w-full lg:w-96 bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 text-sm">Lembar Kerja (LKPD)</h3>
+            </div>
+            <button onclick="toggleLKPD()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-auto bg-slate-100 relative" id="lkpd-content-wrapper">
+             <iframe id="lkpd-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+        </div>
+    </aside>
 
     <!-- Content -->
     <main class="px-4 py-6 flex-1 flex flex-col relative overflow-hidden" id="page-container">
@@ -337,6 +383,12 @@
             } catch (e) {
                 console.error("Load Detail Error:", e);
             } finally {
+                if (moduleData && moduleData.lkpd_url) {
+                    const lkpdBtn = document.getElementById('lkpd-toggle-btn');
+                    if (lkpdBtn) lkpdBtn.classList.remove('hidden');
+                    if (lkpdBtn) lkpdBtn.classList.add('flex');
+                }
+
                 // HIDE LOADER
                 const loader = document.getElementById('fake-loader');
                 if (loader) {
@@ -376,6 +428,30 @@
             }
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleLKPD() {
+            const isOpening = !document.body.classList.contains('lkpd-open');
+            document.body.classList.toggle('lkpd-open');
+            
+            const btn = document.getElementById('lkpd-toggle-btn');
+            if (btn) {
+                btn.querySelector('span').innerText = isOpening ? 'Tutup LKPD' : 'Buka LKPD';
+                btn.className = isOpening 
+                    ? "flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-all shadow-lg"
+                    : "flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-xl font-bold text-xs hover:bg-orange-100 transition-all border border-orange-100";
+            }
+
+            // Sync iframe content if opening and not loaded
+            const iframe = document.getElementById('lkpd-iframe');
+            if (isOpening && moduleData && moduleData.lkpd_url && iframe.src === 'about:blank') {
+                iframe.src = moduleData.lkpd_url;
+            }
+            
+            // On mobile, if we open LKPD, maybe we want to scroll to top
+            if (isOpening && window.innerWidth < 1024) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         async function changePage(dir) {
