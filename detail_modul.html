@@ -1213,15 +1213,18 @@
             try {
                 const { data } = await supabaseClient.from('sesi_kelas').select('halaman_aktif').eq('kode_kelas', groupData.kodeAjar).single();
                 if (data && data.halaman_aktif !== undefined) {
-                    currentPageIndex = data.halaman_aktif;
-                    
-                    if (currentPageIndex > 0) {
-                        const overlay = document.getElementById('waiting-room-overlay');
-                        if (overlay) {
-                            overlay.classList.add('hidden');
-                            overlay.classList.remove('flex');
+                    if (currentPageIndex !== data.halaman_aktif) {
+                        currentPageIndex = data.halaman_aktif;
+                        
+                        if (currentPageIndex > 0) {
+                            const overlay = document.getElementById('waiting-room-overlay');
+                            if (overlay) {
+                                overlay.classList.add('hidden');
+                                overlay.classList.remove('flex');
+                            }
                         }
                         updatePaging();
+                        if (window.SFX && currentPageIndex > 0) window.SFX.play('success');
                     }
                 }
             } catch(e) {
@@ -1316,6 +1319,11 @@
                         } else {
                              clearInterval(pingInterval);
                         }
+                    }, 3000);
+                    
+                    // Fallback polling to guarantee sync works even if Realtime is disabled
+                    setInterval(() => {
+                        fetchTeacherState();
                     }, 3000);
                 }
             });
