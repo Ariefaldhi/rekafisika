@@ -162,6 +162,58 @@
         <p class="text-slate-500 font-bold mt-20 animate-pulse uppercase tracking-widest text-xs">Memuat Materi...</p>
     </div>
 
+    <!-- Waiting Room Overlay -->
+    <div id="waiting-room-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[100] hidden flex-col items-center justify-center p-6">
+        <div class="max-w-2xl w-full bg-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-500 to-orange-500"></div>
+            
+            <div id="wr-teacher-view" class="hidden">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-500 text-2xl">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-800">Ruang Tunggu Kelas</h2>
+                    <p class="text-slate-500 text-sm mt-2">Kode Akses: <span id="wr-kode-ajar" class="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded"></span></p>
+                </div>
+                
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-8 min-h-[200px]">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-700 text-sm">Peserta yang Bergabung</h3>
+                        <span id="wr-count" class="bg-primary-100 text-primary-700 text-xs font-bold px-3 py-1 rounded-full">0 Kelompok</span>
+                    </div>
+                    <div id="wr-student-list" class="flex flex-wrap gap-3">
+                        <div class="text-center w-full text-slate-400 text-sm py-8 w-empty-state">Belum ada peserta masuk...</div>
+                    </div>
+                </div>
+                
+                <button onclick="startSession()" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-white text-xs uppercase tracking-widest transition-all shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> Mulai Sesi Pembelajaran
+                </button>
+            </div>
+
+            <div id="wr-student-view" class="hidden text-center py-8">
+                <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                    <div class="w-full h-full border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin absolute"></div>
+                    <i class="fa-solid fa-hourglass-half text-3xl text-orange-400 animate-pulse"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2">Menunggu Guru...</h2>
+                <p class="text-slate-500 text-sm leading-relaxed">Anda sudah terdaftar. Tunggu aba-aba dari guru Anda untuk memulai sesi pembelajaran sinkron ini.</p>
+                
+                <div class="mt-8 inline-block bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-left w-full max-w-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center text-slate-400">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Sesi Aktif</p>
+                            <p id="wr-student-kode" class="font-bold text-slate-700 text-sm">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
@@ -380,8 +432,8 @@
                         <div class="p-6 bg-slate-900 rounded-3xl text-white shadow-xl shadow-slate-900/20 relative overflow-hidden group">
                              <div class="relative z-10">
                                 <h4 class="font-bold text-lg mb-2">Siap untuk mulai?</h4>
-                                <p class="text-xs text-slate-400 leading-relaxed mb-6">Klik tombol di bawah setelah mengisi data kelompok dengan benar.</p>
-                                <button onclick="changePage(1)" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all">Mulai Petualangan</button>
+                                <p id="cover-help-text" class="text-xs text-slate-400 leading-relaxed mb-6">Klik tombol di bawah setelah mengisi data kelompok dengan benar.</p>
+                                <button id="cover-action-btn" onclick="enterWaitingRoom()" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-primary-500/20"><i class="fa-solid fa-door-open mr-2"></i>Gabung Kelas</button>
                              </div>
                              <i class="fa-solid fa-rocket absolute -right-4 -bottom-4 text-8xl text-white/5 -rotate-12 group-hover:rotate-0 transition-transform duration-700"></i>
                         </div>
@@ -477,7 +529,8 @@
                     groupData.kodeAjar = user.teaching_code;
                 }
 
-                // Pre-fill form if on step 0
+                // Handle Cover Logic based on Role
+                const isTeacherState = user && (user.role === 'teacher' || user.role === 'admin');
                 setTimeout(() => {
                     const kodeInput = document.getElementById('reg-kode-ajar');
                     if (kodeInput) {
@@ -487,8 +540,19 @@
                             kodeInput.classList.add('bg-slate-100', 'text-slate-400');
                             kodeInput.title = "Terkunci: Anda masuk menggunakan kode ini.";
                         }
-                        document.getElementById('reg-group-name').value = groupData.namaKelompok || '';
-                        document.getElementById('reg-members').value = groupData.anggotaKelompok || '';
+                        
+                        if (isTeacherState) {
+                            document.getElementById('reg-group-name').value = 'GURU'; // Auto fill for teacher
+                            document.getElementById('reg-group-name').parentElement.style.display = 'none';
+                            document.getElementById('reg-members').value = user.nama || 'Guru';
+                            document.getElementById('reg-members').parentElement.style.display = 'none';
+                            
+                            document.getElementById('cover-action-btn').innerHTML = '<i class="fa-solid fa-chalkboard-user mr-2"></i>Buka Ruang Tunggu';
+                            document.getElementById('cover-help-text').innerText = 'Sebagai guru, Anda dapat membuka ruang tunggu sebelum memulai sesi sinkron.';
+                        } else {
+                            document.getElementById('reg-group-name').value = groupData.namaKelompok || '';
+                            document.getElementById('reg-members').value = groupData.anggotaKelompok || '';
+                        }
                     }
                 }, 500);
 
@@ -507,10 +571,6 @@
                 
                 // Apply Teacher-Paced Constraints
                 applyRoleRestrictions();
-                const currentUser = checkAuth();
-                if (currentUser && currentUser.role !== 'teacher' && currentUser.role !== 'admin' && groupData && groupData.kodeAjar) {
-                     fetchTeacherState();
-                }
 
             } catch (e) {
                 console.error("Load Detail Error:", e);
@@ -586,28 +646,63 @@
             }
         }
 
+        async function enterWaitingRoom() {
+            const user = checkAuth();
+            const isTeacher = user && (user.role === 'teacher' || user.role === 'admin');
+            
+            const kode = document.getElementById('reg-kode-ajar').value.trim().toUpperCase();
+            const nama = document.getElementById('reg-group-name').value.trim();
+            const members = document.getElementById('reg-members').value.trim();
+
+            if (!kode || !nama || !members) {
+                return VisualModal.alert('Silakan lengkapi data kelompok dan Kode Pengajaran Guru sebelum memulai.', 'Data Belum Lengkap', 'warning');
+            }
+            
+            groupData = { kodeAjar: kode, namaKelompok: nama, anggotaKelompok: members };
+            sessionStorage.setItem(`group_${id}`, JSON.stringify(groupData));
+
+            // Show Overlay
+            const overlay = document.getElementById('waiting-room-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            if (isTeacher) {
+                document.getElementById('wr-teacher-view').classList.remove('hidden');
+                document.getElementById('wr-student-view').classList.add('hidden');
+                document.getElementById('wr-kode-ajar').innerText = kode;
+                
+                // Set DB to waiting room state (0)
+                await updateSesiKelas(0);
+                initRealtimeSync(true); // as teacher
+            } else {
+                document.getElementById('wr-student-view').classList.remove('hidden');
+                document.getElementById('wr-teacher-view').classList.add('hidden');
+                document.getElementById('wr-student-kode').innerText = kode;
+                
+                initRealtimeSync(false); // as student
+                // Initial check in case teacher already started
+                fetchTeacherState();
+            }
+        }
+
+        async function startSession() {
+            // Dismiss WR
+            const overlay = document.getElementById('waiting-room-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            
+            // Move to Page 1
+            changePage(1);
+        }
+
         async function changePage(dir) {
             const user = checkAuth();
             const isTeacher = user && (user.role === 'teacher' || user.role === 'admin');
 
-            // STEP 0 VALIDATION (Group Registration)
-            if (currentPageIndex === 0 && dir === 1) {
-                const kode = document.getElementById('reg-kode-ajar').value.trim().toUpperCase();
-                const nama = document.getElementById('reg-group-name').value.trim();
-                const members = document.getElementById('reg-members').value.trim();
-
-                if (!kode || !nama || !members) {
-                    return VisualModal.alert('Silakan lengkapi data kelompok dan Kode Pengajaran Guru sebelum memulai.', 'Data Belum Lengkap', 'warning');
-                }
-                
-                groupData = { kodeAjar: kode, namaKelompok: nama, anggotaKelompok: members };
-                sessionStorage.setItem(`group_${id}`, JSON.stringify(groupData));
-
-                if (!isTeacher) {
-                    initRealtimeSync();
-                    fetchTeacherState();
-                    return;
-                }
+            // Cover phase is no longer handled here directly (we use enterWaitingRoom), but just in case we are at 0 moving to 1
+            if (currentPageIndex === 0 && dir === 1 && !isTeacher) {
+                // Students shouldn't trigger this manually
+                return;
             }
 
             if (dir === 1 && currentPageIndex === totalPages - 1) {
@@ -1119,35 +1214,111 @@
                 const { data } = await supabaseClient.from('sesi_kelas').select('halaman_aktif').eq('kode_kelas', groupData.kodeAjar).single();
                 if (data && data.halaman_aktif !== undefined) {
                     currentPageIndex = data.halaman_aktif;
-                } else {
-                    currentPageIndex = 1;
+                    
+                    if (currentPageIndex > 0) {
+                        const overlay = document.getElementById('waiting-room-overlay');
+                        if (overlay) {
+                            overlay.classList.add('hidden');
+                            overlay.classList.remove('flex');
+                        }
+                        updatePaging();
+                    }
                 }
-                updatePaging();
             } catch(e) {
-                currentPageIndex = 1;
-                updatePaging();
+                // Ignore if not present yet
             }
         }
 
-        function initRealtimeSync() {
-            if (!groupData || !groupData.kodeAjar) return;
-            if (realtimeChannel) return;
+        let pingInterval;
+        let joinedGroups = new Set();
+
+        function renderJoinedGroups() {
+            const container = document.getElementById('wr-student-list');
+            const countLabel = document.getElementById('wr-count');
+            const emptyLabel = container.querySelector('.w-empty-state');
             
-            realtimeChannel = supabaseClient.channel('realtime_sesi_kelas')
-                .on('postgres_changes', { 
-                    event: '*', 
-                    schema: 'public', 
-                    table: 'sesi_kelas', 
-                    filter: `kode_kelas=eq.${groupData.kodeAjar}` 
-                }, (payload) => {
-                    const newPage = payload.new.halaman_aktif;
-                    if (newPage !== undefined && newPage !== currentPageIndex) {
-                        currentPageIndex = newPage;
-                        updatePaging();
-                        if (window.SFX) window.SFX.play('success');
+            if (joinedGroups.size > 0 && emptyLabel) {
+                emptyLabel.style.display = 'none';
+            }
+            
+            // Render new chips
+            container.innerHTML = '';
+            if (joinedGroups.size === 0) {
+                container.innerHTML = '<div class="text-center w-full text-slate-400 text-sm py-8 w-empty-state">Belum ada peserta masuk...</div>';
+            } else {
+                joinedGroups.forEach(grp => {
+                    const chip = document.createElement('div');
+                    chip.className = 'px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm flex items-center gap-2 animate-slide-up';
+                    chip.innerHTML = `<i class="fa-solid fa-user-check text-emerald-500"></i> ${grp}`;
+                    container.appendChild(chip);
+                });
+            }
+            countLabel.innerText = `${joinedGroups.size} Kelompok`;
+        }
+
+        function initRealtimeSync(isTeacher) {
+            if (!groupData || !groupData.kodeAjar) return;
+            if (realtimeChannel) return; // Prevent double trigger
+            
+            realtimeChannel = supabaseClient.channel(`room_${groupData.kodeAjar}`, {
+                config: { broadcast: { self: true }, presence: { key: groupData.namaKelompok } } // Optional presence fallback, mainly broadcast
+            });
+            
+            // Listen to Postgres Changes (for page navigation)
+            realtimeChannel.on('postgres_changes', { 
+                event: '*', 
+                schema: 'public', 
+                table: 'sesi_kelas', 
+                filter: `kode_kelas=eq.${groupData.kodeAjar}` 
+            }, (payload) => {
+                const newPage = payload.new.halaman_aktif;
+                
+                if (newPage !== undefined && newPage !== currentPageIndex) {
+                    currentPageIndex = newPage;
+                    
+                    // If moving away from 0, dismiss waiting room
+                    if (newPage > 0) {
+                        const overlay = document.getElementById('waiting-room-overlay');
+                        if (overlay) {
+                            overlay.classList.add('hidden');
+                            overlay.classList.remove('flex');
+                        }
                     }
-                })
-                .subscribe();
+                    
+                    if (newPage > 0 || isTeacher) {
+                        updatePaging();
+                    }
+                    if (window.SFX && newPage > 0) window.SFX.play('success');
+                }
+            });
+
+            // Listen to Broadcasts (for Waiting Room Presence)
+            if (isTeacher) {
+                realtimeChannel.on('broadcast', { event: 'ping' }, (payload) => {
+                    const groupName = payload.payload.group;
+                    if (groupName && !joinedGroups.has(groupName)) {
+                        joinedGroups.add(groupName);
+                        renderJoinedGroups();
+                    }
+                });
+            }
+
+            realtimeChannel.subscribe((status) => {
+                if (status === 'SUBSCRIBED' && !isTeacher) {
+                    // Send out ping every 3 seconds while in WR
+                    pingInterval = setInterval(() => {
+                        if (currentPageIndex === 0) { // Only ping if in waiting room state
+                             realtimeChannel.send({
+                                type: 'broadcast',
+                                event: 'ping',
+                                payload: { group: groupData.namaKelompok }
+                             });
+                        } else {
+                             clearInterval(pingInterval);
+                        }
+                    }, 3000);
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
