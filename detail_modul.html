@@ -504,6 +504,14 @@
                 }
                 
                 if (window.MathJax) MathJax.typesetPromise();
+                
+                // Apply Teacher-Paced Constraints
+                applyRoleRestrictions();
+                const currentUser = checkAuth();
+                if (currentUser && currentUser.role !== 'teacher' && currentUser.role !== 'admin' && groupData && groupData.kodeAjar) {
+                     fetchTeacherState();
+                }
+
             } catch (e) {
                 console.error("Load Detail Error:", e);
             } finally {
@@ -580,6 +588,8 @@
 
         async function changePage(dir) {
             const user = checkAuth();
+            const isTeacher = user && (user.role === 'teacher' || user.role === 'admin');
+
             // STEP 0 VALIDATION (Group Registration)
             if (currentPageIndex === 0 && dir === 1) {
                 const kode = document.getElementById('reg-kode-ajar').value.trim().toUpperCase();
@@ -592,6 +602,12 @@
                 
                 groupData = { kodeAjar: kode, namaKelompok: nama, anggotaKelompok: members };
                 sessionStorage.setItem(`group_${id}`, JSON.stringify(groupData));
+
+                if (!isTeacher) {
+                    initRealtimeSync();
+                    fetchTeacherState();
+                    return;
+                }
             }
 
             if (dir === 1 && currentPageIndex === totalPages - 1) {
@@ -602,6 +618,10 @@
             if (nextIdx >= 0 && nextIdx < totalPages) {
                 currentPageIndex = nextIdx;
                 updatePaging();
+                
+                if (isTeacher) {
+                    updateSesiKelas(currentPageIndex);
+                }
             }
         }
 
@@ -1041,6 +1061,93 @@
                 console.error(e);
                 VisualModal.alert('Gagal menyimpan progress: ' + e.message, 'Error', 'error');
             }
+        }
+
+        // --- TEACHER PACED MODE LOGIC ---
+        let realtimeChannel = null;
+
+        function applyRoleRestrictions() {
+            const user = checkAuth();
+            const isTeacher = user && (user.role === 'teacher' || user.role === 'admin');
+
+            if (!isTeacher) {
+                const btnPrev = document.getElementById('btn-prev');
+                const btnNext = document.getElementById('btn-next');
+                if (btnPrev) btnPrev.style.display = 'none';
+                if (btnNext) btnNext.style.display = 'none';
+
+                const counterParent = document.getElementById('step-counter').parentElement;
+                if (!document.getElementById('sync-status')) {
+                    const syncStatus = document.createElement('div');
+                    syncStatus.id = 'sync-status';
+                    syncStatus.className = 'w-full text-center text-[10px] font-bold text-primary-500 tracking-widest uppercase mt-1 animate-pulse';
+                    syncStatus.innerHTML = '<i class="fa-solid fa-tower-broadcast mr-1"></i> Sinkronisasi Layar Aktif';
+                    counterParent.appendChild(syncStatus);
+                }
+                
+                if (groupData && groupData.kodeAjar) {
+                    initRealtimeSync();
+                }
+            } else {
+                 const counterParent = document.getElementById('step-counter').parentElement;
+                 if (!document.getElementById('teacher-status')) {
+                    const tStatus = document.createElement('div');
+                    tStatus.id = 'teacher-status';
+                    tStatus.className = 'w-full text-center text-[10px] font-bold text-orange-500 tracking-widest uppercase mt-1';
+                    tStatus.innerHTML = '<i class="fa-solid fa-chalkboard-user mr-1"></i> Kendali Guru Aktif';
+                    counterParent.appendChild(tStatus);
+                 }
+            }
+        }
+
+        async function updateSesiKelas(pageIndex) {
+            if (!groupData || !groupData.kodeAjar) return;
+            try {
+                await supabaseClient.from('sesi_kelas').upsert({
+                    kode_kelas: groupData.kodeAjar,
+                    halaman_aktif: pageIndex,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'kode_kelas' });
+            } catch(e) {
+                console.error("Gagal update sesi_kelas", e);
+            }
+        }
+
+        async function fetchTeacherState() {
+            if (!groupData || !groupData.kodeAjar) return;
+            try {
+                const { data } = await supabaseClient.from('sesi_kelas').select('halaman_aktif').eq('kode_kelas', groupData.kodeAjar).single();
+                if (data && data.halaman_aktif !== undefined) {
+                    currentPageIndex = data.halaman_aktif;
+                } else {
+                    currentPageIndex = 1;
+                }
+                updatePaging();
+            } catch(e) {
+                currentPageIndex = 1;
+                updatePaging();
+            }
+        }
+
+        function initRealtimeSync() {
+            if (!groupData || !groupData.kodeAjar) return;
+            if (realtimeChannel) return;
+            
+            realtimeChannel = supabaseClient.channel('realtime_sesi_kelas')
+                .on('postgres_changes', { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'sesi_kelas', 
+                    filter: `kode_kelas=eq.${groupData.kodeAjar}` 
+                }, (payload) => {
+                    const newPage = payload.new.halaman_aktif;
+                    if (newPage !== undefined && newPage !== currentPageIndex) {
+                        currentPageIndex = newPage;
+                        updatePaging();
+                        if (window.SFX) window.SFX.play('success');
+                    }
+                })
+                .subscribe();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
