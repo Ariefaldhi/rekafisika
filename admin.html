@@ -51,6 +51,7 @@
 <body class="bg-ui-bg text-ui-text font-inter antialiased selection:bg-primary-500 selection:text-white">
     <!-- Config -->
     <script src="config.js"></script>
+    <script src="auth-guard.js"></script>
 
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -1306,14 +1307,14 @@
             const idx = container.querySelectorAll('.phet-table-item').length + 1;
             const div = document.createElement('div');
             div.className = 'phet-table-item bg-white p-2 rounded border border-emerald-200 space-y-2';
-            div.innerHTML = \`
+            div.innerHTML = `
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-slate-500">Tabel \${idx}</span>
+                    <span class="text-[10px] font-bold text-slate-500">Tabel ${idx}</span>
                     <button type="button" onclick="this.closest('.phet-table-item').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-trash text-xs"></i></button>
                 </div>
                 <input type="text" class="phet-t-cols w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Judul Kolom (cth: Waktu, Jarak, Kecepatan)">
                 <input type="number" class="phet-t-rows w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Jumlah Baris Kosong">
-            \`;
+            `;
             container.appendChild(div);
         }
 
