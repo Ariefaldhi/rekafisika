@@ -235,13 +235,21 @@
 
                     if (!data.user) throw new Error('Gagal memuat profil pengguna.');
 
+                    // Get teaching code if it exists
+                    const { data: profile } = await supabaseClient
+                        .from('profiles')
+                        .select('teaching_code')
+                        .eq('nim', data.user.email)
+                        .maybeSingle();
+
                     // Sync legacy user_session structure
                     const meta = data.user.user_metadata || {};
                     localStorage.setItem('user_session', JSON.stringify({
                         role: meta.role || 'teacher',
                         nama: meta.nama || 'Pengguna',
                         nim: data.user.email, // Use email automatically as the identifier
-                        email: data.user.email
+                        email: data.user.email,
+                        teaching_code: profile ? profile.teaching_code : null
                     }));
 
                     window.location.href = 'index.html';
@@ -272,12 +280,20 @@
                     const userEmail = data.user.email;
                     const userId = data.user.id;
 
+                    // Automatically generate a mixed alphanumeric teaching code
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let teachingCode = '';
+                    for (let i = 0; i < 6; i++) {
+                        teachingCode += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+
                     // --- Insert ke tabel students agar semua fitur yang bergantung pada nim bisa berfungsi ---
                     await supabaseClient.from('students').upsert([{
                         nim: userEmail,          // email dipakai sebagai identifier utama
                         name: nameUser,
                         role: 'teacher',
-                        access_code: null
+                        access_code: null,
+                        teaching_code: teachingCode
                     }], { onConflict: 'nim' });
 
                     // --- Insert ke tabel profiles agar terhubung dengan auth ---
@@ -285,14 +301,16 @@
                         id: userId,
                         nim: userEmail,
                         nama: nameUser,
-                        role: 'teacher'
+                        role: 'teacher',
+                        teaching_code: teachingCode
                     }], { onConflict: 'id' });
 
                     localStorage.setItem('user_session', JSON.stringify({
                         role: meta.role || 'teacher',
                         nama: meta.nama || nameUser,
                         nim: userEmail, // Use email as identifier
-                        email: userEmail
+                        email: userEmail,
+                        teaching_code: teachingCode
                     }));
 
                     alert('Pendaftaran berhasil! Selamat bergabung di RekaFisika.');

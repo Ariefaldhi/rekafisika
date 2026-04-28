@@ -176,14 +176,8 @@
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2 pl-1">Kode Pengajaran (6-Digit)</label>
                     <div class="flex gap-2">
                         <div id="teaching-code-display" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black tracking-[0.5em] text-center uppercase text-primary-600">
-                            ------
+                            Memuat...
                         </div>
-                        <button onclick="generateNewCode()" class="bg-slate-100 text-slate-600 px-4 rounded-xl font-bold text-xs hover:bg-slate-200 transition-colors" title="Generate Baru">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
-                        <button onclick="saveTeachingCode()" id="save-code-btn" class="bg-primary-600 text-white px-6 rounded-xl font-bold text-xs hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/20">
-                            Simpan
-                        </button>
                     </div>
                 </div>
                 <p class="text-[10px] text-slate-400 italic leading-relaxed">Kode ini akan digunakan siswa untuk mengirim hasil belajar mereka langsung ke dashboard Anda.</p>
@@ -373,44 +367,24 @@
                     user.teaching_code = data.teaching_code;
                     localStorage.setItem('user_session', JSON.stringify(user));
                 } else {
-                    generateNewCode(); // Auto generate if empty
+                    // Fallback to auto-generate for legacy accounts
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let result = '';
+                    for (let i = 0; i < 6; i++) {
+                        result += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    
+                    document.getElementById('teaching-code-display').innerText = result;
+                    user.teaching_code = result;
+                    localStorage.setItem('user_session', JSON.stringify(user));
+                    
+                    // Attempt to persist
+                    await supabaseClient.from('profiles').update({ teaching_code: result }).eq('nim', user.nim);
+                    await supabaseClient.from('students').update({ teaching_code: result }).eq('nim', user.nim);
                 }
-            } catch (e) { console.error("Error loading teaching code", e); }
-        }
-
-        function generateNewCode() {
-            const chars = '0123456789';
-            let result = '';
-            for (let i = 0; i < 6; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('teaching-code-display').innerText = result;
-        }
-
-        async function saveTeachingCode() {
-            const user = checkAuth();
-            const code = document.getElementById('teaching-code-display').innerText.trim();
-            if (code === '------') return;
-
-            const btn = document.getElementById('save-code-btn');
-            btn.disabled = true;
-            btn.innerText = '...';
-
-            try {
-                // Update in both profiles and students for consistency
-                const { error: err1 } = await supabaseClient.from('profiles').update({ teaching_code: code }).eq('nim', user.nim);
-                const { error: err2 } = await supabaseClient.from('students').update({ teaching_code: code }).eq('nim', user.nim);
-
-                if (err1 || err2) throw (err1 || err2);
-
-                user.teaching_code = code;
-                localStorage.setItem('user_session', JSON.stringify(user));
-                VisualModal.alert('Kode pengajaran berhasil disimpan!', 'Sukses', 'success');
             } catch (e) {
-                VisualModal.alert('Gagal menyimpan kode: ' + e.message, 'Error', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Simpan';
+                console.error("Error loading teaching code", e);
+                document.getElementById('teaching-code-display').innerText = "ERROR";
             }
         }
 
