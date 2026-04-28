@@ -1162,6 +1162,7 @@
                         score: 100,
                         submitted_at: new Date().toISOString()
                     }, { onConflict: 'student_nim, assignment_id' });
+                }
 
                 if (autoSubmit) {
                     await VisualModal.alert('Sesi telah diakhiri oleh Guru. Semua pekerjaan dan tugasmu telah otomatis dikumpulkan!', 'Sesi Berakhir', 'success');
