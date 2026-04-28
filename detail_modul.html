@@ -363,6 +363,7 @@
 
             moduleData = modul;
             const user = checkAuth();
+            const isTeacherState = user && (user.role === 'teacher' || user.role === 'admin');
 
             document.title = `${modul.topic} | RekaFisika`;
             document.getElementById('m-title').innerText = modul.topic;
@@ -466,9 +467,13 @@
                                 </div>
                             </div>`;
                         } else if (step.type === 'video') {
-                            const playerId = `yt-player-${idx}`;
-                            contentHtml = `<div class="mt-2 relative w-full"><div id="${playerId}" class="aspect-video w-full rounded-3xl overflow-hidden shadow-2xl bg-slate-900"></div>${ step.end_time ? `<p class="text-[10px] text-slate-400 mt-3 text-center font-bold tracking-widest uppercase">⏱ Waktunya Tonton: ${formatTime(step.start_time || 0)} — ${formatTime(step.end_time)}</p>` : '' }</div>`;
-                            setTimeout(() => initRestrictedYT(playerId, step.url, step.start_time || 0, step.end_time || null), 500);
+                            if (isTeacherState) {
+                                const playerId = `yt-player-${idx}`;
+                                contentHtml = `<div class="mt-2 relative w-full"><div id="${playerId}" class="aspect-video w-full rounded-3xl overflow-hidden shadow-2xl bg-slate-900"></div>${ step.end_time ? `<p class="text-[10px] text-slate-400 mt-3 text-center font-bold tracking-widest uppercase">⏱ Waktunya Tonton: ${formatTime(step.start_time || 0)} — ${formatTime(step.end_time)}</p>` : '' }</div>`;
+                                setTimeout(() => initRestrictedYT(playerId, step.url, step.start_time || 0, step.end_time || null), 500);
+                            } else {
+                                contentHtml = `<div class="mt-2 p-10 bg-slate-50 rounded-3xl border border-slate-200 flex flex-col items-center justify-center text-center gap-4 min-h-[300px] shadow-sm"><div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-primary-400 text-3xl shadow-sm mb-2 animate-pulse"><i class="fa-solid fa-desktop"></i></div><h4 class="text-xl font-black text-slate-800">Perhatikan Layar Guru</h4><p class="text-sm font-medium text-slate-500 max-w-sm leading-relaxed">Perhatikan video yang di tampilkan oleh guru kamu.</p></div>`;
+                            }
                         } else if (step.type === 'phet') {
                             contentHtml = `<div class="mt-2 space-y-4 w-full"><div class="flex items-start gap-4 p-4 bg-yellow-50/50 border border-yellow-200 rounded-2xl"><i class="fa-solid fa-lightbulb text-yellow-500 mt-1"></i><p class="text-xs text-yellow-800 italic leading-relaxed">Eksplorasi simulasi di bawah. Jika instruksi kurang jelas, silakan buka <span class="font-bold underline cursor-pointer" onclick="window.open('${modul.lkpd_url}', '_blank')">LKPD</span> kembali.</p></div><div class="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xl" style="height:580px"><iframe src="${step.url}" class="w-full h-full" allowfullscreen sandbox="allow-scripts allow-same-origin"></iframe></div></div>`;
                         } else if (step.type === 'refleksi') {
@@ -530,7 +535,6 @@
                 }
 
                 // Handle Cover Logic based on Role
-                const isTeacherState = user && (user.role === 'teacher' || user.role === 'admin');
                 setTimeout(() => {
                     const kodeInput = document.getElementById('reg-kode-ajar');
                     if (kodeInput) {
