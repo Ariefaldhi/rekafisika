@@ -180,6 +180,24 @@
         tabRegister.addEventListener('click', () => toggleMode('register'));
         tabCode.addEventListener('click', () => toggleMode('code'));
 
+        // Handle Auto-Code from Landing Page
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceMode = urlParams.get('mode');
+            const forceKode = urlParams.get('kode');
+
+            if (forceMode === 'code') {
+                toggleMode('code');
+                if (forceKode) {
+                    document.getElementById('guest-code').value = forceKode.toUpperCase();
+                    // Auto submit for frictionless entry
+                    setTimeout(() => {
+                        document.getElementById('auth-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }, 300);
+                }
+            }
+        });
+
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -317,11 +335,14 @@
                     .maybeSingle();
 
                 if (sesiError) {
+                    if (sesiError.message && sesiError.message.includes('module_id')) {
+                        throw new Error("ERROR DATABASE: Kolom 'module_id' belum ditambahkan ke tabel 'sesi_kelas'. Silakan jalankan perintah SQL yang diberikan Asisten di Supabase.");
+                    }
                     console.warn("Warning database:", sesiError.message);
                 }
 
                 if (!sesi || !sesi.module_id) {
-                    throw new Error('Guru kamu belum memulai sesi pengajaran. Tunggu instruksi guru lalu coba lagi!');
+                    throw new Error('Guru kamu belum memulai sesi pengajaran (Atau Guru gagal menyimpan ruang tunggu). Tunggu instruksi selanjutnya!');
                 }
 
                 // Success - Create Guest Session

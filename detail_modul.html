@@ -1122,11 +1122,35 @@
                 });
             });
         }
-        async function completeModule(moduleId, user) {
+        async function completeModule(moduleId, user, autoSubmit = false) {
             if (!user) { await VisualModal.alert('Silakan login terlebih dahulu.', 'Akses Ditolak', 'error'); return; }
-            if (!await VisualModal.confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.', 'Konfirmasi Selesai')) return;
+            
+            const isTeacher = user && (user.role === 'teacher' || user.role === 'admin');
+
+            if (isTeacher) {
+                if (!await VisualModal.confirm('Akhiri sesi dan simpan secara otomatis SEMUA pekerjaan dan jawaban refleksi seluruh kelompok yang tergabung?', 'Akhiri Sesi Mengajar')) return;
+                
+                if (realtimeChannel) {
+                    realtimeChannel.send({ type: 'broadcast', event: 'session_ended', payload: {} });
+                }
+                
+                if (groupData && groupData.kodeAjar) {
+                     await supabaseClient.from('sesi_kelas').delete().eq('kode_kelas', groupData.kodeAjar);
+                }
+                
+                await VisualModal.alert('Sesi berhasil diakhiri. Pekerjaan murid sedang dikumpulkan.', 'Sesi Selesai', 'success');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!autoSubmit && !await VisualModal.confirm('Apakah anda sudah mempelajari semua materi? Tugas terkait akan otomatis ditandai selesai.', 'Konfirmasi Selesai')) return;
 
             try {
+                if (autoSubmit) {
+                    document.querySelectorAll('button[onclick^="saveRefleksiAnswers"]').forEach(b => { try { b.click(); } catch(e) {} });
+                    await new Promise(r => setTimeout(r, 2000)); // wait for saves to flush
+                }
+
                 // 1. Mark Module Progress
                 await supabaseClient.from('module_progress').upsert({
                     student_nim: user.nim,
@@ -1151,12 +1175,22 @@
                         submitted_at: new Date().toISOString()
                     }, { onConflict: 'student_nim, assignment_id' });
 
-                    await VisualModal.alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan', 'Luar Biasa!', 'success');
+                if (autoSubmit) {
+                    await VisualModal.alert('Sesi telah diakhiri oleh Guru. Semua pekerjaan dan tugasmu telah otomatis dikumpulkan!', 'Sesi Berakhir', 'success');
+                    if (user.is_guest) {
+                        localStorage.removeItem('user_session');
+                        window.location.href = 'login.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else {
-                    await VisualModal.alert('Modul diselesaikan. (Tidak ada tugas terkait)', 'Sukses', 'success');
+                    if (task) {
+                        await VisualModal.alert('Selamat! Modul diselesaikan. Tugas terkait telah otomatis dikumpulkan', 'Luar Biasa!', 'success');
+                    } else {
+                        await VisualModal.alert('Modul diselesaikan. (Tidak ada tugas terkait)', 'Sukses', 'success');
+                    }
+                    window.location.href = 'index.html';
                 }
-
-                window.location.href = 'index.html';
             } catch (e) {
                 console.error(e);
                 VisualModal.alert('Gagal menyimpan progress: ' + e.message, 'Error', 'error');
@@ -1230,7 +1264,16 @@
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'kode_kelas' });
                 
-                if (error) console.warn("DB sesi_kelas error:", error.message);
+                if (error) {
+                    console.warn("DB sesi_kelas error:", error.message);
+                    if (error.message && error.message.includes("module_id")) {
+                        VisualModal.alert("Database belum mendukung kolom 'module_id'. Hubungi asisten untuk update SQL Supabase Anda!", "Database Error", "error");
+                    } else if (error.message && error.message.includes("security")) {
+                        VisualModal.alert("Gagal menyimpan ruang tunggu karena izin RLS di tabel sesi_kelas belum disetel. Jalankan instruksi SQL dari asisten.", "Keamanan Database", "error");
+                    } else {
+                        VisualModal.alert("Gagal sinkron database: " + error.message, "Akses Gagal", "error");
+                    }
+                }
             } catch(e) {
                 console.error("Gagal update sesi_kelas", e);
             }
@@ -1350,6 +1393,10 @@
                         updatePaging();
                         if (window.SFX && newPage > 0) window.SFX.play('success');
                     }
+                });
+
+                realtimeChannel.on('broadcast', { event: 'session_ended' }, () => {
+                    completeModule(id, checkAuth(), true);
                 });
             }
 
