@@ -246,65 +246,6 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="flex bg-slate-200/50 p-1 rounded-xl gap-1">
-                <button onclick="switchTab('lkpd')" id="tab-btn-lkpd" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white text-primary-600 shadow-sm">LKPD</button>
-                <button onclick="switchTab('notes')" id="tab-btn-notes" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600">Catatan</button>
-                <button onclick="switchTab('table')" id="tab-btn-table" class="tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600">Tabel Data</button>
-            </div>
-        </div>
-
-        <!-- Sidebar Content Areas -->
-        <div class="flex-1 overflow-hidden flex flex-col relative">
-            <!-- LKPD Tab -->
-            <div id="tab-content-lkpd" class="tab-pane flex-1">
-                <iframe id="lkpd-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
-            </div>
-
-            <!-- Notes Tab -->
-            <div id="tab-content-notes" class="tab-pane flex-1 hidden flex flex-col p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h4 class="font-bold text-slate-800 text-sm">Catatan Observasi</h4>
-                    <span id="notes-status" class="text-[9px] uppercase font-bold text-emerald-500 opacity-0 transition-opacity">Tersimpan</span>
-                </div>
-                <textarea id="student-notes" oninput="autoSaveNotes()" class="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none" placeholder="Ketik hasil pengamatan atau catatan penting di sini..."></textarea>
-            </div>
-
-            <!-- Table Tab -->
-            <div id="tab-content-table" class="tab-pane flex-1 hidden flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-                    <h4 class="font-bold text-slate-800 text-sm">Tabel Hasil Percobaan</h4>
-                    <div class="flex gap-2">
-                        <button onclick="addColumn()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs" title="Tambah Kolom"><i class="fa-solid fa-plus-square"></i></button>
-                        <button onclick="addRow()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs" title="Tambah Baris"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
-                <div class="flex-1 overflow-auto p-4 bg-slate-50">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-w-full inline-block">
-                        <table class="min-w-full text-xs text-left" id="dynamic-table">
-                            <thead class="bg-slate-900 text-white">
-                                <tr id="table-header">
-                                    <th class="px-4 py-3 border-r border-slate-800 font-bold w-12 text-center">No</th>
-                                    <th class="px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative">
-                                        <span contenteditable="true" onblur="saveTableData()">Variabel X</span>
-                                        <button onclick="removeCol(1)" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>
-                                    </th>
-                                    <th class="px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative">
-                                        <span contenteditable="true" onblur="saveTableData()">Variabel Y</span>
-                                        <button onclick="removeCol(2)" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                <!-- Dynamic Rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
-                    <span id="table-status" class="text-[9px] uppercase font-bold text-emerald-500 opacity-0">Tersimpan</span>
-                    <button onclick="saveTableData(true)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Simpan Tabel</button>
-                </div>
-            </div>
         </div>
     </aside>
 
@@ -491,7 +432,53 @@
                                 contentHtml = `<div class="mt-2 p-10 bg-slate-50 rounded-3xl border border-slate-200 flex flex-col items-center justify-center text-center gap-4 min-h-[300px] shadow-sm"><div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-primary-400 text-3xl shadow-sm mb-2 animate-pulse"><i class="fa-solid fa-desktop"></i></div><h4 class="text-xl font-black text-slate-800">Perhatikan Layar Guru</h4><p class="text-sm font-medium text-slate-500 max-w-sm leading-relaxed">Perhatikan video yang di tampilkan oleh guru kamu.</p></div>`;
                             }
                         } else if (step.type === 'phet') {
-                            contentHtml = `<div class="mt-2 space-y-4 w-full"><div class="flex items-start gap-4 p-4 bg-yellow-50/50 border border-yellow-200 rounded-2xl"><i class="fa-solid fa-lightbulb text-yellow-500 mt-1"></i><p class="text-xs text-yellow-800 italic leading-relaxed">Eksplorasi simulasi di bawah. Jika instruksi kurang jelas, silakan buka <span class="font-bold underline cursor-pointer" onclick="window.open('${modul.lkpd_url}', '_blank')">LKPD</span> kembali.</p></div><div class="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xl" style="height:580px"><iframe src="${step.url}" class="w-full h-full" allowfullscreen sandbox="allow-scripts allow-same-origin"></iframe></div></div>`;
+                            let phetQsHtml = '';
+                            if (step.phet_questions && step.phet_questions.length > 0) {
+                                phetQsHtml = `<div class="mt-8 space-y-4">
+                                    <h4 class="font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clipboard-question text-amber-500"></i> Pertanyaan Simulasi</h4>
+                                    ${step.phet_questions.map((q, qi) => `<div class="space-y-3 p-6 bg-slate-50 rounded-2xl border border-slate-100"><p class="text-sm font-bold text-slate-700">${qi + 1}. ${q}</p><textarea class="phet-answer w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none" rows="3" data-qi="${qi}" oninput="autoSavePhetData(this, '${id}', ${idx})" placeholder="Ketik jawabanmu di sini..."></textarea></div>`).join('')}
+                                </div>`;
+                            }
+                            
+                            let phetTbsHtml = '';
+                            if (step.phet_tables && step.phet_tables.length > 0) {
+                                phetTbsHtml = `<div class="mt-8 space-y-6">
+                                    <h4 class="font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-table border border-emerald-500 bg-emerald-100 text-emerald-600 rounded p-1 text-xs"></i> Tabel Observasi</h4>
+                                    ${step.phet_tables.map((tbl, ti) => `
+                                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto min-w-full">
+                                        <table class="min-w-full text-xs text-left phet-table" data-ti="${ti}">
+                                            <thead class="bg-slate-900 text-white">
+                                                <tr>
+                                                    <th class="px-4 py-3 border-r border-slate-800 font-bold w-12 text-center">No</th>
+                                                    ${tbl.columns.map(col => `<th class="px-4 py-3 border-r border-slate-800 font-bold min-w-[120px]">${col}</th>`).join('')}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${Array.from({length: tbl.rows}).map((_, ri) => `
+                                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors phet-row" data-ri="${ri}">
+                                                    <td class="px-4 py-3 border-r border-slate-100 text-slate-400 font-bold text-center">${ri+1}</td>
+                                                    ${tbl.columns.map((_, ci) => `<td class="px-4 py-3 border-r border-slate-100"><input type="text" data-ci="${ci}" oninput="autoSavePhetData(this, '${id}', ${idx})" class="w-full bg-transparent outline-none phet-cell" placeholder="..."></td>`).join('')}
+                                                </tr>`).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>`).join('')}
+                                </div>`;
+                            }
+
+                            contentHtml = `<div class="mt-2 space-y-4 w-full">
+                                <div class="flex items-start gap-4 p-4 bg-yellow-50/50 border border-yellow-200 rounded-2xl">
+                                    <i class="fa-solid fa-lightbulb text-yellow-500 mt-1"></i>
+                                    <div class="space-y-1 w-full flex-1">
+                                        <p class="text-xs text-yellow-800 italic leading-relaxed">Eksplorasi simulasi di bawah. Jika instruksi kurang jelas, silakan buka <span class="font-bold underline cursor-pointer" onclick="window.open('${modul.lkpd_url}', '_blank')">LKPD</span> kembali.</p>
+                                        <p id="phet-status-${idx}" class="text-[10px] font-bold tracking-widest uppercase text-emerald-600 opacity-0 transition-opacity">Tersimpan</p>
+                                    </div>
+                                </div>
+                                <div class="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xl" style="height:580px">
+                                    <iframe src="${step.url}" class="w-full h-full" allowfullscreen sandbox="allow-scripts allow-same-origin"></iframe>
+                                </div>
+                                ${phetQsHtml}
+                                ${phetTbsHtml}
+                            </div>`;
                         } else if (step.type === 'refleksi') {
                             const qHtml = (step.questions || []).map((q, qi) => `<div class="space-y-3 p-6 bg-slate-50 rounded-2xl border border-slate-100"><p class="text-sm font-bold text-slate-700">${qi + 1}. ${q}</p><textarea class="refleksi-answer w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all outline-none resize-none" rows="3" data-qi="${qi}" placeholder="Ketik jawabanmu di sini..."></textarea></div>`).join('');
                             contentHtml = `<div class="mt-2 space-y-4 w-full">${qHtml}<button onclick="saveRefleksiAnswers(this, '${id}', ${idx})" class="w-full py-4 bg-slate-900 border-b-4 border-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:transform active:translate-y-1 active:border-b-0"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Hasil Refleksi</button><div class="refleksi-status text-[10px] text-center text-slate-400 uppercase font-bold tracking-widest"></div></div>`;
@@ -560,12 +547,11 @@
                     }
                 }, 500);
 
-                // Load existing notes/table if session exists
+                // Load existing answers if session exists
                 if (user) {
                     try {
                         loadRefleksiAnswers(id, user);
-                        loadNotes(id, user);
-                        loadTableData(id, user);
+                        loadPhetAnswers(id, user);
                     } catch (err) {
                         console.error("Content Load Error:", err);
                     }
@@ -887,185 +873,115 @@
 
         // --- TOOLS SIDEBAR LOGIC ---
         function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-600";
-            });
-            document.getElementById(`tab-btn-${tab}`).className = "tab-btn flex-1 py-2 rounded-lg text-xs font-bold transition-all bg-white text-primary-600 shadow-sm";
-            
-            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
-            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
-
             if (tab === 'lkpd' && moduleData && moduleData.lkpd_url) {
                 const iframe = document.getElementById('lkpd-iframe');
-                if (iframe.src === 'about:blank') iframe.src = moduleData.lkpd_url;
+                if (iframe && (iframe.src === 'about:blank' || iframe.src === window.location.href)) {
+                    iframe.src = moduleData.lkpd_url;
+                }
             }
         }
 
-        // --- NOTES LOGIC ---
-        let notesTimer;
-        function autoSaveNotes() {
-            clearTimeout(notesTimer);
-            const status = document.getElementById('notes-status');
-            status.innerText = 'Mengetik...';
-            status.style.opacity = '1';
+        // --- PHET AUTO SAVE LOGIC ---
+        let phetTimer;
+        function autoSavePhetData(el, moduleId, stepIdx) {
+            clearTimeout(phetTimer);
+            const status = document.getElementById(`phet-status-${stepIdx}`);
+            if (status) {
+                status.innerText = 'Mengetik...';
+                status.style.opacity = '1';
+                status.classList.remove('text-emerald-600', 'text-red-500');
+                status.classList.add('text-amber-500');
+            }
 
-            notesTimer = setTimeout(async () => {
+            phetTimer = setTimeout(async () => {
                 const user = checkAuth();
-                const content = document.getElementById('student-notes').value;
                 if (!user || !moduleData) return;
 
+                const stepCard = el.closest('.step-content-wrapper');
+                
+                // Collect questions
+                const qAnswers = Array.from(stepCard.querySelectorAll('.phet-answer')).map(ta => ({
+                    question_index: parseInt(ta.dataset.qi),
+                    answer: ta.value
+                }));
+
+                // Collect tables
+                const tAnswers = Array.from(stepCard.querySelectorAll('.phet-table')).map(tbl => {
+                    const ti = parseInt(tbl.dataset.ti);
+                    const rowsData = Array.from(tbl.querySelectorAll('.phet-row')).map(row => {
+                        const cells = Array.from(row.querySelectorAll('.phet-cell')).map(inp => inp.value);
+                        return cells;
+                    });
+                    return { table_index: ti, rows: rowsData };
+                });
+
                 try {
-                    await supabaseClient.from('student_notes').upsert({
+                    await supabaseClient.from('reflection_answers').upsert({
                         student_nim: user.nim,
-                        module_id: moduleData.id,
+                        module_id: moduleId,
+                        step_index: stepIdx,
                         teaching_code: groupData.kodeAjar,
                         group_name: groupData.namaKelompok,
-                        notes: content,
+                        answers: { questions: qAnswers, tables: tAnswers },
                         updated_at: new Date().toISOString()
-                    }, { onConflict: 'student_nim, module_id, group_name' });
+                    }, { onConflict: 'student_nim, module_id, step_index' });
                     
-                    status.innerText = 'Tersimpan';
-                    setTimeout(() => { if (status.innerText === 'Tersimpan') status.style.opacity = '0'; }, 2000);
+                    if (status) {
+                        status.innerText = 'Tersimpan';
+                        status.classList.remove('text-amber-500');
+                        status.classList.add('text-emerald-600');
+                        setTimeout(() => { if (status.innerText === 'Tersimpan') status.style.opacity = '0'; }, 2000);
+                    }
                 } catch (e) {
-                    status.innerText = 'Gagal Simpan';
+                    if (status) {
+                        status.innerText = 'Gagal Simpan';
+                        status.classList.remove('text-amber-500', 'text-emerald-600');
+                        status.classList.add('text-red-500');
+                    }
                     console.error(e);
                 }
             }, 1000);
         }
 
-        async function loadNotes(moduleId, user) {
-            const { data } = await supabaseClient.from('student_notes')
-                .select('notes')
+        async function loadPhetAnswers(moduleId, user) {
+            if (!user) return;
+            const { data } = await supabaseClient.from('reflection_answers')
+                .select('*')
                 .eq('student_nim', user.nim)
                 .eq('module_id', moduleId)
-                .eq('group_name', groupData.namaKelompok)
-                .maybeSingle();
-            if (data) document.getElementById('student-notes').value = data.notes || '';
-        }
-
-        // --- TABLE LOGIC ---
-        function addRow() {
-            const tbody = document.getElementById('table-body');
-            const rowCount = tbody.rows.length + 1;
-            const colCount = document.getElementById('table-header').cells.length;
+                .eq('group_name', groupData.namaKelompok);
+            if (!data) return;
             
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
-            
-            let html = `<td class="px-4 py-3 border-r border-slate-100 text-slate-400 font-bold text-center">${rowCount}</td>`;
-            for (let i = 1; i < colCount; i++) {
-                html += `<td class="px-4 py-3 border-r border-slate-100"><input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" placeholder="..."></td>`;
-            }
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
-            saveTableData();
-        }
-
-        function addColumn() {
-            const header = document.getElementById('table-header');
-            const colIdx = header.cells.length;
-            const th = document.createElement('th');
-            th.className = "px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative";
-            th.innerHTML = `<span contenteditable="true" onblur="saveTableData()">Variabel Baru</span><button onclick="removeCol(${colIdx})" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>`;
-            header.appendChild(th);
-
-            const rows = document.getElementById('table-body').rows;
-            for (let i = 0; i < rows.length; i++) {
-                const td = document.createElement('td');
-                td.className = "px-4 py-3 border-r border-slate-100";
-                td.innerHTML = `<input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" placeholder="...">`;
-                rows[i].appendChild(td);
-            }
-            saveTableData();
-        }
-
-        function removeCol(idx) {
-            const header = document.getElementById('table-header');
-            if (header.cells.length <= 2) return; // Keep at least No + 1 Col
-            header.deleteCell(idx);
-            const rows = document.getElementById('table-body').rows;
-            for (let i = 0; i < rows.length; i++) {
-                rows[i].deleteCell(idx);
-            }
-            // Re-index remaining delete buttons
-            const ths = header.getElementsByTagName('th');
-            for (let i = 1; i < ths.length; i++) {
-                const btn = ths[i].querySelector('button');
-                if (btn) btn.setAttribute('onclick', `removeCol(${i})`);
-            }
-            saveTableData();
-        }
-
-        async function saveTableData(showPopup = false) {
-            const status = document.getElementById('table-status');
-            status.style.opacity = '1';
-            status.innerText = 'Menyimpan...';
-
-            const header = document.getElementById('table-header');
-            const columns = Array.from(header.cells).slice(1).map(th => th.querySelector('span').innerText);
-            
-            const rows = Array.from(document.getElementById('table-body').rows).map(tr => {
-                return Array.from(tr.cells).slice(1).map(td => td.querySelector('input').value);
+            data.forEach(row => {
+                const stepCard = document.querySelectorAll('.step-content-wrapper')[row.step_index];
+                if (!stepCard) return;
+                
+                if (row.answers && typeof row.answers === 'object' && !Array.isArray(row.answers)) {
+                    // It's a PhET step (stored as object)
+                    if (row.answers.questions) {
+                        row.answers.questions.forEach(a => {
+                            const ta = stepCard.querySelector(`.phet-answer[data-qi="${a.question_index}"]`);
+                            if (ta) ta.value = a.answer || '';
+                        });
+                    }
+                    if (row.answers.tables) {
+                        row.answers.tables.forEach(t => {
+                            const tbl = stepCard.querySelector(`.phet-table[data-ti="${t.table_index}"]`);
+                            if (tbl && t.rows) {
+                                t.rows.forEach((rowData, ri) => {
+                                    const tr = tbl.querySelector(`.phet-row[data-ri="${ri}"]`);
+                                    if (tr) {
+                                        rowData.forEach((cellVal, ci) => {
+                                            const inp = tr.querySelector(`.phet-cell[data-ci="${ci}"]`);
+                                            if (inp) inp.value = cellVal || '';
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
             });
-
-            const user = checkAuth();
-            if (!user || !moduleData) return;
-
-            try {
-                await supabaseClient.from('student_data_tables').upsert({
-                    student_nim: user.nim,
-                    module_id: moduleData.id,
-                    teaching_code: groupData.kodeAjar,
-                    group_name: groupData.namaKelompok,
-                    table_data: { columns, rows },
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'student_nim, module_id, group_name' });
-
-                status.innerText = 'Tersimpan';
-                setTimeout(() => { status.style.opacity = '0'; }, 2000);
-                if (showPopup) VisualModal.alert('Data tabel berhasil disimpan!', 'Sukses', 'success');
-            } catch (e) {
-                status.innerText = 'Gagal';
-                console.error(e);
-            }
-        }
-
-        async function loadTableData(moduleId, user) {
-            const { data } = await supabaseClient.from('student_data_tables')
-                .select('table_data')
-                .eq('student_nim', user.nim)
-                .eq('module_id', moduleId)
-                .eq('group_name', groupData.namaKelompok)
-                .maybeSingle();
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            if (data && data.table_data) {
-                const { columns, rows } = data.table_data;
-                // Re-init Headers (skip first 'No')
-                const header = document.getElementById('table-header');
-                while (header.cells.length > 1) header.deleteCell(1);
-                columns.forEach((col, idx) => {
-                    const th = document.createElement('th');
-                    th.className = "px-4 py-3 border-r border-slate-800 font-bold min-w-[120px] group relative";
-                    th.innerHTML = `<span contenteditable="true" onblur="saveTableData()">${col}</span><button onclick="removeCol(${idx+1})" class="absolute right-1 top-1 text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"><i class="fa-solid fa-circle-minus"></i></button>`;
-                    header.appendChild(th);
-                });
-
-                rows.forEach((row, ri) => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
-                    let html = `<td class="px-4 py-3 border-r border-slate-100 text-slate-400 font-bold text-center">${ri+1}</td>`;
-                    row.forEach(val => {
-                        html += `<td class="px-4 py-3 border-r border-slate-100"><input type="text" onblur="saveTableData()" class="w-full bg-transparent outline-none" value="${val}" placeholder="..."></td>`;
-                    });
-                    tr.innerHTML = html;
-                    tbody.appendChild(tr);
-                });
-            } else {
-                // Default rows if empty
-                for (let i = 0; i < 3; i++) addRow();
-            }
         }
 
         // --- UPDATED REFLEKSI SAVING ---

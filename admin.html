@@ -1207,8 +1207,36 @@
                 </div>
 
                 <!-- PhET Fields -->
-                <div class="step-phet-fields ${stepType==='phet'?'':'hidden'} space-y-1">
-                    <p class="text-[10px] text-slate-400">Masukkan URL simulasi PhET (embed URL)</p>
+                <div class="step-phet-fields ${stepType==='phet'?'':'hidden'} space-y-2">
+                    <p class="text-[10px] text-slate-400">Pastikan Anda mengisi URL simulasi pada kolom "URL / Link..." di bawah.</p>
+                    
+                    <div class="flex justify-between items-center border-t border-slate-100 pt-2 mt-2">
+                        <span class="text-[10px] font-bold text-amber-600 uppercase">Pertanyaan Simulasi</span>
+                        <button type="button" onclick="addPhetQuestion(this)" class="text-xs text-amber-500 bg-amber-50 px-2 py-1 rounded hover:bg-amber-100"><i class="fa-solid fa-plus"></i> Tambah</button>
+                    </div>
+                    <div class="phet-questions space-y-1">
+                        ${(data.phet_questions||[]).map((q,qi)=>`
+                        <div class="flex gap-1">
+                            <input type="text" class="phet-q flex-1 text-xs bg-white border border-amber-200 rounded-lg px-2 py-2" placeholder="Pertanyaan ${qi+1}" value="${q}">
+                            <button type="button" onclick="this.closest('div').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-times"></i></button>
+                        </div>`).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center border-t border-slate-100 pt-2 mt-2">
+                        <span class="text-[10px] font-bold text-emerald-600 uppercase">Tabel Observasi</span>
+                        <button type="button" onclick="addPhetTable(this)" class="text-xs text-emerald-500 bg-emerald-50 px-2 py-1 rounded hover:bg-emerald-100"><i class="fa-solid fa-plus"></i> Tambah</button>
+                    </div>
+                    <div class="phet-tables space-y-2">
+                        ${(data.phet_tables||[]).map((t,ti)=>`
+                        <div class="phet-table-item bg-white p-2 rounded border border-emerald-200 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold text-slate-500">Tabel ${ti+1}</span>
+                                <button type="button" onclick="this.closest('.phet-table-item').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                            <input type="text" class="phet-t-cols w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Judul Kolom (cth: Waktu, Jarak, Kecepatan)" value="${t.columns.join(', ')}">
+                            <input type="number" class="phet-t-rows w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Jumlah Baris" value="${t.rows}">
+                        </div>`).join('')}
+                    </div>
                 </div>
 
                 <!-- Refleksi Fields -->
@@ -1260,6 +1288,32 @@
             div.className = 'flex gap-1';
             div.innerHTML = `<input type="text" class="refleksi-q flex-1 text-xs bg-white border border-purple-200 rounded-lg px-2 py-2" placeholder="Pertanyaan ${idx}">
                 <button type="button" onclick="this.closest('div').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-times"></i></button>`;
+            container.appendChild(div);
+        }
+
+        function addPhetQuestion(btn) {
+            const container = btn.closest('.step-phet-fields').querySelector('.phet-questions');
+            const idx = container.querySelectorAll('.phet-q').length + 1;
+            const div = document.createElement('div');
+            div.className = 'flex gap-1';
+            div.innerHTML = `<input type="text" class="phet-q flex-1 text-xs bg-white border border-amber-200 rounded-lg px-2 py-2" placeholder="Pertanyaan ${idx}">
+                <button type="button" onclick="this.closest('div').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-times"></i></button>`;
+            container.appendChild(div);
+        }
+
+        function addPhetTable(btn) {
+            const container = btn.closest('.step-phet-fields').querySelector('.phet-tables');
+            const idx = container.querySelectorAll('.phet-table-item').length + 1;
+            const div = document.createElement('div');
+            div.className = 'phet-table-item bg-white p-2 rounded border border-emerald-200 space-y-2';
+            div.innerHTML = \`
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-slate-500">Tabel \${idx}</span>
+                    <button type="button" onclick="this.closest('.phet-table-item').remove()" class="text-red-300 hover:text-red-500 px-1"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>
+                <input type="text" class="phet-t-cols w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Judul Kolom (cth: Waktu, Jarak, Kecepatan)">
+                <input type="number" class="phet-t-rows w-full text-xs border border-slate-200 rounded px-2 py-1" placeholder="Jumlah Baris Kosong">
+            \`;
             container.appendChild(div);
         }
 
@@ -1401,6 +1455,24 @@
                 if (hasQ && type !== 'refleksi' && type !== 'phet') {
                     stepData.question = div.querySelector('.step-q-text').value;
                     stepData.answer_key = div.querySelector('.step-q-key').value;
+                }
+
+                if (type === 'phet') {
+                    const qs = div.querySelectorAll('.phet-q');
+                    stepData.phet_questions = Array.from(qs).map(q => q.value).filter(q => q.trim());
+                    
+                    const tables = [];
+                    div.querySelectorAll('.phet-table-item').forEach(tItem => {
+                        const colsStr = tItem.querySelector('.phet-t-cols').value;
+                        const rows = parseInt(tItem.querySelector('.phet-t-rows').value);
+                        if (colsStr && rows > 0) {
+                            tables.push({
+                                columns: colsStr.split(',').map(s=>s.trim()).filter(s=>s),
+                                rows: rows
+                            });
+                        }
+                    });
+                    stepData.phet_tables = tables;
                 }
 
                 steps.push(stepData);
