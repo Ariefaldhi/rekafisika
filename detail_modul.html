@@ -1197,12 +1197,25 @@
 
         async function updateSesiKelas(pageIndex) {
             if (!groupData || !groupData.kodeAjar) return;
+
+            // 1. Sinkronisasi instan via Broadcast (Bypass Postgres/RLS delay)
+            if (realtimeChannel) {
+                realtimeChannel.send({
+                    type: 'broadcast',
+                    event: 'page_sync',
+                    payload: { halaman_aktif: pageIndex }
+                }).catch(err => console.error("Broadcast err", err));
+            }
+
+            // 2. Simpan ke DB untuk peserta baru
             try {
-                await supabaseClient.from('sesi_kelas').upsert({
+                const { error } = await supabaseClient.from('sesi_kelas').upsert({
                     kode_kelas: groupData.kodeAjar,
                     halaman_aktif: pageIndex,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'kode_kelas' });
+                
+                if (error) console.warn("DB sesi_kelas error:", error.message);
             } catch(e) {
                 console.error("Gagal update sesi_kelas", e);
             }
@@ -1211,7 +1224,10 @@
         async function fetchTeacherState() {
             if (!groupData || !groupData.kodeAjar) return;
             try {
-                const { data } = await supabaseClient.from('sesi_kelas').select('halaman_aktif').eq('kode_kelas', groupData.kodeAjar).single();
+                const { data, error } = await supabaseClient.from('sesi_kelas').select('halaman_aktif').eq('kode_kelas', groupData.kodeAjar).single();
+                if (error && error.code !== 'PGRST116') {
+                    console.warn("Polling error:", error.message);
+                }
                 if (data && data.halaman_aktif !== undefined) {
                     if (currentPageIndex !== data.halaman_aktif) {
                         currentPageIndex = data.halaman_aktif;
@@ -1295,13 +1311,29 @@
                 }
             });
 
-            // Listen to Broadcasts (for Waiting Room Presence)
+            // Listen to Broadcasts (for Waiting Room Presence and Page Sync)
             if (isTeacher) {
                 realtimeChannel.on('broadcast', { event: 'ping' }, (payload) => {
                     const groupName = payload.payload.group;
                     if (groupName && !joinedGroups.has(groupName)) {
                         joinedGroups.add(groupName);
                         renderJoinedGroups();
+                    }
+                });
+            } else {
+                realtimeChannel.on('broadcast', { event: 'page_sync' }, (payload) => {
+                    const newPage = payload.payload.halaman_aktif;
+                    if (newPage !== undefined && newPage !== currentPageIndex) {
+                        currentPageIndex = newPage;
+                        if (newPage > 0) {
+                            const overlay = document.getElementById('waiting-room-overlay');
+                            if (overlay) {
+                                overlay.classList.add('hidden');
+                                overlay.classList.remove('flex');
+                            }
+                        }
+                        updatePaging();
+                        if (window.SFX && newPage > 0) window.SFX.play('success');
                     }
                 });
             }
@@ -1315,18 +1347,20 @@
                                 type: 'broadcast',
                                 event: 'ping',
                                 payload: { group: groupData.namaKelompok }
-                             });
+                             }).catch(e => console.error("Ping error:", e));
                         } else {
                              clearInterval(pingInterval);
                         }
                     }, 3000);
-                    
-                    // Fallback polling to guarantee sync works even if Realtime is disabled
-                    setInterval(() => {
-                        fetchTeacherState();
-                    }, 3000);
                 }
             });
+
+            // Fallback polling to guarantee sync works even if Realtime is disabled or stuck
+            if (!isTeacher) {
+                setInterval(() => {
+                    fetchTeacherState();
+                }, 3000);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
