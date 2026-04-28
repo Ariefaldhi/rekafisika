@@ -1215,6 +1215,7 @@
             try {
                 const { error } = await supabaseClient.from('sesi_kelas').upsert({
                     kode_kelas: groupData.kodeAjar,
+                    module_id: id,
                     halaman_aktif: pageIndex,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'kode_kelas' });

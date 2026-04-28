@@ -308,6 +308,21 @@
                 if (error) throw error;
                 if (!teacher) throw new Error('Kode tidak ditemukan atau Guru belum mengaktifkan kode ini.');
 
+                // Find active session for this code
+                const { data: sesi, error: sesiError } = await supabaseClient
+                    .from('sesi_kelas')
+                    .select('module_id')
+                    .eq('kode_kelas', code)
+                    .maybeSingle();
+
+                if (sesiError) {
+                    console.warn("Warning database:", sesiError.message);
+                }
+
+                if (!sesi || !sesi.module_id) {
+                    throw new Error('Guru kamu belum memulai sesi pengajaran. Tunggu instruksi guru lalu coba lagi!');
+                }
+
                 // Success - Create Guest Session
                 localStorage.setItem('user_session', JSON.stringify({
                     is_guest: true,
@@ -315,10 +330,11 @@
                     teaching_code: code,
                     nama: 'Tamu (' + code + ')',
                     nim: 'guest_' + code + '_' + Date.now(),
-                    teacher_name: teacher.nama
+                    teacher_name: teacher.nama,
+                    active_module_id: sesi.module_id
                 }));
 
-                window.location.href = 'index.html';
+                window.location.href = `detail_modul.html?id=${sesi.module_id}`;
 
             } catch (err) {
                 errorMsg.textContent = err.message;
