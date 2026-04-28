@@ -377,8 +377,24 @@
             
             let targetKode = '';
             if (user) {
-                if (user.is_guest) targetKode = user.teaching_code || '';
-                else targetKode = user.kode_guru || user.nim || 'MANDIRI';
+                if (user.is_guest) {
+                    targetKode = user.teaching_code || '';
+                } else if (isTeacherState) {
+                    if (user.teaching_code) {
+                        targetKode = user.teaching_code;
+                    } else {
+                        const { data: prof } = await supabaseClient.from('profiles').select('teaching_code').eq('nim', user.nim).maybeSingle();
+                        if (prof && prof.teaching_code) {
+                            targetKode = prof.teaching_code;
+                            user.teaching_code = prof.teaching_code;
+                            localStorage.setItem('user_session', JSON.stringify(user));
+                        } else {
+                            targetKode = 'KODE-MISSING';
+                        }
+                    }
+                } else {
+                    targetKode = user.nim || 'MANDIRI';
+                }
             }
 
             let formHtml = '';
@@ -408,9 +424,11 @@
                     <input type="hidden" id="reg-kode-ajar" value="${targetKode}">
                     <input type="hidden" id="reg-group-name" value="GURU">
                     <input type="hidden" id="reg-members" value="${user ? user.nama : 'Guru Pusat'}">
-                    <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 text-xs font-bold flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check-circle"></i> Sesi siap dibuka menggunakan Kode: ${targetKode}
-                    </div>
+                    ${targetKode === 'KODE-MISSING' ? 
+                    '<div class="p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 text-xs font-bold flex flex-col items-center justify-center gap-2"><i class="fa-solid fa-triangle-exclamation text-xl"></i><span>Kode Guru Belum Dibuat!</span><a href="profil.html" class="underline hover:text-red-800">Buat di Profil Sekarang</a></div>' 
+                    : 
+                    '<div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 text-xs font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-check-circle"></i> Sesi siap dibuka menggunakan Kode: ' + targetKode + '</div>'
+                    }
                 `;
             }
 
