@@ -523,8 +523,8 @@
                 totalPages = pageContainer.querySelectorAll('.module-page').length;
                 updatePaging();
                 
-                // Load Group Data from Session if exists
-                const savedGroup = sessionStorage.getItem(`group_${id}`);
+                // Load Group Data from DB/Local storage if exists
+                const savedGroup = user ? localStorage.getItem(`group_${id}_${user.nim}`) : null;
                 if (savedGroup) {
                     groupData = JSON.parse(savedGroup);
                 }
@@ -663,7 +663,8 @@
             }
             
             groupData = { kodeAjar: kode, namaKelompok: nama, anggotaKelompok: members };
-            sessionStorage.setItem(`group_${id}`, JSON.stringify(groupData));
+            const userForStorage = checkAuth();
+            if (userForStorage) localStorage.setItem(`group_${id}_${userForStorage.nim}`, JSON.stringify(groupData));
 
             // Show Overlay
             const overlay = document.getElementById('waiting-room-overlay');
@@ -1175,6 +1176,15 @@
                 if (btnPrev) btnPrev.style.display = 'none';
                 if (btnNext) btnNext.style.display = 'none';
 
+                // Prevent Browser Back Navigation
+                const headerBack = document.querySelector('header a[href="modul.html"]');
+                if (headerBack) headerBack.style.display = 'none';
+
+                history.pushState(null, null, location.href);
+                window.onpopstate = function () {
+                    history.go(1);
+                };
+
                 const counterParent = document.getElementById('step-counter').parentElement;
                 if (!document.getElementById('sync-status')) {
                     const syncStatus = document.createElement('div');
@@ -1184,8 +1194,8 @@
                     counterParent.appendChild(syncStatus);
                 }
                 
-                if (groupData && groupData.kodeAjar) {
-                    initRealtimeSync();
+                if (groupData && groupData.kodeAjar && groupData.namaKelompok) {
+                    initRealtimeSync(false);
                 }
             } else {
                  const counterParent = document.getElementById('step-counter').parentElement;
@@ -1362,6 +1372,7 @@
 
             // Fallback polling to guarantee sync works even if Realtime is disabled or stuck
             if (!isTeacher) {
+                fetchTeacherState(); // Sync immediately on start
                 setInterval(() => {
                     fetchTeacherState();
                 }, 3000);
