@@ -314,7 +314,7 @@
     </main>
 
     <!-- Step Navigation (Footer) -->
-    <div class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+    <div id="step-nav-container" class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
         <div
             class="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4">
             <button onclick="changePage(-1)" id="btn-prev"
@@ -375,24 +375,44 @@
             const coverPage = document.createElement('div');
             coverPage.className = 'module-page animate-slide-up flex flex-col justify-center';
             
-            const lkpdSection = modul.lkpd_url ? `
-                <div class="lg:w-80 shrink-0">
-                    <div class="p-1 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl shadow-xl shadow-orange-500/20">
-                        <div class="bg-white rounded-[22px] p-6 space-y-4">
-                            <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center">
-                                <i class="fa-solid fa-file-pdf text-amber-500 text-2xl"></i>
+            let targetKode = '';
+            if (user) {
+                if (user.is_guest) targetKode = user.teaching_code || '';
+                else targetKode = user.kode_guru || user.nim || 'MANDIRI';
+            }
+
+            let formHtml = '';
+            if (!isTeacherState) {
+                formHtml = `
+                    <div class="p-6 bg-orange-50 rounded-3xl border border-orange-100 space-y-4 shadow-sm">
+                        <div class="flex items-center gap-3 text-orange-600 mb-2">
+                            <i class="fa-solid fa-users-gear text-xl"></i>
+                            <h4 class="font-bold text-sm uppercase tracking-wide">Pendaftaran Kelompok</h4>
+                        </div>
+                        <div class="space-y-4">
+                            <input type="hidden" id="reg-kode-ajar" value="${targetKode}">
+                            <div>
+                                <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Nama Kelompok</label>
+                                <input type="text" id="reg-group-name" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Misal: Kelompok 1 / Newton">
                             </div>
                             <div>
-                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Instruksi Belajar</p>
-                                <h4 class="font-bold text-slate-800 text-sm line-clamp-2 leading-tight">${modul.lkpd_title || 'LKPD ' + modul.topic}</h4>
+                                <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Anggota Kelompok</label>
+                                <textarea id="reg-members" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-medium placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none resize-none" rows="2" placeholder="Sebutkan nama lengkap anggota kelompok..."></textarea>
                             </div>
-                            <a href="${modul.lkpd_url}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-colors">
-                                <i class="fa-solid fa-download"></i> Download LKPD
-                            </a>
-                            <p class="text-[10px] text-slate-400 italic text-center leading-relaxed">Persiapkan LKPD ini sebelum memulai langkah pembelajaran.</p>
                         </div>
+                        <p class="text-[10px] text-orange-400 italic font-medium leading-relaxed">Isi data kelompok dengan teliti agar nilai terekam dengan benar ke Guru.</p>
                     </div>
-                </div>` : '';
+                `;
+            } else {
+                formHtml = `
+                    <input type="hidden" id="reg-kode-ajar" value="${targetKode}">
+                    <input type="hidden" id="reg-group-name" value="GURU">
+                    <input type="hidden" id="reg-members" value="${user ? user.nama : 'Guru Pusat'}">
+                    <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 text-xs font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check-circle"></i> Sesi siap dibuka menggunakan Kode: ${targetKode}
+                    </div>
+                `;
+            }
 
             coverPage.innerHTML = `
                 <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:items-center py-8">
@@ -404,37 +424,15 @@
                         <div class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed">
                             ${marked.parse(modul.description || 'Tidak ada deskripsi.')}
                         </div>
-                        
-                        <div class="p-6 bg-orange-50 rounded-3xl border border-orange-100 space-y-4">
-                            <div class="flex items-center gap-3 text-orange-600 mb-2">
-                                <i class="fa-solid fa-users-gear text-xl"></i>
-                                <h4 class="font-bold text-sm uppercase tracking-wide">Pendaftaran Kelompok</h4>
-                            </div>
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div class="sm:col-span-1">
-                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Kode Pengajaran Guru</label>
-                                    <input type="text" id="reg-kode-ajar" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none uppercase tracking-widest" placeholder="CONTOH: FISIKA-A1">
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Nama Kelompok</label>
-                                    <input type="text" id="reg-group-name" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Misal: Kelompok 1 / Archimedes">
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[10px] uppercase font-black text-orange-400 mb-1.5 ml-1 tracking-widest">Anggota Kelompok</label>
-                                    <textarea id="reg-members" class="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-sm font-medium placeholder:text-orange-200 focus:ring-2 focus:ring-orange-500 outline-none resize-none" rows="2" placeholder="Sebutkan nama lengkap anggota kelompok..."></textarea>
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-orange-400 italic font-medium leading-relaxed">Pastikan Kode Pengajaran sesuai dengan yang diberikan oleh Guru agar hasil belajar terekam di dashboard Guru.</p>
-                        </div>
+                        ${formHtml}
                     </div>
                     
                     <div class="space-y-6">
-                        ${lkpdSection}
                         <div class="p-6 bg-slate-900 rounded-3xl text-white shadow-xl shadow-slate-900/20 relative overflow-hidden group">
                              <div class="relative z-10">
-                                <h4 class="font-bold text-lg mb-2">Siap untuk mulai?</h4>
-                                <p id="cover-help-text" class="text-xs text-slate-400 leading-relaxed mb-6">Klik tombol di bawah setelah mengisi data kelompok dengan benar.</p>
-                                <button id="cover-action-btn" onclick="enterWaitingRoom()" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-primary-500/20"><i class="fa-solid fa-door-open mr-2"></i>Gabung Kelas</button>
+                                <h4 class="font-bold text-lg mb-2">${isTeacherState ? 'Mulai Sesi Mengajar?' : 'Siap untuk mulai?'}</h4>
+                                <p id="cover-help-text" class="text-xs text-slate-400 leading-relaxed mb-6">${isTeacherState ? 'Guru tidak perlu mengisi data form. Klik tombol di bawah ini untuk membuka ruang tunggu sesi kelas.' : 'Silahkan masukkan data kelompok, lalu klik tombol di bawah untuk bergabung ke Ruang Tunggu Guru.'}</p>
+                                <button id="cover-action-btn" onclick="enterWaitingRoom()" class="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-primary-500/20"><i class="fa-solid fa-door-open mr-2"></i>${isTeacherState ? 'Buka Sesi' : 'Gabung Kelas'}</button>
                              </div>
                              <i class="fa-solid fa-rocket absolute -right-4 -bottom-4 text-8xl text-white/5 -rotate-12 group-hover:rotate-0 transition-transform duration-700"></i>
                         </div>
@@ -536,27 +534,11 @@
 
                 // Handle Cover Logic based on Role
                 setTimeout(() => {
-                    const kodeInput = document.getElementById('reg-kode-ajar');
-                    if (kodeInput) {
-                        kodeInput.value = groupData.kodeAjar || '';
-                        if (user && user.is_guest) {
-                            kodeInput.readOnly = true;
-                            kodeInput.classList.add('bg-slate-100', 'text-slate-400');
-                            kodeInput.title = "Terkunci: Anda masuk menggunakan kode ini.";
-                        }
-                        
-                        if (isTeacherState) {
-                            document.getElementById('reg-group-name').value = 'GURU'; // Auto fill for teacher
-                            document.getElementById('reg-group-name').parentElement.style.display = 'none';
-                            document.getElementById('reg-members').value = user.nama || 'Guru';
-                            document.getElementById('reg-members').parentElement.style.display = 'none';
-                            
-                            document.getElementById('cover-action-btn').innerHTML = '<i class="fa-solid fa-chalkboard-user mr-2"></i>Buka Ruang Tunggu';
-                            document.getElementById('cover-help-text').innerText = 'Sebagai guru, Anda dapat membuka ruang tunggu sebelum memulai sesi sinkron.';
-                        } else {
-                            document.getElementById('reg-group-name').value = groupData.namaKelompok || '';
-                            document.getElementById('reg-members').value = groupData.anggotaKelompok || '';
-                        }
+                    if (!isTeacherState) {
+                        const nameInput = document.getElementById('reg-group-name');
+                        const membersInput = document.getElementById('reg-members');
+                        if (nameInput) nameInput.value = groupData.namaKelompok || '';
+                        if (membersInput) membersInput.value = groupData.anggotaKelompok || '';
                     }
                 }, 500);
 
@@ -600,6 +582,12 @@
                 if (i === currentPageIndex) p.classList.remove('hidden');
                 else p.classList.add('hidden');
             });
+
+            const navContainer = document.getElementById('step-nav-container');
+            if (navContainer) {
+                if (currentPageIndex === 0) navContainer.classList.add('hidden');
+                else navContainer.classList.remove('hidden');
+            }
 
             // Update Counter
             document.getElementById('step-counter').innerText = `${currentPageIndex + 1} / ${totalPages}`;
