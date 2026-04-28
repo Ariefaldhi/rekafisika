@@ -5,11 +5,15 @@
     const normalizedPage = page.split('?')[0];
     
     // Whitelist for pages that don't need auth
-    const isLoginPage = normalizedPage === 'login.html';
+    const isPublicPage = normalizedPage === 'login.html' || normalizedPage === 'landing.html';
 
     if (!sessionStr) {
-        if (!isLoginPage) {
-            window.location.href = 'login.html' + (normalizedPage !== 'index.html' ? '?redirect=' + normalizedPage : '');
+        if (!isPublicPage) {
+            if (normalizedPage === 'index.html' || normalizedPage === '') {
+                window.location.href = 'landing.html';
+            } else {
+                window.location.href = 'login.html?redirect=' + normalizedPage;
+            }
         }
         return;
     }
@@ -57,7 +61,7 @@
 
     // --- BACKGROUND SYNC: Dynamic Role Refresh ---
     // If Admin changes a user role in DB, this syncs the localStorage session without logout
-    if (!user.is_guest && !isLoginPage) {
+    if (!user.is_guest && !isPublicPage) {
         document.addEventListener('DOMContentLoaded', () => {
             // Wait for Supabase to be ready from config.js
             setTimeout(async () => {
