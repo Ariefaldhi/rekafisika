@@ -238,7 +238,7 @@
                     // Sync legacy user_session structure
                     const meta = data.user.user_metadata || {};
                     localStorage.setItem('user_session', JSON.stringify({
-                        role: meta.role || 'student',
+                        role: meta.role || 'teacher',
                         nama: meta.nama || 'Pengguna',
                         nim: data.user.email, // Use email automatically as the identifier
                         email: data.user.email
@@ -256,7 +256,7 @@
                         options: {
                             data: {
                                 nama: nameUser,
-                                role: 'student'
+                                role: 'teacher'
                             }
                         }
                     });
@@ -276,7 +276,7 @@
                     await supabaseClient.from('students').upsert([{
                         nim: userEmail,          // email dipakai sebagai identifier utama
                         name: nameUser,
-                        role: 'student',
+                        role: 'teacher',
                         access_code: null
                     }], { onConflict: 'nim' });
 
@@ -285,11 +285,11 @@
                         id: userId,
                         nim: userEmail,
                         nama: nameUser,
-                        role: 'student'
+                        role: 'teacher'
                     }], { onConflict: 'id' });
 
                     localStorage.setItem('user_session', JSON.stringify({
-                        role: meta.role || 'student',
+                        role: meta.role || 'teacher',
                         nama: meta.nama || nameUser,
                         nim: userEmail, // Use email as identifier
                         email: userEmail
