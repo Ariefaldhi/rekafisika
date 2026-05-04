@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, Brain, 
   ChevronLeft, ChevronRight, CheckCircle, 
-  Hourglass, Loader2, Radio, DoorOpen
+  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -88,6 +88,7 @@ export default function DetailModul() {
   const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set());
   const [inWaitingRoom, setInWaitingRoom] = useState(true);
   const [isShowingPathReflection, setIsShowingPathReflection] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   
   // Registration State
   const [groupName, setGroupName] = useState('');
@@ -113,7 +114,7 @@ export default function DetailModul() {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
       setMembers(parsed.members);
-      setTeachingCode(parsed.teachingCode);
+      if (!isTeacher) setTeachingCode(parsed.teachingCode);
     }
 
     return () => {
@@ -122,7 +123,7 @@ export default function DetailModul() {
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, pathId]);
+  }, [id, pathId, user?.teaching_code]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -150,13 +151,12 @@ export default function DetailModul() {
         
         if (lpData) {
           setPathData(lpData);
-          // Rangkaian ajar handles reflection itself, so hide module-level reflections
           finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
         }
       }
       
       setModule({ ...modData, steps: finalSteps });
-      setCurrentPage(0); // Ensure reset to cover
+      setCurrentPage(0);
       setIsShowingPathReflection(false);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -314,11 +314,10 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(0, nextModuleId); // Reset to cover of next module
+          updateTeacherState(0, nextModuleId);
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
         } else {
-          // Last module in path, show path reflection
           setIsShowingPathReflection(true);
           updateTeacherState(0, id, true);
           return;
@@ -399,6 +398,12 @@ export default function DetailModul() {
     }
   };
 
+  const handleExitWaitingRoom = () => {
+    if (channelRef.current) channelRef.current.unsubscribe();
+    setIsSyncing(false);
+    setShowExitConfirm(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
@@ -410,7 +415,6 @@ export default function DetailModul() {
 
   if (!module) return <div>Modul tidak ditemukan.</div>;
 
-  // Path Reflection UI
   if (isShowingPathReflection) {
     return (
       <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] pb-24">
@@ -473,115 +477,182 @@ export default function DetailModul() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">{pathId ? 'Rangkaian Ajar' : 'Persiapan Modul'}</p>
+              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">{pathId ? 'Sesi Rangkaian' : 'Sesi Materi'}</p>
               <h1 className="text-sm font-bold text-slate-800 line-clamp-1">{module.topic}</h1>
             </div>
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto p-6 mt-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-              <div className="space-y-2">
-                <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">{pathId ? 'Sesi Rangkaian' : 'Langkah Persiapan'}</span>
-                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 leading-tight">{module.topic}</h2>
-              </div>
-              <div className="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: marked.parse(module.description || '') }} />
+        <main className="max-w-6xl mx-auto p-6 mt-12 flex items-center justify-center min-h-[60vh]">
+          <div className="max-w-xl w-full space-y-12">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-center">
+              <h2 className="text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight">{module.topic}</h2>
+              <div className="prose prose-slate max-w-none text-slate-500 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: marked.parse(module.description || '') }} />
+            </motion.div>
 
-              <div className="p-6 bg-white rounded-3xl border border-slate-200 space-y-4 shadow-sm">
-                <div className="flex items-center gap-3 text-blue-500 mb-2">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-10 bg-white rounded-[3rem] border border-slate-100 space-y-8 shadow-2xl shadow-slate-200/50">
+              <div className="flex items-center gap-4 text-blue-600">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
                   <DoorOpen size={24} />
-                  <h4 className="font-bold text-sm uppercase tracking-wide">Pendaftaran Sesi</h4>
                 </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] uppercase font-black text-slate-400 mb-1.5 ml-1 tracking-widest">Kode Pengajaran Guru</label>
-                    <input 
-                      type="text" 
-                      value={teachingCode}
-                      onChange={(e) => setTeachingCode(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
-                      placeholder="Contoh: PHYS101"
-                    />
-                  </div>
-                  {!isTeacher && (
-                    <>
+                <h4 className="font-black text-xs uppercase tracking-[0.2em]">Pendaftaran Sesi</h4>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[10px] uppercase font-black text-slate-400 mb-2 ml-2 tracking-widest">Kode Pengajaran Guru</label>
+                  <input 
+                    type="text" 
+                    value={teachingCode}
+                    readOnly={isTeacher}
+                    onChange={(e) => !isTeacher && setTeachingCode(e.target.value.toUpperCase())}
+                    className={`w-full ${isTeacher ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 focus:ring-2 focus:ring-blue-500'} border border-slate-100 rounded-2xl px-6 py-4 text-lg font-black outline-none transition-all`} 
+                    placeholder="PHYS-2024"
+                  />
+                </div>
+                {!isTeacher && (
+                  <>
+                    <div className="grid grid-cols-1 gap-6">
                       <div>
-                        <label className="block text-[10px] uppercase font-black text-slate-400 mb-1.5 ml-1 tracking-widest">Nama Kelompok</label>
+                        <label className="block text-[10px] uppercase font-black text-slate-400 mb-2 ml-2 tracking-widest">Nama Kelompok</label>
                         <input 
                           type="text" 
                           value={groupName}
                           onChange={(e) => setGroupName(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
-                          placeholder="Misal: Kelompok 1"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                          placeholder="Misal: Kelompok Newton"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] uppercase font-black text-slate-400 mb-1.5 ml-1 tracking-widest">Anggota Kelompok</label>
+                        <label className="block text-[10px] uppercase font-black text-slate-400 mb-2 ml-2 tracking-widest">Anggota Kelompok</label>
                         <textarea 
                           value={members}
                           onChange={(e) => setMembers(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none" 
+                          className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none" 
                           rows={2} 
+                          placeholder="Nama anggota dipisah koma..."
                         />
                       </div>
-                    </>
-                  )}
-                </div>
-                <button onClick={handleJoin} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg">
-                  {isTeacher ? 'Buka Sesi' : 'Gabung Kelas'}
-                </button>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="hidden lg:block">
-              <div className="aspect-square bg-slate-200 rounded-[3rem] overflow-hidden relative group">
-                <img src={`https://images.unsplash.com/photo-1636466484292-713444498305?q=80&w=800&auto=format&fit=crop`} className="w-full h-full object-cover" alt="Cover" />
-                <div className="absolute bottom-8 left-8 right-8 z-20 bg-white/90 backdrop-blur p-6 rounded-2xl shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white">
-                      <Radio className="animate-pulse" />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Sistem Sinkronisasi</p>
-                      <p className="text-sm font-bold text-slate-800">Pembelajaran Terkendali Guru</p>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
+              <button 
+                onClick={handleJoin} 
+                className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+              >
+                {isTeacher ? 'Buka Sesi Kelas' : 'Masuk ke Kelas'}
+              </button>
             </motion.div>
           </div>
         </main>
 
         <AnimatePresence>
           {isSyncing && inWaitingRoom && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6">
-              <div className="max-w-2xl w-full bg-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-2 bg-blue-500" />
-                {isTeacher ? (
-                  <div className="text-center">
-                    <h2 className="text-2xl font-black text-slate-800">Ruang Tunggu Kelas</h2>
-                    <p className="text-slate-500 text-sm mt-2">Kode Akses: <span className="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded">{teachingCode}</span></p>
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 my-8 min-h-[200px]">
-                      <div className="flex flex-wrap gap-3">
-                        {Array.from(joinedGroups).map(grp => (
-                          <div key={grp} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2">
-                            <CheckCircle size={14} className="text-emerald-500" /> {grp}
-                          </div>
-                        ))}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="max-w-3xl w-full bg-white rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col"
+              >
+                {/* Close Button */}
+                <button 
+                  onClick={() => setShowExitConfirm(true)}
+                  className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center z-20"
+                >
+                  <X size={24} />
+                </button>
+
+                <div className="p-12 space-y-10">
+                   <div className="text-center space-y-4">
+                      <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-sm">
+                         <Radio className="animate-pulse" size={40} />
                       </div>
+                      <h2 className="text-3xl font-black text-slate-900 tracking-tight">Ruang Tunggu Kelas</h2>
+                      <div className="inline-flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-xl">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">KODE AKSES</span>
+                        <span className="font-black text-slate-800 tracking-wider">{teachingCode}</span>
+                      </div>
+                   </div>
+
+                   {isTeacher ? (
+                    <div className="space-y-6">
+                       <div className="flex items-center justify-between">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Siswa Terhubung ({joinedGroups.size})</h4>
+                          {joinedGroups.size > 0 && <span className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase animate-pulse"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live Update</span>}
+                       </div>
+                       <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 min-h-[250px] max-h-[350px] overflow-y-auto custom-scrollbar">
+                         {joinedGroups.size > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {Array.from(joinedGroups).map(grp => (
+                                <motion.div 
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  key={grp} 
+                                  className="px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-4 group hover:border-blue-200 transition-all"
+                                >
+                                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+                                    <CheckCircle size={16} />
+                                  </div>
+                                  <span className="text-sm font-black text-slate-700">{grp}</span>
+                                </motion.div>
+                              ))}
+                            </div>
+                         ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center space-y-3 py-10">
+                               <Users className="text-slate-200" size={48} />
+                               <p className="text-slate-400 text-sm font-medium">Belum ada siswa yang bergabung.<br/>Mintalah siswa memasukkan kode akses di atas.</p>
+                            </div>
+                         )}
+                       </div>
+                       <button onClick={handleStartSession} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all">Mulai Sesi Pembelajaran</button>
                     </div>
-                    <button onClick={handleStartSession} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all">Mulai Sesi</button>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Hourglass className="text-blue-400 animate-pulse mx-auto mb-6" size={48} />
-                    <h2 className="text-2xl font-black text-slate-800 mb-2">Menunggu Guru...</h2>
-                    <p className="text-slate-500 text-sm">Anda sudah terdaftar. Tunggu aba-aba dari guru Anda.</p>
-                  </div>
+                   ) : (
+                    <div className="text-center py-12 space-y-8">
+                       <div className="relative">
+                          <Hourglass className="text-blue-400 animate-spin mx-auto opacity-20" size={100} />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                             <Hourglass className="text-blue-500 animate-pulse" size={48} />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                         <h3 className="text-2xl font-black text-slate-800">Menunggu Guru...</h3>
+                         <p className="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">Pendaftaran Anda berhasil! Silakan perhatikan instruksi guru di depan kelas untuk memulai materi.</p>
+                       </div>
+                    </div>
+                   )}
+                </div>
+              </motion.div>
+
+              {/* Confirmation Modal */}
+              <AnimatePresence>
+                {showExitConfirm && (
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] flex items-center justify-center p-6"
+                  >
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center space-y-8"
+                    >
+                      <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto">
+                        <AlertTriangle size={32} />
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-xl font-black text-slate-800">Keluar Ruang Tunggu?</h4>
+                        <p className="text-slate-500 text-sm leading-relaxed">Koneksi ke sesi kelas akan terputus. Anda harus mendaftar ulang untuk bergabung kembali.</p>
+                      </div>
+                      <div className="flex gap-4">
+                        <button onClick={() => setShowExitConfirm(false)} className="flex-1 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">Batal</button>
+                        <button onClick={handleExitWaitingRoom} className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-rose-500/20 transition-all">Keluar Sesi</button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
                 )}
-              </div>
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>
@@ -667,6 +738,11 @@ export default function DetailModul() {
           </button>
         </div>
       </div>
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+      `}</style>
     </div>
   );
 }
