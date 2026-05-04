@@ -209,7 +209,7 @@ export default function DetailModul() {
       .on('broadcast', { event: 'page_sync' }, ({ payload }) => {
         if (!isTeacher) {
           if (payload.moduleId && payload.moduleId !== id) {
-            navigate(`/detail-modul/${payload.moduleId}?path=${pathId || ''}`);
+            navigate(`/detail-modul/${payload.moduleId}?path=${payload.pathId || pathId || ''}`);
             return;
           }
           if (payload.isPathReflection) {
@@ -277,13 +277,13 @@ export default function DetailModul() {
   const fetchTeacherState = async (code: string) => {
     const { data } = await supabase
       .from('sesi_kelas')
-      .select('halaman_aktif, module_id')
+      .select('halaman_aktif, module_id, path_id')
       .eq('kode_kelas', code)
       .single();
     
     if (data) {
       if (data.module_id !== id) {
-        navigate(`/detail-modul/${data.module_id}?path=${pathId || ''}`);
+        navigate(`/detail-modul/${data.module_id}?path=${data.path_id || pathId || ''}`);
         return;
       }
       if (data.halaman_aktif > 0) {
@@ -302,13 +302,14 @@ export default function DetailModul() {
       channelRef.current.send({
         type: 'broadcast',
         event: 'page_sync',
-        payload: { page, moduleId: moduleId || id, isPathReflection }
+        payload: { page, moduleId: moduleId || id, isPathReflection, pathId }
       });
     }
 
     await supabase.from('sesi_kelas').upsert({
       kode_kelas: teachingCode,
       module_id: moduleId || id,
+      path_id: pathId,
       halaman_aktif: page,
       updated_at: new Date().toISOString()
     }, { onConflict: 'kode_kelas' });
