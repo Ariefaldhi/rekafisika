@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ChevronRight, LogOut, BookOpen, FolderOpen,
+  ChevronRight, LogOut,
   HelpCircle, TrendingUp, ShieldCheck, Camera, Copy
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -196,16 +196,12 @@ export default function Lainnya() {
             <Link
               key={i}
               to={item.to}
-              className={`p-5 rounded-3xl shadow-sm border flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform ${
-                item.dark
-                  ? 'bg-slate-800 border-slate-700'
-                  : 'bg-white border-slate-100'
-              }`}
+              className="p-5 rounded-3xl shadow-sm border bg-white border-slate-100 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform"
             >
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${item.bg}`}>
                 {item.icon}
               </div>
-              <span className={`font-bold text-sm ${item.dark ? 'text-white' : 'text-slate-700'}`}>
+              <span className="font-bold text-sm text-slate-700">
                 {item.label}
               </span>
             </Link>
