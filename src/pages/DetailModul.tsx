@@ -303,8 +303,9 @@ export default function DetailModul() {
       console.log(`Sync Check - Module: ${data.module_id} vs ${id}, Path: ${teacherPathId} vs ${currentPathId}`);
 
       if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
-        console.log("Redirecting student to match teacher context...");
-        navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
+        console.log("Redirecting student to match teacher context via full reload...");
+        // Use window.location.replace for a clean state reset when changing context
+        window.location.replace(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
         return;
       }
 
@@ -328,13 +329,21 @@ export default function DetailModul() {
       });
     }
 
-    await supabase.from('sesi_kelas').upsert({
+    console.log(`Teacher Sync - Saving to DB: Module ${moduleId || id}, Path ${pathId || 'None'}, Page ${page}`);
+    
+    const { error } = await supabase.from('sesi_kelas').upsert({
       kode_kelas: teachingCode,
       module_id: moduleId || id,
       path_id: pathId || null,
       halaman_aktif: page,
       updated_at: new Date().toISOString()
     }, { onConflict: 'kode_kelas' });
+
+    if (error) {
+      console.error('Teacher Sync Error:', error);
+    } else {
+      console.log('Teacher Sync Success');
+    }
   };
 
   const handleNext = () => {
