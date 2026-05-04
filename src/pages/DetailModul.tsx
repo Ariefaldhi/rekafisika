@@ -91,7 +91,7 @@ export default function DetailModul() {
   const [isShowingPathReflection, setIsShowingPathReflection] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showLKPD, setShowLKPD] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<'interactive' | 'pdf'>('interactive');
+  const [sidebarTab, setSidebarTab] = useState<'interactive' | 'pdf'>('pdf');
   
   // Registration State
   const [groupName, setGroupName] = useState('');
@@ -732,158 +732,160 @@ export default function DetailModul() {
           {/* Sidebar Tabs */}
           <div className="flex bg-slate-50 border-b border-slate-200">
              <button 
-              onClick={() => setSidebarTab('interactive')}
-              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${sidebarTab === 'interactive' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
-             >
-                <Edit3 size={14} /> Larik Isian
-             </button>
-             <button 
               onClick={() => setSidebarTab('pdf')}
               className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${sidebarTab === 'pdf' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
              >
                 <Book size={14} /> Buku LKPD
              </button>
+             <button 
+              onClick={() => setSidebarTab('interactive')}
+              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${sidebarTab === 'interactive' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+             >
+                <Edit3 size={14} /> Larik Isian
+             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 bg-slate-50/50">
-            {sidebarTab === 'interactive' ? (
-              <div className="space-y-10 pb-20">
-                {/* Render Kegiatan Sections */}
-                {currentStep?.kegiatan && currentStep.kegiatan.length > 0 ? (
-                  currentStep.kegiatan.map((keg: any, kIdx: number) => (
-                    <div key={kIdx} className="space-y-8">
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg shadow-blue-500/20">
-                             {kIdx + 1}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-black text-slate-800 tracking-tight">{keg.title}</h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktivitas Pembelajaran</p>
-                          </div>
-                       </div>
-
-                       {/* Questions in Activity */}
-                       {keg.questions && keg.questions.length > 0 && (
-                         <div className="space-y-5 pl-4 border-l-2 border-slate-100">
-                           {keg.questions.map((q: string, qIdx: number) => (
-                             <div key={qIdx} className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-sm space-y-4">
-                               <p className="text-sm font-bold text-slate-700 leading-relaxed">{qIdx + 1}. {q}</p>
-                               <textarea 
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                rows={3}
-                                placeholder="Ketik jawaban di sini..."
-                                value={answers[currentPage]?.kegiatan?.[kIdx]?.questions?.[qIdx] || ''}
-                                onChange={(e) => {
-                                  const newAns = { ...answers };
-                                  if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
-                                  if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
-                                  if (!newAns[currentPage].kegiatan[kIdx].questions) newAns[currentPage].kegiatan[kIdx].questions = [];
-                                  newAns[currentPage].kegiatan[kIdx].questions[qIdx] = e.target.value;
-                                  setAnswers(newAns);
-                                }}
-                                onBlur={() => saveAnswers(currentPage, answers[currentPage])}
-                                disabled={isTeacher}
-                               />
-                             </div>
-                           ))}
+          <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 relative">
+            {/* Interactive Tab Content */}
+            <div className={`p-6 space-y-8 ${sidebarTab === 'interactive' ? 'block' : 'hidden'}`}>
+                <div className="space-y-10 pb-20">
+                  {/* Render Kegiatan Sections */}
+                  {currentStep?.kegiatan && currentStep.kegiatan.length > 0 ? (
+                    currentStep.kegiatan.map((keg: any, kIdx: number) => (
+                      <div key={kIdx} className="space-y-8">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg shadow-blue-500/20">
+                               {kIdx + 1}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-black text-slate-800 tracking-tight">{keg.title}</h3>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktivitas Pembelajaran</p>
+                            </div>
                          </div>
-                       )}
 
-                       {/* Tables in Activity */}
-                       {keg.tables && keg.tables.length > 0 && (
-                         <div className="space-y-6 pl-4 border-l-2 border-slate-100">
-                           {keg.tables.map((table: any, tIdx: number) => (
-                             <div key={tIdx} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                                <div className="bg-slate-900 px-6 py-4">
-                                   <h5 className="text-[10px] font-black uppercase tracking-widest text-white/70">{table.title || `Tabel Pengamatan`}</h5>
-                                </div>
-                                <div className="overflow-x-auto">
-                                  <table className="w-full text-xs">
-                                    <thead className="bg-slate-100 text-slate-600 border-b">
-                                      <tr>
-                                        <th className="px-4 py-3 border-r text-center w-12">No</th>
-                                        {table.columns.map((col: string, cIdx: number) => (
-                                          <th key={cIdx} className="px-4 py-3 border-r text-left font-black uppercase tracking-tighter">{col}</th>
-                                        ))}
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {Array.from({ length: table.rows || 1 }).map((_, rIdx) => (
-                                        <tr key={rIdx} className="border-b border-slate-50 last:border-0">
-                                          <td className="px-4 py-3 border-r bg-slate-50/50 text-center font-bold text-slate-400">{rIdx + 1}</td>
-                                          {table.columns.map((_: string, cIdx: number) => (
-                                            <td key={cIdx} className="px-2 py-1 border-r">
-                                              <input 
-                                                type="text"
-                                                className="w-full bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-2 font-medium"
-                                                placeholder="..."
-                                                value={answers[currentPage]?.kegiatan?.[kIdx]?.tables?.[tIdx]?.[rIdx]?.[cIdx] || ''}
-                                                onChange={(e) => {
-                                                  const newAns = { ...answers };
-                                                  if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
-                                                  if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
-                                                  if (!newAns[currentPage].kegiatan[kIdx].tables) newAns[currentPage].kegiatan[kIdx].tables = [];
-                                                  if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx] = [];
-                                                  if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx] = [];
-                                                  newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx][cIdx] = e.target.value;
-                                                  setAnswers(newAns);
-                                                }}
-                                                onBlur={() => saveAnswers(currentPage, answers[currentPage])}
-                                                disabled={isTeacher}
-                                              />
-                                            </td>
+                         {/* Questions in Activity */}
+                         {keg.questions && keg.questions.length > 0 && (
+                           <div className="space-y-5 pl-4 border-l-2 border-slate-100">
+                             {keg.questions.map((q: string, qIdx: number) => (
+                               <div key={qIdx} className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-sm space-y-4">
+                                 <p className="text-sm font-bold text-slate-700 leading-relaxed">{qIdx + 1}. {q}</p>
+                                 <textarea 
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                  rows={3}
+                                  placeholder="Ketik jawaban di sini..."
+                                  value={answers[currentPage]?.kegiatan?.[kIdx]?.questions?.[qIdx] || ''}
+                                  onChange={(e) => {
+                                    const newAns = { ...answers };
+                                    if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
+                                    if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
+                                    if (!newAns[currentPage].kegiatan[kIdx].questions) newAns[currentPage].kegiatan[kIdx].questions = [];
+                                    newAns[currentPage].kegiatan[kIdx].questions[qIdx] = e.target.value;
+                                    setAnswers(newAns);
+                                  }}
+                                  onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                  disabled={isTeacher}
+                                 />
+                               </div>
+                             ))}
+                           </div>
+                         )}
+
+                         {/* Tables in Activity */}
+                         {keg.tables && keg.tables.length > 0 && (
+                           <div className="space-y-6 pl-4 border-l-2 border-slate-100">
+                             {keg.tables.map((table: any, tIdx: number) => (
+                               <div key={tIdx} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                  <div className="bg-slate-900 px-6 py-4">
+                                     <h5 className="text-[10px] font-black uppercase tracking-widest text-white/70">{table.title || `Tabel Pengamatan`}</h5>
+                                  </div>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full text-xs">
+                                      <thead className="bg-slate-100 text-slate-600 border-b">
+                                        <tr>
+                                          <th className="px-4 py-3 border-r text-center w-12">No</th>
+                                          {table.columns.map((col: string, cIdx: number) => (
+                                            <th key={cIdx} className="px-4 py-3 border-r text-left font-black uppercase tracking-tighter">{col}</th>
                                           ))}
                                         </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                             </div>
-                           ))}
-                         </div>
-                       )}
+                                      </thead>
+                                      <tbody>
+                                        {Array.from({ length: table.rows || 1 }).map((_, rIdx) => (
+                                          <tr key={rIdx} className="border-b border-slate-50 last:border-0">
+                                            <td className="px-4 py-3 border-r bg-slate-50/50 text-center font-bold text-slate-400">{rIdx + 1}</td>
+                                            {table.columns.map((_: string, cIdx: number) => (
+                                              <td key={cIdx} className="px-2 py-1 border-r">
+                                                <input 
+                                                  type="text"
+                                                  className="w-full bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-2 font-medium"
+                                                  placeholder="..."
+                                                  value={answers[currentPage]?.kegiatan?.[kIdx]?.tables?.[tIdx]?.[rIdx]?.[cIdx] || ''}
+                                                  onChange={(e) => {
+                                                    const newAns = { ...answers };
+                                                    if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
+                                                    if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
+                                                    if (!newAns[currentPage].kegiatan[kIdx].tables) newAns[currentPage].kegiatan[kIdx].tables = [];
+                                                    if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx] = [];
+                                                    if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx] = [];
+                                                    newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx][cIdx] = e.target.value;
+                                                    setAnswers(newAns);
+                                                  }}
+                                                  onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                                  disabled={isTeacher}
+                                                />
+                                              </td>
+                                            ))}
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                               </div>
+                             ))}
+                           </div>
+                         )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="h-[60vh] flex flex-col items-center justify-center text-center p-10 space-y-4">
+                       <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-3xl flex items-center justify-center">
+                          <Edit3 size={32} />
+                       </div>
+                       <p className="text-sm font-bold text-slate-400">Tidak ada isian digital untuk langkah ini.<br/>Silakan fokus pada media pembelajaran.</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="h-[60vh] flex flex-col items-center justify-center text-center p-10 space-y-4">
-                     <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-3xl flex items-center justify-center">
-                        <Edit3 size={32} />
-                     </div>
-                     <p className="text-sm font-bold text-slate-400">Tidak ada isian digital untuk langkah ini.<br/>Silakan fokus pada media pembelajaran.</p>
-                  </div>
-                )}
+                  )}
 
-                {/* Legacy Refleksi Integration */}
-                {currentStep?.type === 'refleksi' && (
-                  <div className="space-y-8">
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-xs">R</div>
-                        <h3 className="text-lg font-black text-slate-800">Refleksi Mandiri</h3>
-                     </div>
-                     {(currentStep.questions || []).map((q: string, qIdx: number) => (
-                        <div key={qIdx} className="p-6 bg-white rounded-3xl border border-slate-200 space-y-4">
-                          <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm outline-none" rows={4} value={answers[currentPage]?.reflections?.[qIdx] || ''} onChange={(e) => {
-                            const newAns = { ...answers };
-                            if (!newAns[currentPage]) newAns[currentPage] = { reflections: [] };
-                            if (!newAns[currentPage].reflections) newAns[currentPage].reflections = [];
-                            newAns[currentPage].reflections[qIdx] = e.target.value;
-                            setAnswers(newAns);
-                          }} onBlur={() => saveAnswers(currentPage, answers[currentPage])} disabled={isTeacher} />
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="h-full bg-slate-100 rounded-2xl overflow-hidden shadow-inner">
+                  {/* Legacy Refleksi Integration */}
+                  {currentStep?.type === 'refleksi' && (
+                    <div className="space-y-8">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-xs">R</div>
+                          <h3 className="text-lg font-black text-slate-800">Refleksi Mandiri</h3>
+                       </div>
+                       {(currentStep.questions || []).map((q: string, qIdx: number) => (
+                          <div key={qIdx} className="p-6 bg-white rounded-3xl border border-slate-200 space-y-4">
+                            <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
+                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm outline-none" rows={4} value={answers[currentPage]?.reflections?.[qIdx] || ''} onChange={(e) => {
+                              const newAns = { ...answers };
+                              if (!newAns[currentPage]) newAns[currentPage] = { reflections: [] };
+                              if (!newAns[currentPage].reflections) newAns[currentPage].reflections = [];
+                              newAns[currentPage].reflections[qIdx] = e.target.value;
+                              setAnswers(newAns);
+                            }} onBlur={() => saveAnswers(currentPage, answers[currentPage])} disabled={isTeacher} />
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+            </div>
+
+            {/* PDF Tab Content - PERSISTENT */}
+            <div className={`absolute inset-0 bg-slate-100 overflow-hidden ${sidebarTab === 'pdf' ? 'block' : 'hidden'}`}>
                 {module.lkpd_url ? (
                   <iframe src={module.lkpd_url} className="w-full h-full border-none" title="LKPD Viewer" />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-slate-400 text-xs font-bold">Dokumen LKPD tidak tersedia</div>
+                  <div className="h-full flex items-center justify-center text-slate-400 text-xs font-bold p-10 text-center">Dokumen LKPD tidak tersedia</div>
                 )}
-              </div>
-            )}
+            </div>
           </div>
         </aside>
 

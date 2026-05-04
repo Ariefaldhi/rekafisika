@@ -15,6 +15,7 @@ const DetailModul = lazy(() => import('./pages/DetailModul'));
 const Profil = lazy(() => import('./pages/Profil'));
 const Lainnya = lazy(() => import('./pages/Lainnya'));
 const Admin = lazy(() => import('./pages/Admin'));
+const HasilAjar = lazy(() => import('./pages/HasilAjar'));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -44,6 +45,9 @@ export default function App() {
             } />
             <Route path="/lainnya" element={
               <ProtectedRoute><DashboardLayout><Lainnya /></DashboardLayout></ProtectedRoute>
+            } />
+            <Route path="/hasil-ajar" element={
+              <ProtectedRoute><DashboardLayout><HasilAjar /></DashboardLayout></ProtectedRoute>
             } />
 
             {/* Detail Modul accessible by guests too (they arrive via code) */}
