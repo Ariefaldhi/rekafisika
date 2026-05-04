@@ -22,6 +22,7 @@ export interface UserSession {
   is_guest?: boolean;
   active_module_id?: string;
   teacher_name?: string;
+  created_at?: string;
 }
 
 export interface ModuleStep {
