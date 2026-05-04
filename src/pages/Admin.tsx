@@ -5,9 +5,8 @@ import {
   LayoutDashboard, BookOpen, Users, 
   ChevronRight, Menu, Loader2,
   ShieldCheck, ArrowLeft, Trash2, Plus, 
-  Save, X, Lock, Unlock, Eye, FileText, 
-  Video, Globe, MessageSquare, List,
-  Upload, Sparkles, LogOut
+  Save, X, Lock, Unlock, FileText, 
+  List, Upload, Sparkles, LogOut
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';

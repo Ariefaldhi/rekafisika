@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, CheckCircle2, Lock, ChevronRight, Rocket, Star, Clock, ArrowRight } from 'lucide-react';
+import { BookOpen, CheckCircle2, Lock, ChevronRight, Rocket, Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import type { Module, ModuleProgress } from '../lib/supabase';
