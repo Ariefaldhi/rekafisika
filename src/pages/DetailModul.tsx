@@ -282,10 +282,15 @@ export default function DetailModul() {
       .single();
     
     if (data) {
-      if (data.module_id !== id) {
-        navigate(`/detail-modul/${data.module_id}?path=${data.path_id || pathId || ''}`);
+      // If teacher is in a different module OR different path, redirect student
+      const currentPathId = pathId || '';
+      const teacherPathId = data.path_id || '';
+
+      if (data.module_id !== id || teacherPathId !== currentPathId) {
+        navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
         return;
       }
+
       if (data.halaman_aktif > 0) {
         setCurrentPage(data.halaman_aktif);
         setInWaitingRoom(false);
