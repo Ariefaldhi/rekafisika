@@ -734,4 +734,4 @@ export default function DetailModul() {
     </div>
   );
 }
-" ,Description:
+
