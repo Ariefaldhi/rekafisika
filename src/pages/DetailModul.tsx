@@ -109,7 +109,7 @@ export default function DetailModul() {
   useEffect(() => {
     fetchData();
     
-    if (user?.teaching_code) setTeachingCode(user.teaching_code);
+    if (user?.teaching_code) setTeachingCode(user.teaching_code.trim().toUpperCase());
     
     const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
     const saved = localStorage.getItem(sessionKey);
@@ -119,7 +119,7 @@ export default function DetailModul() {
       setGroupName(parsed.groupName);
       setMembers(parsed.members);
       if (!isTeacher) {
-        setTeachingCode(parsed.teachingCode);
+        setTeachingCode(parsed.teachingCode.trim().toUpperCase());
       }
 
       if (parsed.teachingCode) {
@@ -209,9 +209,10 @@ export default function DetailModul() {
   };
 
   const setupRealtime = (code: string) => {
+    const cleanCode = code.trim().toUpperCase();
     if (channelRef.current) channelRef.current.unsubscribe();
 
-    const channel = supabase.channel(`room_${code}`, {
+    const channel = supabase.channel(`room_${cleanCode}`, {
       config: { broadcast: { self: true } }
     });
 
@@ -243,10 +244,18 @@ export default function DetailModul() {
       })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to realtime channel');
           setIsSyncing(true);
           if (!isTeacher) {
+            // Immediate ping
+            channel.send({
+              type: 'broadcast',
+              event: 'ping',
+              payload: { group: groupName }
+            });
+
             const interval = setInterval(() => {
-              if (inWaitingRoom) {
+              if (channelRef.current) {
                 channel.send({
                   type: 'broadcast',
                   event: 'ping',
@@ -255,7 +264,7 @@ export default function DetailModul() {
               } else {
                 clearInterval(interval);
               }
-            }, 5000);
+            }, 3000);
           }
         }
       });
@@ -290,11 +299,17 @@ export default function DetailModul() {
   };
 
   const fetchTeacherState = async (code: string) => {
-    const { data } = await supabase
+    const cleanCode = code.trim().toUpperCase();
+    const { data, error } = await supabase
       .from('sesi_kelas')
       .select('halaman_aktif, module_id, path_id')
-      .eq('kode_kelas', code)
+      .eq('kode_kelas', cleanCode)
       .single();
+    
+    if (error) {
+      console.error('Fetch Teacher State Error:', error);
+      return;
+    }
     
     if (data) {
       const currentPathId = pathId || '';
@@ -304,7 +319,6 @@ export default function DetailModul() {
 
       if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
         console.log("Redirecting student to match teacher context via full reload...");
-        // Use window.location.replace for a clean state reset when changing context
         window.location.replace(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
         return;
       }
@@ -329,10 +343,13 @@ export default function DetailModul() {
       });
     }
 
+    const cleanCode = (isTeacher ? user?.teaching_code : teachingCode)?.trim().toUpperCase();
+    if (!cleanCode) return;
+
     console.log(`Teacher Sync - Saving to DB: Module ${moduleId || id}, Path ${pathId || 'None'}, Page ${page}`);
     
     const { error } = await supabase.from('sesi_kelas').upsert({
-      kode_kelas: teachingCode,
+      kode_kelas: cleanCode,
       module_id: moduleId || id,
       path_id: pathId || null,
       halaman_aktif: page,
