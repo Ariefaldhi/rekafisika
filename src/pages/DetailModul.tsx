@@ -124,6 +124,7 @@ export default function DetailModul() {
 
       if (parsed.teachingCode) {
         setupRealtime(parsed.teachingCode);
+        setIsSyncing(true); // Auto-sync if session exists
         if (!isTeacher) {
           fetchTeacherState(parsed.teachingCode);
         }
@@ -182,8 +183,19 @@ export default function DetailModul() {
         }
       }
       
+      const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+      const saved = localStorage.getItem(sessionKey);
+
       setModule({ ...modData, steps: finalSteps });
-      setCurrentPage(0);
+      
+      // If we are in a path and have a saved session, we likely want to continue
+      // from the first content page instead of the cover
+      if (pathId && saved) {
+        setCurrentPage(1);
+        if (!isTeacher) setInWaitingRoom(false);
+      } else {
+        setCurrentPage(0);
+      }
 
       // Load existing answers
       const { data: existingAnswers } = await supabase
@@ -397,7 +409,7 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(0, nextModuleId); 
+          updateTeacherState(1, nextModuleId); 
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
         } else {
