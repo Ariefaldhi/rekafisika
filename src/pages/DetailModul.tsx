@@ -209,6 +209,7 @@ export default function DetailModul() {
 
       let finalSteps = modData.steps || [];
 
+      let isFirstModule = true;
       if (pathId) {
         const { data: lpData } = await supabase
           .from('learning_paths')
@@ -219,6 +220,10 @@ export default function DetailModul() {
         if (lpData) {
           setPathData(lpData);
           finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
+          
+          // Fix: Use lpData instead of pathData state to avoid stale value
+          const sortedModules = lpData.modules?.sort((a: any, b: any) => a.order_index - b.order_index) || [];
+          isFirstModule = sortedModules.length > 0 && sortedModules[0].module_id === id;
         }
       }
       
@@ -229,9 +234,6 @@ export default function DetailModul() {
       
       // Only skip to Page 1 if it's a path, we have a saved session, 
       // AND it's NOT the first module in the path (to allow registration)
-      const sortedModules = pathData?.modules?.sort((a: any, b: any) => a.order_index - b.order_index) || [];
-      const isFirstModule = sortedModules.length > 0 && sortedModules[0].module_id === id;
-
       if (pathId && saved && !isFirstModule) {
         setCurrentPage(1);
         setInWaitingRoom(false);
