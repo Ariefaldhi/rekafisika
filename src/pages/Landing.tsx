@@ -8,7 +8,16 @@ export default function Landing() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleJoin = () => {
     const trimmed = code.trim().toUpperCase();
@@ -63,8 +72,8 @@ export default function Landing() {
       </div>
 
       {/* ── Navbar ── */}
-      <nav className="fixed w-full z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-8 lg:px-12 h-24 flex items-center justify-between">
+      <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-[#060813]/80 backdrop-blur-xl border-b border-white/5 py-4' : 'bg-transparent py-8'}`}>
+        <div className="max-w-7xl mx-auto px-8 lg:px-12 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoUrl} alt="RekaFisika" className="w-10 h-10 object-contain"
               onError={(e) => { (e.target as HTMLImageElement).src = 'https://cdn-icons-png.flaticon.com/512/3242/3242120.png'; }} />
@@ -97,7 +106,7 @@ export default function Landing() {
               <Zap size={14} className="text-yellow-500 animate-pulse" /> Platform Belajar Generasi Baru
             </div>
 
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] text-white">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
               Landing Page<br />
               <span className="text-blue-500">Creative Design.</span>
             </h1>
@@ -138,20 +147,6 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          <div className="hidden lg:flex justify-center relative">
-            {/* Visual element representing the 'creative design' - Abstract 3D elements or just more focus on the blobs */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="w-full aspect-square relative"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-[4rem] rotate-12 blur-3xl animate-pulse" />
-              <div className="relative z-10 w-full h-full border border-white/5 rounded-[4rem] bg-white/5 backdrop-blur-3xl overflow-hidden flex items-center justify-center">
-                 <img src={logoUrl} alt="Logo" className="w-48 h-48 object-contain opacity-20 filter invert" />
-              </div>
-            </motion.div>
-          </div>
         </div>
       </main>
 
