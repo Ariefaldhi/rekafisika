@@ -23,131 +23,147 @@ export default function Landing() {
   const features = [
     {
       icon: <Radio size={24} />,
-      color: 'bg-blue-100 text-blue-600',
+      color: 'bg-blue-500/10 text-blue-400',
       title: 'Teacher-Paced Mode',
       desc: 'Sinkronisasi Realtime. Saat guru pindah halaman, layar seluruh HP siswa di kelas akan ikut berpindah dalam kedipan mata.',
     },
     {
       icon: <FlaskConical size={24} />,
-      color: 'bg-emerald-100 text-emerald-600',
+      color: 'bg-emerald-500/10 text-emerald-400',
       title: 'LKPD Cerdas Terpadu',
       desc: 'Siswa dapat memasukkan jawaban langsung di halaman materi. Semua jawaban langsung terekam dan ternilai otomatis ke dashboard guru.',
     },
     {
       icon: <ShieldCheck size={24} />,
-      color: 'bg-purple-100 text-purple-600',
+      color: 'bg-purple-500/10 text-purple-400',
       title: 'Mode Tamu Anti Hilang',
       desc: 'Siswa tidak perlu daftar ribet. Cukup masukkan kode ruang tunggu dari guru, dan siswa tak bisa keluyuran selama sesi belum ditutup.',
     },
   ];
 
   return (
-    <div className="font-[Inter,sans-serif] text-slate-800 antialiased min-h-screen overflow-x-hidden selection:bg-blue-500/30"
-      style={{ background: 'radial-gradient(circle at top right, #e0e7ff 0%, #f8fafc 40%, #f1f5f9 100%)' }}>
+    <div className="font-[Inter,sans-serif] text-slate-100 antialiased min-h-screen overflow-x-hidden selection:bg-blue-500/30 bg-[#060813] relative">
+      
+      {/* ── Organic Blobs ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] rounded-full bg-blue-600/20 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] rounded-full bg-indigo-600/20 blur-[100px]" />
+        <div className="absolute top-[20%] left-[10%] w-[30%] h-[30%] rounded-full bg-purple-600/10 blur-[80px]" />
+        
+        {/* SVG Waves/Blobs for that fluid look */}
+        <svg className="absolute top-0 right-0 w-full h-full opacity-20" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: '#2563eb', stopOpacity: 0.5 }} />
+              <stop offset="100%" style={{ stopColor: '#4f46e5', stopOpacity: 0.2 }} />
+            </linearGradient>
+          </defs>
+          <path d="M784.5,604.5Q688,709,563,744.5Q438,780,317,719.5Q196,659,165.5,529.5Q135,400,230,305.5Q325,211,463.5,170.5Q602,130,691.5,233.5Q781,337,831,470.5Q881,604,784.5,604.5Z" fill="url(#grad1)" transform="translate(100, -100) rotate(15)" />
+        </svg>
+      </div>
 
       {/* ── Navbar ── */}
-      <nav className="fixed w-full z-50 transition-all duration-300"
-        style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.3)' }}>
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className="fixed w-full z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-8 lg:px-12 h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoUrl} alt="RekaFisika" className="w-9 h-9 object-contain"
+            <img src={logoUrl} alt="RekaFisika" className="w-10 h-10 object-contain"
               onError={(e) => { (e.target as HTMLImageElement).src = 'https://cdn-icons-png.flaticon.com/512/3242/3242120.png'; }} />
-            <span className="text-2xl font-black tracking-tight text-slate-900">RekaFisika</span>
+            <span className="text-2xl font-black tracking-tight text-white">RekaFisika</span>
           </div>
 
-          <div className="hidden md:flex gap-8 items-center font-medium text-slate-600">
-            <a href="#fitur" className="hover:text-blue-600 transition-colors">Fitur</a>
-            <a href="#tentang" className="hover:text-blue-600 transition-colors">Cara Kerja</a>
+          <div className="hidden md:flex gap-10 items-center font-bold text-xs uppercase tracking-[0.2em] text-slate-400">
+            <a href="#fitur" className="hover:text-blue-400 transition-colors">Fitur</a>
+            <a href="#tentang" className="hover:text-blue-400 transition-colors">Tentang</a>
+            <Link
+              to="/login"
+              className="px-8 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 transition-all"
+            >
+              Sign In
+            </Link>
           </div>
-
-          <Link
-            to="/login"
-            className="px-6 py-2.5 rounded-full font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all"
-          >
-            Masuk Akun
-          </Link>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <main className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
-        {/* Blobs */}
-        <div className="absolute top-20 right-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
-        <div className="absolute top-40 left-10 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }} />
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+      <main className="relative z-10 pt-32 pb-20 lg:pt-56 lg:pb-32 px-8 lg:px-12 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-10"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold mb-8 shadow-sm">
-              <Zap size={12} className="text-yellow-500" /> Platform Belajar Generasi Baru
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em]">
+              <Zap size={14} className="text-yellow-500 animate-pulse" /> Platform Belajar Generasi Baru
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
-              Eksplorasi Dunia Fisika<br />
-              <span style={{
-                background: 'linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>
-                Secara Interaktif
-              </span>
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] text-white">
+              Landing Page<br />
+              <span className="text-blue-500">Creative Design.</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-              <strong className="text-slate-800">Media Interaktif Fisika berbasis website untuk Membantu Guru.</strong>{' '}
+            <p className="text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed font-medium">
+              <strong className="text-white">Media Interaktif Fisika berbasis website untuk Membantu Guru.</strong>{' '}
               Tinggalkan metode ceramah satu arah. Buka ruang kelas digital dengan sinkronisasi layar seketika,
               lembar kerja pintar, dan visualisasi rumus yang hidup.
             </p>
+
+            <div className="flex flex-col sm:flex-row gap-5 pt-4">
+              {/* Code Join Form integrated as primary action */}
+              <div className="relative group min-w-[320px]">
+                <Key size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 z-10" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                  className="w-full bg-white/5 border border-white/10 text-white font-black tracking-[0.3em] uppercase rounded-2xl py-5 pl-16 pr-6 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all text-xl backdrop-blur-xl"
+                  placeholder="KODE GURU"
+                />
+                {error && <p className="absolute -bottom-6 left-2 text-rose-500 text-[10px] font-bold uppercase">{error}</p>}
+              </div>
+              
+              <button
+                onClick={handleJoin}
+                className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
+              >
+                Try Now <ArrowRight size={18} />
+              </button>
+            </div>
+            
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2">
+              Punya kode 6 digit dari guru? Masukkan di atas untuk langsung belajar.
+            </p>
           </motion.div>
 
-          {/* Code Join Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-xl mx-auto p-4 md:p-6 rounded-3xl shadow-xl flex flex-col md:flex-row gap-4 items-center"
-            style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.5)' }}
-          >
-            <div className="flex-1 w-full relative">
-              <Key size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                ref={inputRef}
-                type="text"
-                maxLength={6}
-                value={code}
-                onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-center font-bold tracking-[0.4em] uppercase rounded-2xl py-4 pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-xl"
-                placeholder="KODE GURU"
-              />
-            </div>
-            <button
-              onClick={handleJoin}
-              className="w-full md:w-auto px-8 py-4 bg-slate-900 border border-slate-700 text-white font-bold rounded-2xl hover:bg-slate-800 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/20 text-center transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+          <div className="hidden lg:flex justify-center relative">
+            {/* Visual element representing the 'creative design' - Abstract 3D elements or just more focus on the blobs */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="w-full aspect-square relative"
             >
-              Gabung Kelas <ArrowRight size={16} />
-            </button>
-          </motion.div>
-          {error && <p className="text-red-500 text-sm mt-3 font-medium">{error}</p>}
-          <p className="text-xs text-slate-400 mt-4">
-            Punya kode 6 digit dari guru? Masukkan di atas untuk langsung belajar.
-          </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-[4rem] rotate-12 blur-3xl animate-pulse" />
+              <div className="relative z-10 w-full h-full border border-white/5 rounded-[4rem] bg-white/5 backdrop-blur-3xl overflow-hidden flex items-center justify-center">
+                 <img src={logoUrl} alt="Logo" className="w-48 h-48 object-contain opacity-20 filter invert" />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </main>
 
       {/* ── Features ── */}
-      <section id="fitur" className="py-24 bg-white relative z-20 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Masa Depan Belajar Fisika</h2>
-            <p className="text-slate-500">Dirancang khusus untuk memecahkan kebosanan dan kerumitan konsep di dalam ruang kelas.</p>
+      <section id="fitur" className="py-32 relative z-20">
+        <div className="max-w-7xl mx-auto px-8 lg:px-12">
+          <div className="mb-20">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter leading-none">Masa Depan<br/>Belajar Fisika.</h2>
+            <p className="text-slate-500 max-w-md font-medium">Dirancang khusus untuk memecahkan kebosanan dan kerumitan konsep di dalam ruang kelas.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-10">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -155,13 +171,13 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:shadow-xl transition-all group"
+                className="p-10 rounded-[3rem] bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all group backdrop-blur-sm"
               >
-                <div className={`w-14 h-14 ${f.color} rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform`}>
+                <div className={`w-16 h-16 ${f.color} rounded-2xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-transform`}>
                   {f.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                <p className="text-slate-600 leading-relaxed text-sm">{f.desc}</p>
+                <h3 className="text-2xl font-black text-white mb-4 tracking-tight">{f.title}</h3>
+                <p className="text-slate-400 leading-relaxed text-sm font-medium">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -169,28 +185,35 @@ export default function Landing() {
       </section>
 
       {/* ── Footer CTA ── */}
-      <footer id="tentang" className="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 text-center">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl font-black text-white mb-6">Siap Membantu Kelasmu?</h2>
-          <p className="mb-8 max-w-lg mx-auto">
-            Bergabung dengan RekaFisika dan permudah administrasi serta pemahaman praktikum alat peraga di sekolah Anda.
-          </p>
-          <Link
-            to="/login"
-            className="inline-block px-8 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 shadow-lg shadow-blue-500/20 transition-all"
-          >
-            Daftar Sebagai Pengajar
-          </Link>
+      <footer id="tentang" className="py-24 relative z-20 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-8 lg:px-12 text-center">
+          <div className="max-w-3xl mx-auto space-y-10">
+            <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none">Siap Membantu<br/>Kelasmu?</h2>
+            <p className="text-slate-400 max-w-lg mx-auto font-medium text-lg leading-relaxed">
+              Bergabung dengan RekaFisika dan permudah administrasi serta pemahaman praktikum alat peraga di sekolah Anda.
+            </p>
+            <Link
+              to="/login"
+              className="inline-block px-12 py-6 bg-white text-slate-900 font-black rounded-2xl hover:scale-105 hover:bg-slate-100 transition-all uppercase tracking-[0.2em] text-xs shadow-2xl shadow-white/10"
+            >
+              Daftar Sebagai Pengajar
+            </Link>
 
-          <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center text-xs gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logoUrl} alt="RekaFisika" className="w-5 h-5 opacity-50 grayscale" />
-              <span className="font-bold text-slate-300">RekaFisika</span> &copy; 2026. Hak Cipta Dilindungi.
+            <div className="mt-32 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 gap-8">
+              <div className="flex items-center gap-3">
+                <img src={logoUrl} alt="RekaFisika" className="w-6 h-6 grayscale opacity-20" />
+                <span className="text-slate-400">RekaFisika</span> &copy; 2026. Hak Cipta Dilindungi.
+              </div>
+              <div className="flex gap-8">
+                 <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                 <a href="#" className="hover:text-white transition-colors">Terms</a>
+                 <a href="#" className="hover:text-white transition-colors">Github</a>
+              </div>
             </div>
-            <div>A Platform For Education.</div>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+
