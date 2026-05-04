@@ -118,7 +118,9 @@ export default function DetailModul() {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
       setMembers(parsed.members);
-      setTeachingCode(parsed.teachingCode);
+      if (!isTeacher) {
+        setTeachingCode(parsed.teachingCode);
+      }
 
       if (parsed.teachingCode) {
         setupRealtime(parsed.teachingCode);
@@ -135,6 +137,12 @@ export default function DetailModul() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, pathId, user?.teaching_code]);
+
+  useEffect(() => {
+    if (isTeacher && user?.teaching_code) {
+      setTeachingCode(user.teaching_code);
+    }
+  }, [isTeacher, user?.teaching_code]);
 
   useEffect(() => {
     if (isTeacher && module && teachingCode) {
@@ -266,7 +274,7 @@ export default function DetailModul() {
     const sessionData = {
       groupName: isTeacher ? 'GURU' : groupName,
       members: isTeacher ? user?.nama : members,
-      teachingCode
+      teachingCode: isTeacher ? user?.teaching_code : teachingCode
     };
 
     const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
@@ -323,7 +331,7 @@ export default function DetailModul() {
     await supabase.from('sesi_kelas').upsert({
       kode_kelas: teachingCode,
       module_id: moduleId || id,
-      path_id: pathId,
+      path_id: pathId || null,
       halaman_aktif: page,
       updated_at: new Date().toISOString()
     }, { onConflict: 'kode_kelas' });
