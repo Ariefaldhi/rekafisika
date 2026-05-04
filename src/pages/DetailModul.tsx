@@ -540,7 +540,7 @@ export default function DetailModul() {
                           value={groupName}
                           onChange={(e) => setGroupName(e.target.value)}
                           className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
-                          placeholder="Misal: Kelompok Newton"
+                          placeholder="Misal: Kelompok 1 / Newton"
                         />
                       </div>
                       <div>
@@ -681,7 +681,7 @@ export default function DetailModul() {
   const currentStep = module.steps[currentPage - 1];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32 overflow-hidden relative">
+    <div className={`min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32 overflow-hidden relative transition-all duration-300 ${showLKPD ? 'lkpd-open' : ''}`}>
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/home')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
@@ -698,7 +698,7 @@ export default function DetailModul() {
             <button 
               onClick={() => setShowLKPD(!showLKPD)}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-sm ${
-                showLKPD ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-white border border-slate-200 text-blue-600 hover:bg-blue-50'
+                showLKPD ? 'bg-slate-900 text-white shadow-slate-500/20' : 'bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100'
               }`}
             >
               {showLKPD ? <ChevronsLeft className="rotate-180" size={14} /> : <FileText size={14} />} 
@@ -708,91 +708,90 @@ export default function DetailModul() {
         </div>
       </header>
 
-      {/* Main Content Area with Persisted LKPD Sidebar */}
       <div className="flex flex-1 relative overflow-hidden h-full">
-        {/* LKPD Sidebar - Always in DOM but animated width */}
-        {module.lkpd_url && (
-          <motion.div
-            initial={false}
-            animate={{ 
-              width: showLKPD ? (window.innerWidth < 1024 ? '100%' : '450px') : '0px',
-              opacity: showLKPD ? 1 : 0
-            }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="flex-shrink-0 bg-white border-r border-slate-200 shadow-2xl flex flex-col overflow-hidden h-full"
-          >
-            <div className="p-6 border-b flex items-center justify-between bg-slate-50 min-w-[300px]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                  <FileText size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
-                </div>
+        {/* LKPD Sidebar - Exact replica of legacy behavior */}
+        <aside 
+          className={`fixed top-[73px] left-0 bottom-0 w-full lg:w-[28rem] bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col z-[45] transition-transform duration-300 ease-out ${showLKPD ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          <div className="p-6 border-b flex items-center justify-between bg-slate-50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <FileText size={20} />
               </div>
-              <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
-                <X size={20} />
-              </button>
+              <div>
+                <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
+              </div>
             </div>
-            <div className="flex-1 bg-slate-100 min-w-[300px]">
+            <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 bg-slate-100">
+            {module.lkpd_url && (
               <iframe 
                 src={module.lkpd_url} 
                 className="w-full h-full border-none"
                 title="LKPD Viewer"
               />
-            </div>
-          </motion.div>
-        )}
+            )}
+          </div>
+        </aside>
 
-        {/* Main Content - Flex-1 will grow/shrink naturally as sidebar changes width */}
-        <main className="flex-1 max-w-5xl mx-auto w-full p-6 h-full overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out">
-          <AnimatePresence mode="wait">
-            <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-              <div className="flex items-center gap-4 mb-8">
-                <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
-                  {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
-                </span>
-                <div>
-                  <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
+        {/* Main Content - Pushed using margin exactly like legacy */}
+        <main 
+          id="page-container"
+          className={`flex-1 px-4 py-6 relative overflow-hidden transition-all duration-300 ease-out ${showLKPD ? 'lg:ml-[28rem] lg:w-[calc(100%-28rem)]' : 'ml-0 w-full'}`}
+        >
+          <div className="max-w-5xl mx-auto w-full h-full flex flex-col">
+            <AnimatePresence mode="wait">
+              <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6 flex-1 flex flex-col">
+                <div className="flex items-center gap-4 mb-8">
+                  <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
+                    {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
+                  </span>
+                  <div>
+                    <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
+                  </div>
                 </div>
-              </div>
 
-              {currentStep.instruction && (
-                <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
-                  <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
-                </div>
-              )}
-
-              <div className="immersive-content h-full">
-                {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
-                  <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
-                )}
-                {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
-                {currentStep.type === 'phet' && (
-                  <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl min-h-[500px] lg:h-[calc(100vh-400px)]">
-                    <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
+                {currentStep.instruction && (
+                  <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
+                    <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
                   </div>
                 )}
-                {currentStep.type === 'refleksi' && (
-                  <div className="space-y-6 pb-24">
-                    {(currentStep.questions || []).map((q, qIdx) => (
-                      <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                        <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+
+                <div className="immersive-content flex-1 flex flex-col min-h-0">
+                  {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
+                    <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
+                  )}
+                  {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
+                  {currentStep.type === 'phet' && (
+                    <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl flex-1 min-h-[500px]">
+                      <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
+                    </div>
+                  )}
+                  {currentStep.type === 'refleksi' && (
+                    <div className="space-y-6 pb-24">
+                      {(currentStep.questions || []).map((q, qIdx) => (
+                        <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                          <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
+                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
       </div>
 
-      <div className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
-        <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4">
+      {/* Footer Navigation */}
+      <div id="step-nav-container" className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+        <div className={`max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4 transition-all duration-300 ${showLKPD ? 'lg:translate-x-[14rem]' : ''}`}>
           <button onClick={handlePrev} disabled={!isTeacher || currentPage <= 1} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 disabled:opacity-30">
             <ChevronLeft size={20} /> <span className="hidden sm:inline">Sebelumnya</span>
           </button>
