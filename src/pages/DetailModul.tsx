@@ -125,7 +125,22 @@ export default function DetailModul() {
   useEffect(() => {
     fetchData();
     
-    if (user?.teaching_code) setTeachingCode(user.teaching_code.trim().toUpperCase());
+    const codeFromUrl = searchParams.get('code');
+    if (codeFromUrl) {
+      const cleanCode = codeFromUrl.toUpperCase();
+      setTeachingCode(cleanCode);
+      // Proactively check if teacher has an active session
+      if (!isTeacher) {
+        fetchTeacherState(cleanCode).then(exists => {
+          if (!exists) {
+            // If session doesn't exist, navigate away after alert (alert is in fetchTeacherState)
+            navigate('/');
+          }
+        });
+      }
+    } else if (user?.teaching_code) {
+      setTeachingCode(user.teaching_code.trim().toUpperCase());
+    }
     
     const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
     const saved = localStorage.getItem(sessionKey);
@@ -684,9 +699,9 @@ export default function DetailModul() {
                   <input 
                     type="text" 
                     value={teachingCode}
-                    readOnly={isTeacher}
-                    onChange={(e) => !isTeacher && setTeachingCode(e.target.value.toUpperCase())}
-                    className={`w-full ${isTeacher ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 focus:ring-2 focus:ring-blue-500'} border border-slate-100 rounded-2xl px-6 py-4 text-lg font-black outline-none transition-all`} 
+                    readOnly={isTeacher || !!searchParams.get('code')}
+                    onChange={(e) => !isTeacher && !searchParams.get('code') && setTeachingCode(e.target.value.toUpperCase())}
+                    className={`w-full ${isTeacher || searchParams.get('code') ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'bg-slate-50 focus:ring-2 focus:ring-blue-500'} border border-slate-100 rounded-2xl px-6 py-4 text-lg font-black outline-none transition-all`} 
                     placeholder="PHYS-2024"
                   />
                 </div>

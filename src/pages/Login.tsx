@@ -156,25 +156,23 @@ export default function Login() {
       if (teacherErr) throw teacherErr;
       if (!teacher) throw new Error('Kode tidak ditemukan atau Guru belum mengaktifkan kode ini.');
 
-      const { data: sesi } = await supabase
+      const { data: sesi, error: sesiErr } = await supabase
         .from('sesi_kelas')
-        .select('module_id')
+        .select('module_id, path_id')
         .eq('kode_kelas', trimmed)
         .maybeSingle();
 
-      if (!sesi?.module_id) throw new Error('Guru kamu belum memulai sesi pengajaran. Tunggu instruksi selanjutnya!');
+      if (sesiErr) throw sesiErr;
+      if (!sesi || !sesi.module_id) {
+        throw new Error('Guru kamu belum membuka sesi kelas (Waiting Room). Silakan tunggu instruksi guru di depan kelas!');
+      }
 
-      login({
-        is_guest: true,
-        role: 'student',
-        teaching_code: trimmed,
-        nama: `Tamu (${trimmed})`,
-        nim: `guest_${trimmed}_${Date.now()}`,
-        teacher_name: teacher.nama,
-        active_module_id: sesi.module_id,
-      });
-
-      navigate(`/detail-modul/${sesi.module_id}`, { replace: true });
+      // Instead of logging in here, redirect to the module registration page with the code
+      const url = sesi.path_id 
+        ? `/detail-modul/${sesi.module_id}?path=${sesi.path_id}&code=${trimmed}`
+        : `/detail-modul/${sesi.module_id}?code=${trimmed}`;
+      
+      navigate(url, { replace: true });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gagal tersambung.';
       setError(msg);
