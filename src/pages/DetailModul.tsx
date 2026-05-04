@@ -87,6 +87,7 @@ export default function DetailModul() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set());
   const [inWaitingRoom, setInWaitingRoom] = useState(true);
+  const [isShowingPathReflection, setIsShowingPathReflection] = useState(false);
   
   // Registration State
   const [groupName, setGroupName] = useState('');
@@ -95,6 +96,7 @@ export default function DetailModul() {
   
   // Reflection Answers State
   const [answers, setAnswers] = useState<Record<number, any>>({});
+  const [pathReflectionAnswers, setPathReflectionAnswers] = useState<Record<number, string>>({});
   const [saveStatus, setSaveStatus] = useState<string>('');
 
   const channelRef = useRef<any>(null);
@@ -148,17 +150,14 @@ export default function DetailModul() {
         
         if (lpData) {
           setPathData(lpData);
-          const sortedModules = lpData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
-          const currentIdx = sortedModules.findIndex((pm: any) => pm.module_id === id);
-          const isLastModule = currentIdx === sortedModules.length - 1;
-
-          if (!isLastModule) {
-            finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
-          }
+          // Rangkaian ajar handles reflection itself, so hide module-level reflections
+          finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
         }
       }
       
       setModule({ ...modData, steps: finalSteps });
+      setCurrentPage(0); // Ensure reset to cover
+      setIsShowingPathReflection(false);
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
@@ -183,6 +182,11 @@ export default function DetailModul() {
         if (!isTeacher) {
           if (payload.moduleId && payload.moduleId !== id) {
             navigate(`/detail-modul/${payload.moduleId}?path=${pathId || ''}`);
+            return;
+          }
+          if (payload.isPathReflection) {
+            setIsShowingPathReflection(true);
+            setInWaitingRoom(false);
             return;
           }
           setCurrentPage(payload.page);
@@ -257,14 +261,14 @@ export default function DetailModul() {
     }
   };
 
-  const updateTeacherState = async (page: number, moduleId?: string) => {
+  const updateTeacherState = async (page: number, moduleId?: string, isPathReflection?: boolean) => {
     if (!isTeacher) return;
     
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'page_sync',
-        payload: { page, moduleId: moduleId || id }
+        payload: { page, moduleId: moduleId || id, isPathReflection }
       });
     }
 
@@ -310,8 +314,13 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(0, nextModuleId);
+          updateTeacherState(0, nextModuleId); // Reset to cover of next module
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
+          return;
+        } else {
+          // Last module in path, show path reflection
+          setIsShowingPathReflection(true);
+          updateTeacherState(0, id, true);
           return;
         }
       }
@@ -337,10 +346,13 @@ export default function DetailModul() {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
+        } else {
+          setIsShowingPathReflection(true);
+          return;
         }
       }
 
-      alert('Selamat! Anda telah menyelesaikan seluruh rangkaian.');
+      alert('Selamat! Anda telah menyelesaikan modul.');
       navigate('/home');
     }
   };
@@ -366,6 +378,27 @@ export default function DetailModul() {
     }
   };
 
+  const savePathReflection = async () => {
+    setSaveStatus('Menyimpan Refleksi Akhir...');
+    try {
+      const { error } = await supabase.from('path_reflection_answers').upsert({
+        student_nim: user?.nim,
+        path_id: pathId,
+        teaching_code: teachingCode,
+        group_name: groupName,
+        answers: pathReflectionAnswers,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'student_nim, path_id' });
+
+      if (error) throw error;
+      setSaveStatus('Selesai!');
+      alert('Terima kasih! Seluruh rangkaian ajar telah selesai.');
+      navigate('/home');
+    } catch (err) {
+      alert('Gagal menyimpan refleksi rangkaian.');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
@@ -376,6 +409,60 @@ export default function DetailModul() {
   }
 
   if (!module) return <div>Modul tidak ditemukan.</div>;
+
+  // Path Reflection UI
+  if (isShowingPathReflection) {
+    return (
+      <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] pb-24">
+        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+          <h1 className="text-sm font-black text-slate-800 uppercase tracking-widest">Refleksi Akhir Rangkaian</h1>
+          {saveStatus && <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{saveStatus}</span>}
+        </header>
+
+        <main className="max-w-3xl mx-auto p-6 mt-8 space-y-10">
+           <div className="text-center space-y-4">
+             <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-3xl flex items-center justify-center mx-auto shadow-sm">
+                <Brain size={40} />
+             </div>
+             <h2 className="text-3xl font-black text-slate-900">Refleksi Pembelajaran</h2>
+             <p className="text-slate-500 text-sm max-w-lg mx-auto leading-relaxed">
+               Selamat! Anda telah menyelesaikan seluruh materi dalam rangkaian **{pathData?.title}**. 
+               Silakan jawab pertanyaan refleksi berikut untuk mengakhiri sesi.
+             </p>
+           </div>
+
+           <div className="space-y-6">
+              {(pathData?.reflection_questions || []).map((q: string, idx: number) => (
+                <div key={idx} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                   <p className="text-sm font-black text-slate-800">{idx + 1}. {q}</p>
+                   <textarea 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-purple-500 outline-none"
+                    rows={4}
+                    placeholder="Ketik jawaban kelompok Anda di sini..."
+                    value={pathReflectionAnswers[idx] || ''}
+                    onChange={e => setPathReflectionAnswers({...pathReflectionAnswers, [idx]: e.target.value})}
+                   />
+                </div>
+              ))}
+           </div>
+
+           {!isTeacher ? (
+             <button 
+              onClick={savePathReflection}
+              className="w-full py-5 bg-purple-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-purple-600/20 hover:bg-purple-700 transition-all"
+             >
+               Kirim Jawaban & Selesai
+             </button>
+           ) : (
+             <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100 text-center">
+                <p className="text-sm font-bold text-blue-600">Guru sedang menunggu siswa mengisi refleksi.</p>
+                <button onClick={() => navigate('/home')} className="mt-4 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:underline">Selesaikan Sesi Live Sekarang</button>
+             </div>
+           )}
+        </main>
+      </div>
+    );
+  }
 
   if (currentPage === 0) {
     return (
@@ -575,7 +662,7 @@ export default function DetailModul() {
           </div>
 
           <button onClick={currentPage === module.steps.length ? () => handleFinishModule() : handleNext} disabled={!isTeacher} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-white shadow-lg ${currentPage === module.steps.length ? 'bg-emerald-500' : 'bg-blue-600'} disabled:opacity-50`}>
-            <span>{currentPage === module.steps.length ? (pathId ? 'Lanjut Materi' : 'Selesai') : 'Selanjutnya'}</span>
+            <span>{currentPage === module.steps.length ? (pathId ? 'Lanjut Rangkaian' : 'Selesai') : 'Selanjutnya'}</span>
             <ChevronRight size={20} />
           </button>
         </div>

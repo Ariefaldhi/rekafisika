@@ -7,7 +7,7 @@ import {
   ShieldCheck, ArrowLeft, Trash2, Plus, 
   X, Lock, Unlock, FileText, 
   Upload, Sparkles, LogOut,
-  Route, ArrowUp, ArrowDown
+  Route, ArrowUp, ArrowDown, Brain
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -168,6 +168,7 @@ export default function Admin() {
         title: editingPath.title,
         description: editingPath.description || '',
         is_visible: editingPath.is_visible ?? true,
+        reflection_questions: editingPath.reflection_questions || []
       };
 
       let pathId = editingPath.id;
@@ -403,7 +404,7 @@ export default function Admin() {
                        </div>
                        <button 
                         onClick={() => {
-                          setEditingPath({ title: '', description: '', is_visible: true });
+                          setEditingPath({ title: '', description: '', is_visible: true, reflection_questions: [] });
                           setPathModules([]);
                         }}
                         className="bg-purple-600 text-white px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-purple-500 transition-all shadow-lg shadow-purple-500/20"
@@ -648,9 +649,10 @@ export default function Admin() {
                   <input type="text" value={editingPath.title} onChange={e => setEditingPath({...editingPath, title: e.target.value})} placeholder="Nama Rangkaian" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg outline-none" />
                   <textarea value={editingPath.description} onChange={e => setEditingPath({...editingPath, description: e.target.value})} placeholder="Deskripsi" rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium outline-none" />
                 </div>
+                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                    <div className="space-y-3">
-                     <p className="text-[10px] font-black text-slate-300 uppercase">Urutan Materi:</p>
+                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Alur Materi:</p>
                      <div className="flex flex-col gap-3 min-h-[100px] p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed">
                        {pathModules.map((mId, idx) => {
                          const m = modules.find(mod => mod.id === mId);
@@ -671,14 +673,43 @@ export default function Admin() {
                      </div>
                    </div>
                    <div className="space-y-3">
-                     <p className="text-[10px] font-black text-slate-300 uppercase">Pilih Materi:</p>
-                     <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Pilih Materi:</p>
+                     <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
                         {modules.filter(m => !pathModules.includes(m.id)).map(m => (
                           <button key={m.id} onClick={() => setPathModules([...pathModules, m.id])} className="text-left bg-white p-4 rounded-2xl border hover:bg-purple-50 group">
                             <div className="flex justify-between items-center"><span className="text-xs font-bold">{m.topic}</span><Plus size={14}/></div>
                           </button>
                         ))}
                      </div>
+                   </div>
+                </div>
+
+                {/* Path Reflection Editor */}
+                <div className="bg-purple-50/50 p-8 rounded-[2.5rem] border border-purple-100/50 space-y-6">
+                   <h4 className="flex items-center gap-3 text-purple-700 font-black uppercase tracking-widest text-xs"><Brain size={18} /> Pertanyaan Refleksi Akhir Rangkaian</h4>
+                   <div className="space-y-3">
+                      {editingPath.reflection_questions?.map((q, qIdx) => (
+                        <div key={qIdx} className="flex gap-2">
+                           <input 
+                            type="text" 
+                            value={q}
+                            onChange={e => {
+                              const newQs = [...(editingPath.reflection_questions || [])];
+                              newQs[qIdx] = e.target.value;
+                              setEditingPath({...editingPath, reflection_questions: newQs});
+                            }}
+                            className="flex-1 bg-white border border-purple-100 rounded-xl px-4 py-3 text-sm font-medium"
+                            placeholder={`Pertanyaan ${qIdx + 1}`}
+                           />
+                           <button onClick={() => setEditingPath({...editingPath, reflection_questions: editingPath.reflection_questions?.filter((_, i) => i !== qIdx)})} className="p-3 text-rose-400 hover:text-rose-600"><Trash2 size={18}/></button>
+                        </div>
+                      ))}
+                      <button 
+                        onClick={() => setEditingPath({...editingPath, reflection_questions: [...(editingPath.reflection_questions || []), '']})}
+                        className="w-full py-3 bg-white border border-purple-200 border-dashed rounded-xl text-xs font-black text-purple-500 hover:bg-purple-50 transition-all uppercase tracking-widest"
+                      >
+                        + Tambah Pertanyaan Refleksi
+                      </button>
                    </div>
                 </div>
               </div>

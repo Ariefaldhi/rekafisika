@@ -59,6 +59,7 @@ export interface LearningPath {
   title: string;
   description: string;
   is_visible: boolean;
+  reflection_questions?: string[];
   created_at: string;
   learning_path_modules?: LearningPathModule[];
 }
