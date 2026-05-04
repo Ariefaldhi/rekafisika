@@ -136,6 +136,13 @@ export default function DetailModul() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, pathId, user?.teaching_code]);
 
+  useEffect(() => {
+    if (isTeacher && module && teachingCode) {
+      updateTeacherState(currentPage, id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [module, currentPage]);
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -282,11 +289,13 @@ export default function DetailModul() {
       .single();
     
     if (data) {
-      // If teacher is in a different module OR different path, redirect student
       const currentPathId = pathId || '';
       const teacherPathId = data.path_id || '';
+      
+      console.log(`Sync Check - Module: ${data.module_id} vs ${id}, Path: ${teacherPathId} vs ${currentPathId}`);
 
-      if (data.module_id !== id || teacherPathId !== currentPathId) {
+      if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
+        console.log("Redirecting student to match teacher context...");
         navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
         return;
       }
