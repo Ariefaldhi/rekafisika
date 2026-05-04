@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, CheckCircle2, Lock, ChevronRight, Rocket, Route } from 'lucide-react';
+import { BookOpen, CheckCircle2, Lock, ChevronRight, Route } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import type { Module, ModuleProgress, LearningPath } from '../lib/supabase';
@@ -17,7 +17,6 @@ function getGreeting() {
 
 interface ModuleWithProgress extends Module {
   prog?: ModuleProgress;
-  percent: number;
 }
 
 export default function Home() {
@@ -52,16 +51,12 @@ export default function Home() {
 
       const enriched: ModuleWithProgress[] = mods.map((m) => {
         const prog = progressMap[m.id];
-        const totalSteps = Array.isArray(m.steps) ? m.steps.length : 0;
-        const doneSteps = prog?.completed_steps?.length ?? 0;
-        const percent = prog?.is_completed ? 100 : (totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0);
-        return { ...m, prog, percent };
+        return { ...m, prog };
       });
 
       setModules(enriched);
       setPaths(pathList);
       
-      // Set the first path as featured (often used by teachers)
       if (pathList.length > 0) {
         setFeaturedPath(pathList[0]);
       }
@@ -106,7 +101,7 @@ export default function Home() {
         {/* ── Main Layout ── */}
         <div className="flex flex-col gap-16">
           
-          {/* Featured Path Banner (Frequently used by teachers) */}
+          {/* Featured Path Banner */}
           {featuredPath && (
             <motion.div 
               initial={{ opacity: 0, y: 24 }} 
@@ -118,15 +113,10 @@ export default function Home() {
                 className="block relative bg-slate-900 rounded-[3rem] p-8 lg:p-12 text-white shadow-2xl shadow-slate-900/40 overflow-hidden group hover:scale-[1.005] transition-transform duration-500"
               >
                 <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-purple-600/20 rounded-full blur-[100px] -mr-40 -mt-40 pointer-events-none" />
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                  <div className="flex-1 space-y-6">
-                    <div className="flex items-center gap-3">
-                      <span className="px-4 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-purple-400 backdrop-blur-sm">
-                        Rekomendasi Rangkaian Ajar
-                      </span>
-                    </div>
-                    <h2 className="text-4xl lg:text-5xl font-black mb-2 leading-[1.1] tracking-tight">{featuredPath.title}</h2>
-                    <p className="text-slate-400 text-lg lg:text-xl max-w-xl line-clamp-2">{featuredPath.description || 'Alur pembelajaran terstruktur yang sering digunakan untuk penguasaan materi yang mendalam.'}</p>
+                <div className="relative z-10">
+                  <div className="space-y-6">
+                    <h2 className="text-4xl lg:text-6xl font-black mb-2 leading-[1.1] tracking-tight">{featuredPath.title}</h2>
+                    <p className="text-slate-400 text-lg lg:text-xl max-w-2xl line-clamp-3">{featuredPath.description || 'Alur pembelajaran terstruktur yang sering digunakan untuk penguasaan materi yang mendalam.'}</p>
                     
                     <div className="flex items-center gap-4 pt-4">
                        <div className="px-6 py-3 bg-white/10 rounded-2xl border border-white/5 backdrop-blur-sm">
@@ -138,10 +128,6 @@ export default function Home() {
                           <p className="text-xl font-black text-emerald-400 flex items-center gap-2">Populer <CheckCircle2 size={18} /></p>
                        </div>
                     </div>
-                  </div>
-                  <div className="relative shrink-0 flex items-center justify-center lg:w-64 lg:h-64">
-                     <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-                     <Rocket size={160} className="relative z-10 text-white/90 -rotate-12 group-hover:translate-x-3 group-hover:-translate-y-3 transition-transform duration-700 ease-out" />
                   </div>
                 </div>
                 <div className="absolute bottom-8 right-12 hidden lg:flex items-center gap-2 text-purple-400 font-black uppercase tracking-widest text-xs">
@@ -240,6 +226,7 @@ export default function Home() {
                       }`}>
                         {item.is_locked ? <Lock size={24} /> : (item.prog?.is_completed ? <CheckCircle2 size={28} /> : <BookOpen size={28} />)}
                       </div>
+                      {item.prog?.is_completed && <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Selesai</span>}
                     </div>
 
                     <div>
@@ -247,17 +234,9 @@ export default function Home() {
                       <p className="text-slate-500 text-sm font-medium line-clamp-3 leading-relaxed">{item.description || 'Pelajari bab ini untuk memahami prinsip dasar fisika melalui simulasi interaktif.'}</p>
                     </div>
 
-                    <div className="mt-8 pt-8 border-t border-slate-50">
-                      <div className="flex items-center justify-between mb-3">
-                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
-                         <span className="text-xs font-black text-slate-900">{item.percent}%</span>
-                      </div>
-                      <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full transition-all duration-1000 ${item.prog?.is_completed ? 'bg-emerald-500' : 'bg-blue-500'}`} 
-                          style={{ width: `${item.percent}%` }} 
-                        />
-                      </div>
+                    <div className="mt-8 pt-8 border-t border-slate-50 flex justify-between items-center">
+                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Akses Mandiri</span>
+                       <ChevronRight className="text-slate-200 group-hover:text-blue-500 transition-colors" size={20} />
                     </div>
                   </Link>
                 </motion.div>

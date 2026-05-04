@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, Brain, 
   ChevronLeft, ChevronRight, CheckCircle, 
-  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users
+  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ExternalLink
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -117,8 +117,6 @@ export default function DetailModul() {
       setMembers(parsed.members);
       setTeachingCode(parsed.teachingCode);
 
-      // --- AUTO JOIN LOGIC FOR LEARNING PATH ---
-      // If we're in a path and already have session data, we auto-join and setup realtime
       if (pathId) {
         setupRealtime(parsed.teachingCode);
       }
@@ -169,9 +167,6 @@ export default function DetailModul() {
       
       setModule({ ...modData, steps: finalSteps });
       
-      // --- PAGE LOGIC ---
-      // If it's a learning path and NOT the first module, we skip page 0 (cover)
-      // because the user already registered in the first module.
       if (pathId && !isFirstInPath) {
         setCurrentPage(1);
         setInWaitingRoom(false);
@@ -338,8 +333,6 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          // When moving to next module in path, teacher immediately starts at step 1
-          // but we use state sync to ensure students also follow.
           updateTeacherState(1, nextModuleId); 
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
@@ -704,14 +697,27 @@ export default function DetailModul() {
       <main className="flex-1 max-w-4xl mx-auto w-full p-6">
         <AnimatePresence mode="wait">
           <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-              <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
-                {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
-              </span>
-              <div>
-                <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
+                  {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
+                </span>
+                <div>
+                  <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
+                </div>
               </div>
+
+              {currentStep.type === 'phet' && module.lkpd_url && (
+                <a 
+                  href={module.lkpd_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm"
+                >
+                  <ExternalLink size={14} /> Buka LKPD
+                </a>
+              )}
             </div>
 
             {currentStep.instruction && (
