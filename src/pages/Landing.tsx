@@ -85,65 +85,62 @@ export default function Landing() {
             <a href="#tentang" className="hover:text-blue-400 transition-colors">Tentang</a>
             <Link
               to="/login"
-              className="px-8 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 transition-all"
+              className="px-8 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 transition-all cursor-pointer inline-block"
             >
-              Sign In
+              Masuk/Daftar
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <main className="relative z-10 pt-32 pb-20 lg:pt-56 lg:pb-32 px-8 lg:px-12 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-10"
-          >
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
-              Eksplorasi Fisika<br />
-              <span className="text-blue-500">Secara Interaktif.</span>
-            </h1>
+      <main className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 px-8 lg:px-12 max-w-5xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="space-y-8 flex flex-col items-center"
+        >
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1] text-white">
+            Eksplorasi Fisika<br />
+            <span className="text-blue-500">Secara Interaktif.</span>
+          </h1>
 
-            <p className="text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed font-medium">
-              <strong className="text-white">Media Interaktif Fisika berbasis website untuk Membantu Guru.</strong>{' '}
-              Tinggalkan metode ceramah satu arah. Buka ruang kelas digital dengan sinkronisasi layar seketika,
-              lembar kerja pintar, dan visualisasi rumus yang hidup.
-            </p>
+          <p className="text-base md:text-lg text-slate-400 max-w-2xl leading-relaxed font-medium">
+            <strong className="text-white">Media Interaktif Fisika berbasis website untuk Membantu Guru.</strong>{' '}
+            Tinggalkan metode ceramah satu arah. Buka ruang kelas digital dengan sinkronisasi layar seketika,
+            lembar kerja pintar, dan visualisasi rumus yang hidup.
+          </p>
 
-            <div className="flex flex-col sm:flex-row gap-5 pt-4">
-              {/* Code Join Form integrated as primary action */}
-              <div className="relative group min-w-[320px]">
-                <Key size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 z-10" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                  className="w-full bg-white/5 border border-white/10 text-white font-black tracking-[0.3em] uppercase rounded-2xl py-5 pl-16 pr-6 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all text-xl backdrop-blur-xl"
-                  placeholder="KODE GURU"
-                />
-                {error && <p className="absolute -bottom-6 left-2 text-rose-500 text-[10px] font-bold uppercase">{error}</p>}
-              </div>
-              
-              <button
-                onClick={handleJoin}
-                className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
-              >
-                Try Now <ArrowRight size={18} />
-              </button>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4 justify-center w-full max-w-2xl">
+            {/* Code Join Form integrated as primary action */}
+            <div className="relative group flex-1">
+              <Key size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 z-10" />
+              <input
+                ref={inputRef}
+                type="text"
+                maxLength={6}
+                value={code}
+                onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                className="w-full bg-white/5 border border-white/10 text-white font-black tracking-[0.3em] uppercase rounded-2xl py-4 pl-16 pr-6 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all text-lg backdrop-blur-xl"
+                placeholder="KODE GURU"
+              />
+              {error && <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-rose-500 text-[10px] font-bold uppercase whitespace-nowrap">{error}</p>}
             </div>
             
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2">
-              Punya kode 6 digit dari guru? Masukkan di atas untuk langsung belajar.
-            </p>
-          </motion.div>
-
-        </div>
+            <button
+              onClick={handleJoin}
+              className="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
+            >
+              Try Now <ArrowRight size={18} />
+            </button>
+          </div>
+          
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2">
+            Punya kode 6 digit dari guru? Masukkan di atas untuk langsung belajar.
+          </p>
+        </motion.div>
       </main>
 
       {/* ── Features ── */}
