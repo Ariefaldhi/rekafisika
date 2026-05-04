@@ -94,7 +94,7 @@ export default function Admin() {
     { id: 'points', label: 'Poin Keaktifan', icon: Star },
     { id: 'presence', label: 'Presensi', icon: QrCode },
     { id: 'progress', label: 'Progress', icon: LineChart },
-    { id: 'users', label: 'Manajemen User', icon: UserShield },
+    { id: 'users', label: 'Manajemen User', icon: Shield },
     { id: 'settings', label: 'Pengaturan', icon: Settings },
   ];
 
