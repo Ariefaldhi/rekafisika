@@ -440,7 +440,7 @@ export default function DetailModul() {
       <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] pb-24">
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
           <h1 className="text-sm font-black text-slate-800 uppercase tracking-widest">Refleksi Akhir Rangkaian</h1>
-          {saveStatus && <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{saveStatus}</span>}
+          {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
         </header>
 
         <main className="max-w-3xl mx-auto p-6 mt-8 space-y-10">
@@ -708,43 +708,45 @@ export default function DetailModul() {
         </div>
       </header>
 
-      <div className="flex flex-1 relative overflow-hidden">
-        {/* LKPD Sidebar */}
-        <AnimatePresence>
-          {showLKPD && module.lkpd_url && (
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute inset-y-0 left-0 w-full lg:w-[450px] bg-white border-r border-slate-200 z-50 shadow-2xl flex flex-col"
-            >
-              <div className="p-6 border-b flex items-center justify-between bg-slate-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                    <FileText size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
-                  </div>
+      {/* Main Content Area with Persisted LKPD Sidebar */}
+      <div className="flex flex-1 relative overflow-hidden h-full">
+        {/* LKPD Sidebar - Always in DOM but animated width */}
+        {module.lkpd_url && (
+          <motion.div
+            initial={false}
+            animate={{ 
+              width: showLKPD ? (window.innerWidth < 1024 ? '100%' : '450px') : '0px',
+              opacity: showLKPD ? 1 : 0
+            }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="flex-shrink-0 bg-white border-r border-slate-200 shadow-2xl flex flex-col overflow-hidden h-full"
+          >
+            <div className="p-6 border-b flex items-center justify-between bg-slate-50 min-w-[300px]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                  <FileText size={20} />
                 </div>
-                <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
-                  <X size={20} />
-                </button>
+                <div>
+                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
+                </div>
               </div>
-              <div className="flex-1 bg-slate-100">
-                <iframe 
-                  src={module.lkpd_url} 
-                  className="w-full h-full border-none"
-                  title="LKPD Viewer"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 bg-slate-100 min-w-[300px]">
+              <iframe 
+                src={module.lkpd_url} 
+                className="w-full h-full border-none"
+                title="LKPD Viewer"
+              />
+            </div>
+          </motion.div>
+        )}
 
-        <main className="flex-1 max-w-4xl mx-auto w-full p-6 h-full overflow-y-auto custom-scrollbar">
+        {/* Main Content - Flex-1 will grow/shrink naturally as sidebar changes width */}
+        <main className="flex-1 max-w-5xl mx-auto w-full p-6 h-full overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out">
           <AnimatePresence mode="wait">
             <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
               <div className="flex items-center gap-4 mb-8">
@@ -763,18 +765,18 @@ export default function DetailModul() {
                 </div>
               )}
 
-              <div className="immersive-content">
+              <div className="immersive-content h-full">
                 {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
                   <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
                 )}
                 {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
                 {currentStep.type === 'phet' && (
-                  <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl h-[600px]">
+                  <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl min-h-[500px] lg:h-[calc(100vh-400px)]">
                     <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
                   </div>
                 )}
                 {currentStep.type === 'refleksi' && (
-                  <div className="space-y-6">
+                  <div className="space-y-6 pb-24">
                     {(currentStep.questions || []).map((q, qIdx) => (
                       <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
                         <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
