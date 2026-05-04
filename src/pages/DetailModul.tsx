@@ -347,23 +347,28 @@ export default function DetailModul() {
       return;
     }
 
-    setIsSyncing(true);
-
-    const sessionData = {
-      groupName: isTeacher ? 'GURU' : groupName,
-      members: isTeacher ? user?.nama : members,
-      teachingCode: isTeacher ? user?.teaching_code : teachingCode
-    };
-
-    const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
-    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
-
-    setupRealtime(teachingCode);
-    
     if (isTeacher) {
+      setIsSyncing(true);
+      const sessionData = {
+        groupName: 'GURU',
+        members: user?.nama,
+        teachingCode: user?.teaching_code
+      };
+      const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+      localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+      setupRealtime(teachingCode);
       updateTeacherState(0, id);
     } else {
-      fetchTeacherState(teachingCode);
+      // Students must verify session exists BEFORE joining
+      fetchTeacherState(teachingCode).then(success => {
+        if (success) {
+          setIsSyncing(true);
+          const sessionData = { groupName, members, teachingCode };
+          const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+          localStorage.setItem(sessionKey, JSON.stringify(sessionData));
+          setupRealtime(teachingCode);
+        }
+      });
     }
   };
 
@@ -373,35 +378,43 @@ export default function DetailModul() {
       .from('sesi_kelas')
       .select('halaman_aktif, module_id, path_id')
       .eq('kode_kelas', cleanCode)
-      .single();
+      .maybeSingle(); // Use maybeSingle to avoid error if not found
     
     if (error) {
       console.error('Fetch Teacher State Error:', error);
-      return;
+      return false;
     }
     
-    if (data) {
-      const currentPathId = pathId || '';
-      const teacherPathId = data.path_id || '';
-      
-      console.log(`Sync Check - Module: ${data.module_id} vs ${id}, Path: ${teacherPathId} vs ${currentPathId}`);
-
-      // Only redirect if there is an ACTUAL mismatch
-      if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
-        console.log("Redirecting student to match teacher context...");
-        // Use navigate instead of location.replace for smoother SPA transition if possible,
-        // but if it's the same path, maybe we don't even need to redirect.
-        navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
-        return;
+    if (!data) {
+      if (!isTeacher) {
+        alert('Maaf, Guru belum membuka sesi untuk materi ini. Silakan tunggu instruksi guru.');
+        // Clean up any stale sync state
+        setIsSyncing(false);
+        const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+        localStorage.removeItem(sessionKey);
       }
-
-      if (data.halaman_aktif > 0) {
-        setCurrentPage(data.halaman_aktif);
-        setInWaitingRoom(false);
-      } else {
-        setInWaitingRoom(true);
-      }
+      return false;
     }
+
+    const currentPathId = pathId || '';
+    const teacherPathId = data.path_id || '';
+    
+    console.log(`Sync Check - Module: ${data.module_id} vs ${id}, Path: ${teacherPathId} vs ${currentPathId}`);
+
+    // Only redirect if there is an ACTUAL mismatch
+    if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
+      console.log("Redirecting student to match teacher context...");
+      navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
+      return true;
+    }
+
+    if (data.halaman_aktif > 0) {
+      setCurrentPage(data.halaman_aktif);
+      setInWaitingRoom(false);
+    } else {
+      setInWaitingRoom(true);
+    }
+    return true;
   };
 
   const updateTeacherState = async (page: number, moduleId?: string, isPathReflection?: boolean) => {
