@@ -289,6 +289,8 @@ export default function DetailModul() {
       if (data.halaman_aktif > 0) {
         setCurrentPage(data.halaman_aktif);
         setInWaitingRoom(false);
+      } else {
+        setInWaitingRoom(true);
       }
     }
   };
@@ -346,7 +348,7 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(1, nextModuleId); 
+          updateTeacherState(0, nextModuleId); 
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
         } else {
