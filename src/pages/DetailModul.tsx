@@ -120,8 +120,11 @@ export default function DetailModul() {
       setMembers(parsed.members);
       setTeachingCode(parsed.teachingCode);
 
-      if (pathId) {
+      if (parsed.teachingCode) {
         setupRealtime(parsed.teachingCode);
+        if (!isTeacher) {
+          fetchTeacherState(parsed.teachingCode);
+        }
       }
     }
 
@@ -150,7 +153,6 @@ export default function DetailModul() {
       }
 
       let finalSteps = modData.steps || [];
-      let isFirstInPath = true;
 
       if (pathId) {
         const { data: lpData } = await supabase
@@ -162,20 +164,11 @@ export default function DetailModul() {
         if (lpData) {
           setPathData(lpData);
           finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
-          
-          const sorted = lpData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
-          isFirstInPath = sorted[0]?.module_id === id;
         }
       }
       
       setModule({ ...modData, steps: finalSteps });
-      
-      if (pathId && !isFirstInPath) {
-        setCurrentPage(1);
-        setInWaitingRoom(false);
-      } else {
-        setCurrentPage(0);
-      }
+      setCurrentPage(0);
 
       // Load existing answers
       const { data: existingAnswers } = await supabase
