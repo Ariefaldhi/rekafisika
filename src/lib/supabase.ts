@@ -45,12 +45,29 @@ export interface Module {
   id: string;
   topic: string;
   description?: string;
-  week: number;
+  sort_order: number;
   is_visible: boolean;
   is_locked: boolean;
   steps: ModuleStep[];
   lkpd_url?: string;
   created_at: string;
+}
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  is_visible: boolean;
+  created_at: string;
+  modules?: LearningPathModule[];
+}
+
+export interface LearningPathModule {
+  id: string;
+  path_id: string;
+  module_id: string;
+  order_index: number;
+  module?: Module;
 }
 
 export interface ModuleProgress {

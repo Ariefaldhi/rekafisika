@@ -6,10 +6,12 @@ import {
   ChevronRight, Menu, Loader2,
   ShieldCheck, ArrowLeft, Trash2, Plus, 
   Save, X, Lock, Unlock, FileText, 
-  List, Upload, Sparkles, LogOut
+  List, Upload, Sparkles, LogOut,
+  Route, ArrowUp, ArrowDown, Settings
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import type { Module, LearningPath, LearningPathModule } from '../lib/supabase';
 
 // --- Types ---
 interface Profile {
@@ -18,18 +20,6 @@ interface Profile {
   nama: string;
   role: 'admin' | 'teacher' | 'student';
   profile_photo_url?: string;
-}
-
-interface Module {
-  id: string;
-  week: number;
-  topic: string;
-  description: string;
-  steps: any[];
-  is_visible: boolean;
-  is_locked: boolean;
-  lkpd_url?: string;
-  lkpd_title?: string;
 }
 
 interface Stat {
@@ -49,12 +39,18 @@ export default function Admin() {
   // Data States
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Management States
+  // Management States (Modules)
   const [searchQuery, setSearchQuery] = useState('');
   const [editingModule, setEditingModule] = useState<Partial<Module> | null>(null);
+  
+  // Management States (Learning Paths)
+  const [editingPath, setEditingPath] = useState<Partial<LearningPath> | null>(null);
+  const [pathModules, setPathModules] = useState<string[]>([]); // Array of module IDs
+
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -64,23 +60,26 @@ export default function Admin() {
   const fetchInitialData = async () => {
     setIsLoading(true);
     try {
-      const [pRes, mRes] = await Promise.all([
+      const [pRes, mRes, lpRes] = await Promise.all([
         supabase.from('profiles').select('*').order('nama'),
-        supabase.from('modules').select('*').order('week'),
+        supabase.from('modules').select('*').order('sort_order'),
+        supabase.from('learning_paths').select('*, modules:learning_path_modules(module_id, order_index)').order('created_at', { ascending: false })
       ]);
 
       setProfiles(pRes.data || []);
       setModules(mRes.data || []);
+      setLearningPaths(lpRes.data || []);
 
       const studentCount = pRes.data?.filter(p => p.role === 'student').length || 0;
       const teacherCount = pRes.data?.filter(p => p.role === 'teacher').length || 0;
       const moduleCount = mRes.data?.length || 0;
+      const pathCount = lpRes.data?.length || 0;
 
       setStats([
         { label: 'Mahasiswa', value: studentCount, icon: Users, color: 'bg-blue-500' },
         { label: 'Guru/Dosen', value: teacherCount, icon: ShieldCheck, color: 'bg-indigo-500' },
         { label: 'Total Modul', value: moduleCount, icon: BookOpen, color: 'bg-emerald-500' },
-        { label: 'Sistem Health', value: '100%', icon: Sparkles, color: 'bg-amber-500' },
+        { label: 'Rangkaian Ajar', value: pathCount, icon: Route, color: 'bg-purple-500' },
       ]);
 
     } catch (err) {
@@ -112,7 +111,7 @@ export default function Admin() {
       const payload = {
         topic: editingModule.topic,
         description: editingModule.description || '',
-        week: editingModule.week || 1,
+        sort_order: editingModule.sort_order || 1,
         steps: editingModule.steps || [],
         lkpd_url: editingModule.lkpd_url || null,
         lkpd_title: editingModule.lkpd_title || null,
@@ -158,9 +157,63 @@ export default function Admin() {
     }
   };
 
+  // --- Learning Path Management ---
+  const handleSavePath = async () => {
+    if (!editingPath?.title) return alert('Judul wajib diisi');
+    if (pathModules.length === 0) return alert('Pilih minimal satu materi');
+    
+    setIsSaving(true);
+    try {
+      const pathPayload = {
+        title: editingPath.title,
+        description: editingPath.description || '',
+        is_visible: editingPath.is_visible ?? true,
+      };
+
+      let pathId = editingPath.id;
+      if (pathId) {
+        await supabase.from('learning_paths').update(pathPayload).eq('id', pathId);
+        // Delete old relations
+        await supabase.from('learning_path_modules').delete().eq('path_id', pathId);
+      } else {
+        const { data, error } = await supabase.from('learning_paths').insert([pathPayload]).select().single();
+        if (error) throw error;
+        pathId = data.id;
+      }
+
+      // Insert new relations
+      const relations = pathModules.map((mId, idx) => ({
+        path_id: pathId,
+        module_id: mId,
+        order_index: idx + 1
+      }));
+
+      await supabase.from('learning_path_modules').insert(relations);
+
+      setEditingPath(null);
+      setPathModules([]);
+      fetchInitialData();
+    } catch (err) {
+      alert('Gagal simpan rangkaian: ' + (err as any).message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deletePath = async (id: string) => {
+    if (!confirm('Hapus rangkaian ajar ini?')) return;
+    try {
+      await supabase.from('learning_paths').delete().eq('id', id);
+      fetchInitialData();
+    } catch (err) {
+      alert('Gagal hapus rangkaian');
+    }
+  };
+
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'modules', label: 'Manajemen Modul', icon: BookOpen },
+    { id: 'paths', label: 'Rangkaian Ajar', icon: Route },
     { id: 'users', label: 'Manajemen User', icon: Users },
   ];
 
@@ -231,7 +284,7 @@ export default function Admin() {
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-slate-500">
               <Menu size={24} />
             </button>
-            <h2 className="text-xl font-black text-slate-800 capitalize tracking-tight">{activeSection}</h2>
+            <h2 className="text-xl font-black text-slate-800 capitalize tracking-tight">{activeSection.replace('_', ' ')}</h2>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-xl text-slate-500 text-[10px] font-black uppercase tracking-widest">
@@ -274,8 +327,11 @@ export default function Admin() {
                     <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
                        <div className="relative z-10">
                          <h3 className="text-2xl font-black text-slate-800 mb-4 tracking-tight">Selamat Datang di RekaFisika Admin</h3>
-                         <p className="text-slate-500 leading-relaxed max-w-2xl mb-8">Gunakan panel ini untuk mengelola modul pembelajaran dan status pengguna. Semua perubahan yang Anda lakukan akan langsung tersinkronisasi ke seluruh platform dalam hitungan detik.</p>
-                         <button onClick={() => setActiveSection('modules')} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">Mulai Kelola Modul</button>
+                         <p className="text-slate-500 leading-relaxed max-w-2xl mb-8">Gunakan panel ini untuk mengelola modul pembelajaran, rangkaian ajar, dan status pengguna. Semua perubahan yang Anda lakukan akan langsung tersinkronisasi ke seluruh platform.</p>
+                         <div className="flex gap-4">
+                           <button onClick={() => setActiveSection('modules')} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">Manajemen Materi</button>
+                           <button onClick={() => setActiveSection('paths')} className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all shadow-sm">Atur Rangkaian</button>
+                         </div>
                        </div>
                        <Sparkles size={200} className="absolute -right-20 -bottom-20 text-slate-50 pointer-events-none" />
                     </div>
@@ -291,7 +347,7 @@ export default function Admin() {
                          <p className="text-slate-400 text-sm font-medium">Total {modules.length} modul aktif di sistem.</p>
                        </div>
                        <button 
-                        onClick={() => setEditingModule({ topic: '', steps: [], week: modules.length + 1 })}
+                        onClick={() => setEditingModule({ topic: '', steps: [], sort_order: modules.length + 1 })}
                         className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20"
                        >
                          <Plus size={18} /> Tambah Modul
@@ -303,7 +359,7 @@ export default function Admin() {
                         <div key={m.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between group hover:border-blue-200 transition-all shadow-sm">
                            <div className="flex items-center gap-6">
                              <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl">
-                               {m.week}
+                               {m.sort_order}
                              </div>
                              <div>
                                <h4 className="font-black text-slate-800 text-lg">{m.topic}</h4>
@@ -335,6 +391,66 @@ export default function Admin() {
                            </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* --- SECTIONS: LEARNING PATHS --- */}
+                {activeSection === 'paths' && (
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                       <div>
+                         <h3 className="text-2xl font-black text-slate-800 tracking-tight">Rangkaian Ajar</h3>
+                         <p className="text-slate-400 text-sm font-medium">Gabungkan beberapa materi menjadi alur pembelajaran.</p>
+                       </div>
+                       <button 
+                        onClick={() => {
+                          setEditingPath({ title: '', description: '', is_visible: true });
+                          setPathModules([]);
+                        }}
+                        className="bg-purple-600 text-white px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-purple-500 transition-all shadow-lg shadow-purple-500/20"
+                       >
+                         <Plus size={18} /> Buat Rangkaian
+                       </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {learningPaths.map(path => (
+                        <div key={path.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                           <div className="flex justify-between items-start mb-6">
+                              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                <Route size={24} />
+                              </div>
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => {
+                                  setEditingPath(path);
+                                  setPathModules(path.modules?.sort((a,b) => a.order_index - b.order_index).map(m => m.module_id) || []);
+                                }} className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg"><FileText size={16}/></button>
+                                <button onClick={() => deletePath(path.id)} className="p-2 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-lg"><Trash2 size={16}/></button>
+                              </div>
+                           </div>
+                           <h4 className="text-xl font-black text-slate-800 mb-2">{path.title}</h4>
+                           <p className="text-xs text-slate-400 font-medium line-clamp-2 mb-6">{path.description}</p>
+                           
+                           <div className="space-y-3">
+                              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Alur Materi:</p>
+                              <div className="flex flex-col gap-2">
+                                {path.modules?.sort((a,b) => a.order_index - b.order_index).map((pm, idx) => (
+                                  <div key={idx} className="flex items-center gap-3 text-xs font-bold text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] border border-slate-200">{idx+1}</span>
+                                    {modules.find(m => m.id === pm.module_id)?.topic || 'Materi tidak ditemukan'}
+                                  </div>
+                                ))}
+                              </div>
+                           </div>
+                        </div>
+                      ))}
+                      {learningPaths.length === 0 && (
+                        <div className="md:col-span-2 text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
+                           <Route size={48} className="mx-auto text-slate-200 mb-4" />
+                           <p className="text-slate-400 font-medium">Belum ada rangkaian ajar yang dibuat.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -448,11 +564,11 @@ export default function Admin() {
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                    <div className="md:col-span-1">
-                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Urutan / Minggu</label>
+                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Urutan Tampil</label>
                      <input 
                       type="number" 
-                      value={editingModule.week}
-                      onChange={e => setEditingModule({...editingModule, week: parseInt(e.target.value)})}
+                      value={editingModule.sort_order}
+                      onChange={e => setEditingModule({...editingModule, sort_order: parseInt(e.target.value)})}
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                      />
                    </div>
@@ -610,6 +726,136 @@ export default function Admin() {
                 >
                   {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                   Simpan Modul
+                </button>
+              </div>
+           </motion.div>
+        </div>
+      )}
+
+      {/* --- MODAL: EDIT LEARNING PATH --- */}
+      {editingPath && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+           <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white w-full max-w-4xl h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden"
+           >
+              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingPath.id ? 'Edit Rangkaian' : 'Buat Rangkaian Ajar'}</h3>
+                  <p className="text-sm text-slate-400 font-medium">Gabungkan beberapa materi menjadi satu alur.</p>
+                </div>
+                <button onClick={() => setEditingPath(null)} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Nama Rangkaian</label>
+                    <input 
+                      type="text" 
+                      value={editingPath.title}
+                      onChange={e => setEditingPath({...editingPath, title: e.target.value})}
+                      placeholder="Contoh: Rangkaian Dasar Kinematika"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Deskripsi</label>
+                    <textarea 
+                      value={editingPath.description}
+                      onChange={e => setEditingPath({...editingPath, description: e.target.value})}
+                      placeholder="Jelaskan tujuan rangkaian ajar ini..."
+                      rows={2}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-purple-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                   <h4 className="font-black text-slate-800 text-xl tracking-tight">Alur Materi</h4>
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Selected Modules */}
+                      <div className="space-y-3">
+                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Urutan Materi:</p>
+                         <div className="flex flex-col gap-3 min-h-[100px] p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                           {pathModules.map((mId, idx) => {
+                             const m = modules.find(mod => mod.id === mId);
+                             return (
+                               <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group">
+                                 <div className="flex items-center gap-3">
+                                   <span className="w-6 h-6 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
+                                   <span className="text-xs font-bold text-slate-700">{m?.topic || 'Materi tidak ditemukan'}</span>
+                                 </div>
+                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                   <button 
+                                    onClick={() => {
+                                      if (idx === 0) return;
+                                      const newModules = [...pathModules];
+                                      [newModules[idx], newModules[idx-1]] = [newModules[idx-1], newModules[idx]];
+                                      setPathModules(newModules);
+                                    }}
+                                    className="p-1.5 text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
+                                   ><ArrowUp size={14}/></button>
+                                   <button 
+                                    onClick={() => {
+                                      if (idx === pathModules.length - 1) return;
+                                      const newModules = [...pathModules];
+                                      [newModules[idx], newModules[idx+1]] = [newModules[idx+1], newModules[idx]];
+                                      setPathModules(newModules);
+                                    }}
+                                    className="p-1.5 text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
+                                   ><ArrowDown size={14}/></button>
+                                   <button 
+                                    onClick={() => setPathModules(pathModules.filter((_, i) => i !== idx))}
+                                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md"
+                                   ><Trash2 size={14}/></button>
+                                 </div>
+                               </div>
+                             );
+                           })}
+                           {pathModules.length === 0 && <p className="text-center text-xs text-slate-400 italic py-6">Klik materi di sebelah kanan untuk menambahkan</p>}
+                         </div>
+                      </div>
+
+                      {/* Available Modules */}
+                      <div className="space-y-3">
+                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Pilih Materi:</p>
+                         <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                           {modules.filter(m => !pathModules.includes(m.id)).map(m => (
+                             <button 
+                              key={m.id}
+                              onClick={() => setPathModules([...pathModules, m.id])}
+                              className="text-left bg-white p-4 rounded-2xl border border-slate-100 hover:border-purple-300 hover:bg-purple-50/30 transition-all group"
+                             >
+                               <div className="flex items-center justify-between">
+                                 <span className="text-xs font-bold text-slate-700">{m.topic}</span>
+                                 <Plus size={14} className="text-slate-300 group-hover:text-purple-500" />
+                               </div>
+                             </button>
+                           ))}
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-slate-100 flex items-center justify-end gap-4 bg-slate-50/50">
+                <button 
+                  onClick={() => setEditingPath(null)}
+                  className="px-8 py-4 rounded-2xl font-bold text-slate-400 hover:bg-white transition-all"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleSavePath}
+                  disabled={isSaving}
+                  className="bg-purple-600 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 hover:bg-purple-500 transition-all shadow-xl shadow-purple-600/20 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                  Simpan Rangkaian
                 </button>
               </div>
            </motion.div>

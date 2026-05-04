@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, FlaskConical, Brain, Link as LinkIcon, 
   ChevronLeft, ChevronRight, CheckCircle, Users, Hourglass, 
-  MessageSquare, Loader2, Info, Radio, DoorOpen
+  MessageSquare, Loader2, Info, Radio, DoorOpen, Route
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -22,14 +22,13 @@ const PDFViewer = ({ url, startPage, endPage }: { url: string; startPage?: numbe
       />
       <div className="bg-white border-t border-slate-200 p-3 flex justify-between items-center px-6">
         <p className="text-xs text-slate-400 font-medium">Halaman yang disarankan: <span className="text-slate-800 font-bold">{startPage || 1} - {endPage || 'Akhir'}</span></p>
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-primary-500 hover:underline">Buka Fullscreen</a>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-500 hover:underline">Buka Fullscreen</a>
       </div>
     </div>
   );
 };
 
 const VideoViewer = ({ url, startTime, endTime, isTeacher }: { url: string; startTime?: number; endTime?: number; isTeacher: boolean }) => {
-  // Extract YouTube ID
   const getYouTubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -41,7 +40,7 @@ const VideoViewer = ({ url, startTime, endTime, isTeacher }: { url: string; star
   if (!isTeacher && videoId) {
     return (
       <div className="mt-2 p-10 bg-slate-50 rounded-3xl border border-slate-200 flex flex-col items-center justify-center text-center gap-4 min-h-[300px] shadow-sm">
-        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-primary-400 text-3xl shadow-sm mb-2 animate-pulse">
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-400 text-3xl shadow-sm mb-2 animate-pulse">
           <Radio size={40} />
         </div>
         <h4 className="text-xl font-black text-slate-800">Perhatikan Layar Guru</h4>
@@ -67,11 +66,6 @@ const VideoViewer = ({ url, startTime, endTime, isTeacher }: { url: string; star
           title="Video Player"
         />
       </div>
-      {endTime && (
-        <p className="text-[10px] text-slate-400 mt-3 text-center font-bold tracking-widest uppercase">
-          ⏱ Durasi Rekomendasi: {Math.floor((startTime || 0)/60)}:{((startTime||0)%60).toString().padStart(2,'0')} — {Math.floor(endTime/60)}:{(endTime%60).toString().padStart(2,'0')}
-        </p>
-      )}
     </div>
   );
 };
@@ -80,10 +74,14 @@ const VideoViewer = ({ url, startTime, endTime, isTeacher }: { url: string; star
 
 export default function DetailModul() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   
+  const pathId = searchParams.get('path');
+  
   const [module, setModule] = useState<Module | null>(null);
+  const [pathData, setPathData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -103,13 +101,14 @@ export default function DetailModul() {
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
 
   useEffect(() => {
-    fetchModule();
+    fetchData();
     
     // Auto-fill from user session if available
     if (user?.teaching_code) setTeachingCode(user.teaching_code);
     
-    // Check if previously joined
-    const saved = localStorage.getItem(`rekafisika_session_${id}`);
+    // Check if previously joined in this path or module
+    const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+    const saved = localStorage.getItem(sessionKey);
     if (saved) {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
@@ -122,26 +121,48 @@ export default function DetailModul() {
         channelRef.current.unsubscribe();
       }
     };
-  }, [id]);
+  }, [id, pathId]);
 
-  const fetchModule = async () => {
+  const fetchData = async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: modData, error: modError } = await supabase
         .from('modules')
         .select('*')
         .eq('id', id)
         .single();
       
-      if (error) throw error;
-      if (data.is_locked && !isTeacher) {
+      if (modError) throw modError;
+      if (modData.is_locked && !isTeacher) {
         alert('Modul ini masih terkunci.');
-        navigate('/modul');
+        navigate('/home');
         return;
       }
+
+      // Filter out reflections if in path and not the last module
+      let finalSteps = modData.steps || [];
+      if (pathId) {
+        const { data: lpData } = await supabase
+          .from('learning_paths')
+          .select('*, modules:learning_path_modules(*)')
+          .eq('id', pathId)
+          .single();
+        
+        if (lpData) {
+          setPathData(lpData);
+          const sortedModules = lpData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
+          const currentIdx = sortedModules.findIndex((pm: any) => pm.module_id === id);
+          const isLastModule = currentIdx === sortedModules.length - 1;
+
+          if (!isLastModule) {
+            finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
+          }
+        }
+      }
       
-      setModule(data as Module);
+      setModule({ ...modData, steps: finalSteps });
     } catch (err) {
-      console.error('Error fetching module:', err);
+      console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
     }
@@ -162,6 +183,11 @@ export default function DetailModul() {
       })
       .on('broadcast', { event: 'page_sync' }, ({ payload }) => {
         if (!isTeacher) {
+          if (payload.moduleId && payload.moduleId !== id) {
+            // Redirect students to the next module in path
+            navigate(`/detail-modul/${payload.moduleId}?path=${pathId || ''}`);
+            return;
+          }
           setCurrentPage(payload.page);
           if (payload.page > 0) setInWaitingRoom(false);
         }
@@ -175,7 +201,6 @@ export default function DetailModul() {
         if (status === 'SUBSCRIBED') {
           setIsSyncing(true);
           if (!isTeacher) {
-            // Ping presence every 5 seconds
             const interval = setInterval(() => {
               if (inWaitingRoom) {
                 channel.send({
@@ -200,19 +225,20 @@ export default function DetailModul() {
       return;
     }
 
-    localStorage.setItem(`rekafisika_session_${id}`, JSON.stringify({
+    const sessionData = {
       groupName: isTeacher ? 'GURU' : groupName,
       members: isTeacher ? user?.nama : members,
       teachingCode
-    }));
+    };
+
+    const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+    localStorage.setItem(sessionKey, JSON.stringify(sessionData));
 
     setupRealtime(teachingCode);
     
     if (isTeacher) {
-      // Sync initial state
-      updateTeacherState(0);
+      updateTeacherState(0, id);
     } else {
-      // Fetch current state from DB as fallback
       fetchTeacherState(teachingCode);
     }
   };
@@ -220,32 +246,34 @@ export default function DetailModul() {
   const fetchTeacherState = async (code: string) => {
     const { data } = await supabase
       .from('sesi_kelas')
-      .select('halaman_aktif')
+      .select('halaman_aktif, module_id')
       .eq('kode_kelas', code)
       .single();
     
     if (data) {
+      if (data.module_id !== id) {
+        navigate(`/detail-modul/${data.module_id}?path=${pathId || ''}`);
+        return;
+      }
       setCurrentPage(data.halaman_aktif);
       if (data.halaman_aktif > 0) setInWaitingRoom(false);
     }
   };
 
-  const updateTeacherState = async (page: number) => {
+  const updateTeacherState = async (page: number, moduleId?: string) => {
     if (!isTeacher) return;
     
-    // Broadcast
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'page_sync',
-        payload: { page }
+        payload: { page, moduleId: moduleId || id }
       });
     }
 
-    // Persist to DB
     await supabase.from('sesi_kelas').upsert({
       kode_kelas: teachingCode,
-      module_id: id,
+      module_id: moduleId || id,
       halaman_aktif: page,
       updated_at: new Date().toISOString()
     }, { onConflict: 'kode_kelas' });
@@ -279,19 +307,24 @@ export default function DetailModul() {
     if (!auto && !window.confirm('Selesaikan modul ini?')) return;
 
     if (isTeacher) {
-      // Broadcast end
-      if (channelRef.current) {
-        channelRef.current.send({
-          type: 'broadcast',
-          event: 'session_ended',
-          payload: {}
-        });
+      if (pathId && pathData) {
+        const sortedModules = pathData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
+        const currentIdx = sortedModules.findIndex((pm: any) => pm.module_id === id);
+        
+        if (currentIdx < sortedModules.length - 1) {
+          const nextModuleId = sortedModules[currentIdx + 1].module_id;
+          updateTeacherState(0, nextModuleId); // Reset to cover of next module
+          navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
+          return;
+        }
       }
-      // Cleanup session
+
+      if (channelRef.current) {
+        channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
+      }
       await supabase.from('sesi_kelas').delete().eq('kode_kelas', teachingCode);
       navigate('/home');
     } else {
-      // Submit progress
       await supabase.from('module_progress').upsert({
         student_nim: user?.nim,
         module_id: id,
@@ -299,7 +332,18 @@ export default function DetailModul() {
         completed_at: new Date().toISOString()
       }, { onConflict: 'student_nim, module_id' });
 
-      alert('Selamat! Modul berhasil diselesaikan.');
+      if (pathId && pathData) {
+        const sortedModules = pathData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
+        const currentIdx = sortedModules.findIndex((pm: any) => pm.module_id === id);
+        
+        if (currentIdx < sortedModules.length - 1) {
+          const nextModuleId = sortedModules[currentIdx + 1].module_id;
+          navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
+          return;
+        }
+      }
+
+      alert('Selamat! Anda telah menyelesaikan seluruh rangkaian.');
       navigate('/home');
     }
   };
@@ -328,7 +372,7 @@ export default function DetailModul() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
         <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-xs">Memuat Materi...</p>
       </div>
     );
@@ -336,19 +380,16 @@ export default function DetailModul() {
 
   if (!module) return <div>Modul tidak ditemukan.</div>;
 
-  // --- Rendering Logic ---
-
   if (currentPage === 0) {
     return (
       <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] pb-24">
-        {/* Header */}
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/modul')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
+            <button onClick={() => navigate('/home')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
               <ArrowLeft size={18} />
             </button>
             <div>
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">Persiapan Modul</p>
+              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">{pathId ? 'Rangkaian Ajar' : 'Persiapan Modul'}</p>
               <h1 className="text-sm font-bold text-slate-800 line-clamp-1">{module.topic}</h1>
             </div>
           </div>
@@ -356,20 +397,15 @@ export default function DetailModul() {
 
         <main className="max-w-6xl mx-auto p-6 mt-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Info Section */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
               <div className="space-y-2">
-                <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-widest">Langkah Persiapan</span>
+                <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">{pathId ? 'Sesi Rangkaian' : 'Langkah Persiapan'}</span>
                 <h2 className="text-4xl lg:text-5xl font-black text-slate-900 leading-tight">{module.topic}</h2>
               </div>
-              <div 
-                className="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: marked.parse(module.description || '') }}
-              />
+              <div className="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: marked.parse(module.description || '') }} />
 
-              {/* Form Registration */}
               <div className="p-6 bg-white rounded-3xl border border-slate-200 space-y-4 shadow-sm">
-                <div className="flex items-center gap-3 text-primary-500 mb-2">
+                <div className="flex items-center gap-3 text-blue-500 mb-2">
                   <DoorOpen size={24} />
                   <h4 className="font-bold text-sm uppercase tracking-wide">Pendaftaran Sesi</h4>
                 </div>
@@ -381,7 +417,7 @@ export default function DetailModul() {
                       type="text" 
                       value={teachingCode}
                       onChange={(e) => setTeachingCode(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary-500 outline-none" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
                       placeholder="Contoh: PHYS101"
                     />
                   </div>
@@ -393,8 +429,8 @@ export default function DetailModul() {
                           type="text" 
                           value={groupName}
                           onChange={(e) => setGroupName(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary-500 outline-none" 
-                          placeholder="Misal: Kelompok 1 / Newton"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" 
+                          placeholder="Misal: Kelompok 1"
                         />
                       </div>
                       <div>
@@ -402,35 +438,25 @@ export default function DetailModul() {
                         <textarea 
                           value={members}
                           onChange={(e) => setMembers(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-500 outline-none resize-none" 
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none" 
                           rows={2} 
-                          placeholder="Sebutkan nama lengkap anggota..."
                         />
                       </div>
                     </>
                   )}
                 </div>
-                <button 
-                  onClick={handleJoin}
-                  className="w-full py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-primary-500/20"
-                >
+                <button onClick={handleJoin} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg">
                   {isTeacher ? 'Buka Sesi' : 'Gabung Kelas'}
                 </button>
               </div>
             </motion.div>
 
-            {/* Visual/Status Section */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="hidden lg:block">
               <div className="aspect-square bg-slate-200 rounded-[3rem] overflow-hidden relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-transparent z-10" />
-                <img 
-                  src={`https://source.unsplash.com/800x800/?physics,science,education&${id}`} 
-                  alt="Module Cover"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
+                <img src={`https://images.unsplash.com/photo-1636466484292-713444498305?q=80&w=800&auto=format&fit=crop`} className="w-full h-full object-cover" alt="Cover" />
                 <div className="absolute bottom-8 left-8 right-8 z-20 bg-white/90 backdrop-blur p-6 rounded-2xl shadow-xl">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center text-white">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white">
                       <Radio className="animate-pulse" />
                     </div>
                     <div>
@@ -444,72 +470,31 @@ export default function DetailModul() {
           </div>
         </main>
 
-        {/* Waiting Room Overlay */}
         <AnimatePresence>
           {isSyncing && inWaitingRoom && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6">
               <div className="max-w-2xl w-full bg-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-500 to-orange-500" />
-                
+                <div className="absolute top-0 left-0 w-full h-2 bg-blue-500" />
                 {isTeacher ? (
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-500">
-                      <DoorOpen size={32} />
-                    </div>
                     <h2 className="text-2xl font-black text-slate-800">Ruang Tunggu Kelas</h2>
                     <p className="text-slate-500 text-sm mt-2">Kode Akses: <span className="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded">{teachingCode}</span></p>
-                    
                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 my-8 min-h-[200px]">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-slate-700 text-sm">Peserta yang Bergabung</h3>
-                        <span className="bg-primary-100 text-primary-700 text-xs font-bold px-3 py-1 rounded-full">{joinedGroups.size} Kelompok</span>
-                      </div>
                       <div className="flex flex-wrap gap-3">
-                        {joinedGroups.size === 0 ? (
-                          <div className="text-center w-full text-slate-400 text-sm py-8">Belum ada peserta masuk...</div>
-                        ) : (
-                          Array.from(joinedGroups).map(grp => (
-                            <div key={grp} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm flex items-center gap-2">
-                              <CheckCircle size={14} className="text-emerald-500" />
-                              {grp}
-                            </div>
-                          ))
-                        )}
+                        {Array.from(joinedGroups).map(grp => (
+                          <div key={grp} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2">
+                            <CheckCircle size={14} className="text-emerald-500" /> {grp}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    
-                    <button 
-                      onClick={handleStartSession}
-                      className="w-full py-4 bg-primary-500 hover:bg-primary-600 rounded-2xl font-black text-white text-xs uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <Play size={16} /> Mulai Sesi Pembelajaran
-                    </button>
+                    <button onClick={handleStartSession} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all">Mulai Sesi</button>
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
-                      <div className="w-full h-full border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin absolute" />
-                      <Hourglass className="text-orange-400 animate-pulse" size={40} />
-                    </div>
+                    <Hourglass className="text-blue-400 animate-pulse mx-auto mb-6" size={48} />
                     <h2 className="text-2xl font-black text-slate-800 mb-2">Menunggu Guru...</h2>
-                    <p className="text-slate-500 text-sm leading-relaxed">Anda sudah terdaftar. Tunggu aba-aba dari guru Anda untuk memulai sesi pembelajaran sinkron ini.</p>
-                    
-                    <div className="mt-8 inline-block bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-left w-full max-w-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center text-slate-400">
-                          <Users size={20} />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Sesi Aktif</p>
-                          <p className="font-bold text-slate-700 text-sm">{teachingCode}</p>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-slate-500 text-sm">Anda sudah terdaftar. Tunggu aba-aba dari guru Anda.</p>
                   </div>
                 )}
               </div>
@@ -520,218 +505,83 @@ export default function DetailModul() {
     );
   }
 
-  // --- Step Content Rendering ---
-
   const currentStep = module.steps[currentPage - 1];
-
-  const renderStepIcon = (type: string) => {
-    switch (type) {
-      case 'ppt':
-      case 'pdf': return <FileText />;
-      case 'video': return <Play />;
-      case 'phet': return <FlaskConical />;
-      case 'refleksi': return <Brain />;
-      default: return <LinkIcon />;
-    }
-  };
-
-  const renderStepColor = (type: string) => {
-    switch (type) {
-      case 'ppt': return 'bg-orange-50 text-orange-500';
-      case 'pdf': return 'bg-rose-50 text-rose-500';
-      case 'video': return 'bg-red-50 text-red-500';
-      case 'phet': return 'bg-emerald-50 text-emerald-500';
-      case 'refleksi': return 'bg-purple-50 text-purple-500';
-      default: return 'bg-blue-50 text-blue-500';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/modul')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
+          <button onClick={() => navigate('/home')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
             <ArrowLeft size={18} />
           </button>
           <div>
-            <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">Modul Pembelajaran</p>
+            <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">{pathId ? 'Rangkaian Ajar' : 'Materi Tunggal'}</p>
             <h1 className="text-sm font-bold text-slate-800 line-clamp-1">{module.topic}</h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {module.lkpd_url && (
-            <a 
-              href={module.lkpd_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-xl font-bold text-xs hover:bg-orange-100 transition-all border border-orange-100"
-            >
-              <FileText size={14} />
-              <span className="hidden sm:inline">Buka LKPD</span>
-            </a>
-          )}
-          <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-500">
-            <Radio size={14} className="animate-pulse" />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto w-full p-6">
         <AnimatePresence mode="wait">
-          <motion.div 
-            key={currentPage}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            {/* Step Header */}
-            <div className="flex items-center justify-between gap-4 mb-8">
-              <div className="flex items-center gap-4">
-                <span className={`w-12 h-12 rounded-2xl ${renderStepColor(currentStep.type)} font-bold flex items-center justify-center text-xl shadow-sm`}>
-                  {renderStepIcon(currentStep.type)}
-                </span>
-                <div>
-                  <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
-                </div>
-              </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-[9px] uppercase font-black text-slate-300 tracking-tighter">Langkah {currentPage}</p>
+          <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+            <div className="flex items-center gap-4 mb-8">
+              <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
+                {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
+              </span>
+              <div>
+                <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
               </div>
             </div>
 
-            {/* Instruction */}
             {currentStep.instruction && (
-              <div className="bg-primary-50 text-primary-900 text-sm p-5 rounded-2xl border-l-4 border-primary-500 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <Info className="text-primary-500 mt-0.5 shrink-0" size={20} />
-                  <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
-                </div>
+              <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
+                <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
               </div>
             )}
 
-            {/* Step Specific Content */}
             <div className="immersive-content">
               {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
                 <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
               )}
-
-              {currentStep.type === 'video' && (
-                <VideoViewer 
-                  url={currentStep.url} 
-                  startTime={currentStep.start_time} 
-                  endTime={currentStep.end_time} 
-                  isTeacher={isTeacher} 
-                />
-              )}
-
+              {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
               {currentStep.type === 'phet' && (
-                <div className="space-y-4">
-                  <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl h-[600px]">
-                    <iframe src={currentStep.url} className="w-full h-full" allowFullScreen title="PhET Simulation" />
-                  </div>
-                  {/* PhET Questions & Tables would go here, simplified for now */}
+                <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl h-[600px]">
+                  <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
                 </div>
               )}
-
               {currentStep.type === 'refleksi' && (
                 <div className="space-y-6">
                   {(currentStep.questions || []).map((q, qIdx) => (
-                    <div key={qIdx} className="space-y-3 p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
                       <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                      <textarea 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
-                        rows={3}
-                        placeholder="Ketik jawabanmu di sini..."
-                        value={answers[currentPage]?.[qIdx] || ''}
-                        onChange={(e) => {
-                          const newStepAnswers = { ...answers[currentPage], [qIdx]: e.target.value };
-                          setAnswers({ ...answers, [currentPage]: newStepAnswers });
-                        }}
-                        onBlur={() => saveRefleksi(currentPage, answers[currentPage])}
-                      />
+                      <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
                     </div>
                   ))}
-                  {saveStatus && <p className="text-center text-[10px] font-bold text-primary-500 uppercase tracking-widest">{saveStatus}</p>}
-                </div>
-              )}
-
-              {currentStep.type === 'link' && (
-                <div className="mt-2 p-8 bg-white rounded-3xl border border-dotted border-slate-300 flex flex-col items-center text-center gap-4 shadow-sm">
-                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 text-2xl shadow-sm">
-                    <LinkIcon />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-slate-700">Tautan Eksternal</h4>
-                    <p className="text-xs text-slate-400 line-clamp-1">{currentStep.url}</p>
-                  </div>
-                  <a href={currentStep.url} target="_blank" rel="noopener noreferrer" className="px-8 py-3 bg-primary-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-600 transition-all">Buka Tautan</a>
                 </div>
               )}
             </div>
-
-            {/* Quiz Section (Optional) */}
-            {currentStep.question && (
-              <div className="p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl mt-8">
-                <div className="flex items-start gap-4 mb-4">
-                  <MessageSquare className="text-primary-400 mt-1" />
-                  <div>
-                    <p className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-1">Cek Pemahaman</p>
-                    <p className="text-white font-bold leading-relaxed">{currentStep.question}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Masukkan jawaban..." className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-primary-500 outline-none transition-all placeholder:text-slate-600" />
-                  <button className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Verifikasi</button>
-                </div>
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Navigation Footer */}
       <div className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
         <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4">
-          <button 
-            onClick={handlePrev}
-            disabled={!isTeacher || currentPage <= 1}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft size={20} />
-            <span className="hidden sm:inline">Sebelumnya</span>
+          <button onClick={handlePrev} disabled={!isTeacher || currentPage <= 1} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 disabled:opacity-30">
+            <ChevronLeft size={20} /> <span className="hidden sm:inline">Sebelumnya</span>
           </button>
           
           <div className="flex-1 text-center">
-            <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-0.5">Langkah</p>
             <p className="text-sm font-bold text-slate-700">{currentPage} / {module.steps.length}</p>
-            {!isTeacher && <div className="text-[9px] text-primary-500 font-bold uppercase tracking-tighter animate-pulse mt-1">Layar Terkendali Guru</div>}
+            {!isTeacher && <div className="text-[9px] text-blue-500 font-bold uppercase animate-pulse mt-1">Layar Terkendali Guru</div>}
           </div>
 
-          {currentPage === module.steps.length ? (
-            <button 
-              onClick={() => handleFinishModule()}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-all"
-            >
-              <CheckCircle size={20} />
-              <span className="hidden sm:inline">Selesaikan Modul</span>
-            </button>
-          ) : (
-            <button 
-              onClick={handleNext}
-              disabled={!isTeacher}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-primary-500 text-white shadow-lg hover:bg-primary-600 transition-all disabled:opacity-50"
-            >
-              <span className="hidden sm:inline">Selanjutnya</span>
-              <ChevronRight size={20} />
-            </button>
-          )}
+          <button onClick={currentPage === module.steps.length ? () => handleFinishModule() : handleNext} disabled={!isTeacher} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-white shadow-lg ${currentPage === module.steps.length ? 'bg-emerald-500' : 'bg-blue-600'} disabled:opacity-50`}>
+            <span>{currentPage === module.steps.length ? (pathId ? 'Lanjut Materi' : 'Selesai') : 'Selanjutnya'}</span>
+            <ChevronRight size={20} />
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
