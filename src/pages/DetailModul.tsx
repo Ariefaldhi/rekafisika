@@ -110,11 +110,18 @@ export default function DetailModul() {
     
     const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
     const saved = localStorage.getItem(sessionKey);
+    
     if (saved) {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
       setMembers(parsed.members);
-      if (!isTeacher) setTeachingCode(parsed.teachingCode);
+      setTeachingCode(parsed.teachingCode);
+
+      // --- AUTO JOIN LOGIC FOR LEARNING PATH ---
+      // If we're in a path and already have session data, we auto-join and setup realtime
+      if (pathId) {
+        setupRealtime(parsed.teachingCode);
+      }
     }
 
     return () => {
@@ -142,6 +149,8 @@ export default function DetailModul() {
       }
 
       let finalSteps = modData.steps || [];
+      let isFirstInPath = true;
+
       if (pathId) {
         const { data: lpData } = await supabase
           .from('learning_paths')
@@ -152,11 +161,24 @@ export default function DetailModul() {
         if (lpData) {
           setPathData(lpData);
           finalSteps = finalSteps.filter((s: any) => s.type !== 'refleksi');
+          
+          const sorted = lpData.modules.sort((a: any, b: any) => a.order_index - b.order_index);
+          isFirstInPath = sorted[0]?.module_id === id;
         }
       }
       
       setModule({ ...modData, steps: finalSteps });
-      setCurrentPage(0);
+      
+      // --- PAGE LOGIC ---
+      // If it's a learning path and NOT the first module, we skip page 0 (cover)
+      // because the user already registered in the first module.
+      if (pathId && !isFirstInPath) {
+        setCurrentPage(1);
+        setInWaitingRoom(false);
+      } else {
+        setCurrentPage(0);
+      }
+
       setIsShowingPathReflection(false);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -256,8 +278,10 @@ export default function DetailModul() {
         navigate(`/detail-modul/${data.module_id}?path=${pathId || ''}`);
         return;
       }
-      setCurrentPage(data.halaman_aktif);
-      if (data.halaman_aktif > 0) setInWaitingRoom(false);
+      if (data.halaman_aktif > 0) {
+        setCurrentPage(data.halaman_aktif);
+        setInWaitingRoom(false);
+      }
     }
   };
 
@@ -314,7 +338,9 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(0, nextModuleId);
+          // When moving to next module in path, teacher immediately starts at step 1
+          // but we use state sync to ensure students also follow.
+          updateTeacherState(1, nextModuleId); 
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
         } else {
@@ -555,7 +581,6 @@ export default function DetailModul() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="max-w-3xl w-full bg-white rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col"
               >
-                {/* Close Button */}
                 <button 
                   onClick={() => setShowExitConfirm(true)}
                   className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center z-20"
@@ -624,7 +649,6 @@ export default function DetailModul() {
                 </div>
               </motion.div>
 
-              {/* Confirmation Modal */}
               <AnimatePresence>
                 {showExitConfirm && (
                   <motion.div 
