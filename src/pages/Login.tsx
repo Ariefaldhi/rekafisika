@@ -82,20 +82,21 @@ export default function Login() {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('teaching_code')
+          .select('teaching_code, role, nama, created_at')
           .eq('nim', data.user.email)
           .maybeSingle();
 
         const meta = data.user.user_metadata || {};
         const session: UserSession = {
-          role: (meta.role as UserSession['role']) || 'teacher',
-          nama: meta.nama || 'Pengguna',
+          role: (profile?.role as UserSession['role']) || (meta.role as UserSession['role']) || 'teacher',
+          nama: profile?.nama || meta.nama || 'Pengguna',
           nim: data.user.email!,
           email: data.user.email,
           teaching_code: profile?.teaching_code ?? null,
+          created_at: profile?.created_at ?? data.user.created_at,
         };
         login(session);
-        navigate('/home', { replace: true });
+        navigate(session.role === 'admin' ? '/admin' : '/home', { replace: true });
 
       } else {
         // Register
