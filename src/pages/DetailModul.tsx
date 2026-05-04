@@ -112,9 +112,9 @@ export default function DetailModul() {
     if (!isTeacher && isSyncing && !isLoading) {
       const watchdog = setInterval(() => {
         const diff = Date.now() - lastTeacherPulse;
-        if (diff > 20000) { // 20 seconds timeout for safety
+        if (diff > 45000) { // Increased to 45 seconds for better resilience
           setIsSyncing(false);
-          alert('Sesi terputus: Guru meninggalkan kelas.');
+          alert('Sesi terputus: Guru meninggalkan kelas atau koneksi bermasalah.');
           navigate('/home');
         }
       }, 5000);
@@ -147,9 +147,12 @@ export default function DetailModul() {
       }
     }
 
-    const handleUnload = () => {
-      if (isTeacher && channelRef.current) {
-        channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
+    const handleUnload = (e: BeforeUnloadEvent) => {
+      // Teachers: Don't end session on refresh/close anymore, let them resume!
+      // Students: Warn before leaving active session
+      if (!isTeacher && isSyncing) {
+        e.preventDefault();
+        e.returnValue = ''; // Standard browser prompt
       }
     };
     window.addEventListener('beforeunload', handleUnload);
@@ -157,9 +160,6 @@ export default function DetailModul() {
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
       if (channelRef.current) {
-        if (isTeacher) {
-          channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
-        }
         channelRef.current.unsubscribe();
       }
     };
@@ -379,9 +379,12 @@ export default function DetailModul() {
       
       console.log(`Sync Check - Module: ${data.module_id} vs ${id}, Path: ${teacherPathId} vs ${currentPathId}`);
 
+      // Only redirect if there is an ACTUAL mismatch
       if (data.module_id !== id || (teacherPathId && teacherPathId !== currentPathId)) {
-        console.log("Redirecting student to match teacher context via full reload...");
-        window.location.replace(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
+        console.log("Redirecting student to match teacher context...");
+        // Use navigate instead of location.replace for smoother SPA transition if possible,
+        // but if it's the same path, maybe we don't even need to redirect.
+        navigate(`/detail-modul/${data.module_id}?path=${teacherPathId}`);
         return;
       }
 

@@ -24,6 +24,7 @@ export default function Home() {
   const [modules, setModules] = useState<ModuleWithProgress[]>([]);
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [featuredPath, setFeaturedPath] = useState<LearningPath | null>(null);
+  const [activeSession, setActiveSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -59,6 +60,19 @@ export default function Home() {
       
       if (pathList.length > 0) {
         setFeaturedPath(pathList[0]);
+      }
+
+      // Check for active teacher session
+      if (user?.teaching_code && (user.role === 'teacher' || user.role === 'admin')) {
+        const { data: session } = await supabase
+          .from('sesi_kelas')
+          .select('*, modules(topic)')
+          .eq('kode_kelas', user.teaching_code.trim().toUpperCase())
+          .maybeSingle();
+        
+        if (session) {
+          setActiveSession(session);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -100,6 +114,37 @@ export default function Home() {
 
         {/* ── Main Layout ── */}
         <div className="flex flex-col gap-16">
+          
+          {/* Active Session Recovery Banner (Teacher Only) */}
+          {activeSession && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-600 rounded-[2.5rem] p-8 lg:p-10 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-100">Sesi Sedang Berjalan</p>
+                  </div>
+                  <h3 className="text-2xl lg:text-3xl font-black tracking-tight">
+                    {activeSession.modules?.topic || 'Materi Sedang Diajarkan'}
+                  </h3>
+                  <p className="text-blue-100 text-sm font-medium opacity-80">
+                    Siswa sedang menunggu di halaman {activeSession.halaman_aktif || 'awal'}.
+                  </p>
+                </div>
+                <Link
+                  to={`/detail-modul/${activeSession.module_id}${activeSession.path_id ? `?path=${activeSession.path_id}` : ''}`}
+                  className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95"
+                >
+                  Lanjutkan Mengajar <ChevronRight size={16} />
+                </Link>
+              </div>
+            </motion.div>
+          )}
           
           {/* Featured Path Banner */}
           {featuredPath && (
