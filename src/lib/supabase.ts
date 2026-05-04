@@ -25,6 +25,12 @@ export interface UserSession {
   created_at?: string;
 }
 
+export interface Kegiatan {
+  title: string;
+  questions?: string[];
+  tables?: { title: string; columns: string[]; rows: number }[];
+}
+
 export interface ModuleStep {
   type: 'ppt' | 'pdf' | 'video' | 'phet' | 'refleksi' | 'link';
   title: string;
@@ -40,6 +46,7 @@ export interface ModuleStep {
   phet_tables?: { columns: string[]; rows: number }[];
   questions?: string[]; 
   tables?: { title: string; columns: string[]; rows: number }[];
+  kegiatan?: Kegiatan[];
 }
 
 export interface Module {

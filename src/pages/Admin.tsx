@@ -8,7 +8,8 @@ import {
   X, Lock, Unlock, FileText, 
   Upload, Sparkles, LogOut,
   Route, ArrowUp, ArrowDown, Brain,
-  Layout, Table as TableIcon, Columns
+  Table as TableIcon,
+  Edit3, ListTodo
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -580,7 +581,7 @@ export default function Admin() {
                    <div className="flex justify-between items-center pb-4 border-b">
                      <h4 className="font-black text-slate-800 text-xl">Langkah Pembelajaran</h4>
                      <button onClick={() => {
-                       const newSteps: ModuleStep[] = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '', questions: [], tables: [] } as any];
+                       const newSteps: ModuleStep[] = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '', kegiatan: [] } as any];
                        setEditingModule({...editingModule, steps: newSteps});
                      }} className="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Tambah Langkah</button>
                    </div>
@@ -634,158 +635,197 @@ export default function Admin() {
                               </div>
                            </div>
 
-                           {/* INTERACTIVE ELEMENTS EDITOR */}
-                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-                              {/* Questions Editor */}
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-3 mb-2">
-                                   <Layout className="text-blue-500" size={18} />
-                                   <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Digital Input (Isian)</h5>
-                                </div>
-                                <div className="space-y-3">
-                                   {(step.questions || []).map((q: string, qIdx: number) => (
-                                     <div key={qIdx} className="flex gap-2">
-                                        <input 
-                                          type="text" 
-                                          value={q}
-                                          onChange={e => {
-                                            const newSteps = [...(editingModule.steps || [])];
-                                            if (!newSteps[sIdx].questions) newSteps[sIdx].questions = [];
-                                            newSteps[sIdx].questions[qIdx] = e.target.value;
-                                            setEditingModule({...editingModule, steps: newSteps});
-                                          }}
-                                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium"
-                                          placeholder={`Pertanyaan ${qIdx + 1}`}
-                                        />
-                                        <button onClick={() => {
-                                          const newSteps = [...(editingModule.steps || [])];
-                                          const currentQs = newSteps[sIdx].questions || [];
-                                          newSteps[sIdx].questions = currentQs.filter((_:any, i:any) => i !== qIdx);
-                                          setEditingModule({...editingModule, steps: newSteps});
-                                        }} className="text-rose-400 hover:text-rose-600"><Trash2 size={16}/></button>
-                                     </div>
-                                   ))}
-                                   <button 
-                                    onClick={() => {
-                                      const newSteps = [...(editingModule.steps || [])];
-                                      if (!newSteps[sIdx].questions) newSteps[sIdx].questions = [];
-                                      newSteps[sIdx].questions.push('');
+                           {/* KEGIATAN (WORKSHEET) EDITOR */}
+                           <div className="pt-8 border-t border-slate-100 space-y-6">
+                              <div className="flex justify-between items-center">
+                                 <div className="flex items-center gap-3">
+                                    <ListTodo className="text-blue-600" size={20} />
+                                    <h5 className="text-sm font-black text-slate-800 uppercase tracking-widest">Daftar Kegiatan Worksheet</h5>
+                                 </div>
+                                 <button 
+                                  onClick={() => {
+                                    const newSteps = [...(editingModule.steps || [])];
+                                    const targetStep = newSteps[sIdx];
+                                    if (targetStep) {
+                                      if (!targetStep.kegiatan) targetStep.kegiatan = [];
+                                      targetStep.kegiatan.push({ title: 'Kegiatan Baru', questions: [], tables: [] });
                                       setEditingModule({...editingModule, steps: newSteps});
-                                    }}
-                                    className="w-full py-3 bg-blue-50 border border-blue-100 border-dashed rounded-xl text-[9px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-100 transition-all"
-                                   >
-                                     + Tambah Pertanyaan
-                                   </button>
-                                </div>
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase hover:bg-blue-100 transition-colors"
+                                 >+ Tambah Kegiatan</button>
                               </div>
 
-                              {/* Tables Editor */}
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-3 mb-2">
-                                   <TableIcon className="text-emerald-500" size={18} />
-                                   <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Tabel Digital</h5>
-                                </div>
-                                <div className="space-y-6">
-                                   {(step.tables || []).map((table: any, tIdx: number) => (
-                                     <div key={tIdx} className="p-5 bg-emerald-50/50 rounded-[2rem] border border-emerald-100 space-y-4">
-                                        <div className="flex justify-between items-center">
-                                           <input 
-                                            type="text" 
-                                            value={table.title}
-                                            onChange={e => {
-                                              const newSteps = [...(editingModule.steps || [])];
-                                              const currentTable = newSteps[sIdx].tables?.[tIdx];
-                                              if (currentTable) {
-                                                currentTable.title = e.target.value;
-                                                setEditingModule({...editingModule, steps: newSteps});
-                                              }
-                                            }}
-                                            className="bg-white border-none text-[10px] font-black uppercase tracking-widest text-emerald-700 w-full"
-                                            placeholder="JUDUL TABEL"
-                                           />
-                                           <button onClick={() => {
-                                              const newSteps = [...(editingModule.steps || [])];
-                                              const currentTables = newSteps[sIdx].tables || [];
-                                              newSteps[sIdx].tables = currentTables.filter((_:any, i:any) => i !== tIdx);
-                                              setEditingModule({...editingModule, steps: newSteps});
-                                           }} className="text-rose-400"><Trash2 size={14}/></button>
-                                        </div>
-                                        
-                                        <div className="space-y-3">
-                                           <div className="flex items-center gap-2">
-                                              <Columns size={12} className="text-emerald-400" />
-                                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kolom Tabel</p>
-                                           </div>
-                                           <div className="flex flex-wrap gap-2">
-                                              {table.columns.map((col: string, cIdx: number) => (
-                                                <div key={cIdx} className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-emerald-100">
-                                                   <input 
-                                                    type="text" 
-                                                    value={col}
-                                                    onChange={e => {
-                                                      const newSteps = [...(editingModule.steps || [])];
-                                                      if (newSteps[sIdx].tables?.[tIdx]) {
-                                                        newSteps[sIdx].tables[tIdx].columns[cIdx] = e.target.value;
-                                                        setEditingModule({...editingModule, steps: newSteps});
-                                                      }
-                                                    }}
-                                                    className="bg-transparent border-none text-[10px] font-bold w-20 outline-none"
-                                                   />
-                                                   <button onClick={() => {
-                                                      const newSteps = [...(editingModule.steps || [])];
-                                                      const currentCols = newSteps[sIdx].tables?.[tIdx].columns || [];
-                                                      if (newSteps[sIdx].tables?.[tIdx]) {
-                                                        newSteps[sIdx].tables[tIdx].columns = currentCols.filter((_:any, i:any) => i !== cIdx);
-                                                      }
-                                                      setEditingModule({...editingModule, steps: newSteps});
-                                                   }} className="text-rose-300 hover:text-rose-500"><X size={10}/></button>
-                                                </div>
-                                              ))}
-                                              <button 
-                                                onClick={() => {
-                                                  const newSteps = [...(editingModule.steps || [])];
-                                                  if (newSteps[sIdx].tables?.[tIdx]) {
-                                                    newSteps[sIdx].tables[tIdx].columns.push('Baru');
-                                                    setEditingModule({...editingModule, steps: newSteps});
-                                                  }
-                                                }}
-                                                className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-[9px] font-black"
-                                              >+ Kolom</button>
-                                           </div>
-                                        </div>
+                              <div className="space-y-8">
+                                 {(step.kegiatan || []).map((keg: any, kIdx: number) => (
+                                   <div key={kIdx} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-200 space-y-8 relative">
+                                      <button 
+                                        onClick={() => {
+                                          const newSteps = [...(editingModule.steps || [])];
+                                          const targetStep = newSteps[sIdx];
+                                          if (targetStep && targetStep.kegiatan) {
+                                            targetStep.kegiatan = targetStep.kegiatan.filter((_, i) => i !== kIdx);
+                                            setEditingModule({...editingModule, steps: newSteps});
+                                          }
+                                        }}
+                                        className="absolute top-6 right-6 text-slate-300 hover:text-rose-500"
+                                      ><Trash2 size={18} /></button>
 
-                                        <div className="flex items-center gap-4">
-                                           <div className="flex-1">
-                                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Jumlah Baris</label>
-                                              <input 
-                                                type="number" 
-                                                value={table.rows}
-                                                onChange={e => {
+                                      <div className="max-w-md">
+                                         <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">JUDUL KEGIATAN</label>
+                                         <input 
+                                          type="text" 
+                                          value={keg.title}
+                                          onChange={e => {
+                                            const newSteps = [...(editingModule.steps || [])];
+                                            const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                            if (targetKeg) {
+                                              targetKeg.title = e.target.value;
+                                              setEditingModule({...editingModule, steps: newSteps});
+                                            }
+                                          }}
+                                          className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-black"
+                                          placeholder="Contoh: Kegiatan 1.1"
+                                         />
+                                      </div>
+
+                                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                         {/* Questions in Activity */}
+                                         <div className="space-y-4">
+                                            <div className="flex items-center gap-3">
+                                               <Edit3 className="text-blue-400" size={16} />
+                                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pertanyaan Isian</p>
+                                            </div>
+                                            <div className="space-y-3">
+                                               {(keg.questions || []).map((q: string, qIdx: number) => (
+                                                 <div key={qIdx} className="flex gap-2">
+                                                    <input 
+                                                      type="text" 
+                                                      value={q}
+                                                      onChange={e => {
+                                                        const newSteps = [...(editingModule.steps || [])];
+                                                        const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                        if (targetKeg && targetKeg.questions) {
+                                                          targetKeg.questions[qIdx] = e.target.value;
+                                                          setEditingModule({...editingModule, steps: newSteps});
+                                                        }
+                                                      }}
+                                                      className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs"
+                                                      placeholder={`Pertanyaan ${qIdx + 1}`}
+                                                    />
+                                                    <button onClick={() => {
+                                                       const newSteps = [...(editingModule.steps || [])];
+                                                       const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                       if (targetKeg && targetKeg.questions) {
+                                                          targetKeg.questions = targetKeg.questions.filter((_, i) => i !== qIdx);
+                                                          setEditingModule({...editingModule, steps: newSteps});
+                                                       }
+                                                    }} className="text-rose-300"><Trash2 size={14}/></button>
+                                                 </div>
+                                               ))}
+                                               <button onClick={() => {
                                                   const newSteps = [...(editingModule.steps || [])];
-                                                  const targetTable = newSteps[sIdx].tables?.[tIdx];
-                                                  if (targetTable) {
-                                                    targetTable.rows = parseInt(e.target.value) || 1;
+                                                  const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                  if (targetKeg) {
+                                                    if (!targetKeg.questions) targetKeg.questions = [];
+                                                    targetKeg.questions.push('');
                                                     setEditingModule({...editingModule, steps: newSteps});
                                                   }
-                                                }}
-                                                className="w-full bg-white border border-emerald-100 rounded-xl px-4 py-2 text-xs font-bold"
-                                              />
-                                           </div>
-                                        </div>
-                                     </div>
-                                   ))}
-                                   <button 
-                                    onClick={() => {
-                                      const newSteps = [...(editingModule.steps || [])];
-                                      if (!newSteps[sIdx].tables) newSteps[sIdx].tables = [];
-                                      newSteps[sIdx].tables.push({ title: '', columns: ['Data 1', 'Data 2'], rows: 3 });
-                                      setEditingModule({...editingModule, steps: newSteps});
-                                    }}
-                                    className="w-full py-3 bg-emerald-50 border border-emerald-100 border-dashed rounded-xl text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-100 transition-all"
-                                   >
-                                     + Tambah Tabel Digital
-                                   </button>
-                                </div>
+                                               }} className="w-full py-3 bg-white border border-slate-200 border-dashed rounded-xl text-[9px] font-black text-blue-500 uppercase tracking-widest">+ Isian Baru</button>
+                                            </div>
+                                         </div>
+
+                                         {/* Tables in Activity */}
+                                         <div className="space-y-4">
+                                            <div className="flex items-center gap-3">
+                                               <TableIcon className="text-emerald-400" size={16} />
+                                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tabel Observasi</p>
+                                            </div>
+                                            <div className="space-y-4">
+                                               {(keg.tables || []).map((table: any, tIdx: number) => (
+                                                 <div key={tIdx} className="p-5 bg-white rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+                                                    <div className="flex justify-between items-center">
+                                                       <input 
+                                                        type="text" 
+                                                        value={table.title}
+                                                        onChange={e => {
+                                                          const newSteps = [...(editingModule.steps || [])];
+                                                          const targetTable = newSteps[sIdx].kegiatan?.[kIdx]?.tables?.[tIdx];
+                                                          if (targetTable) {
+                                                            targetTable.title = e.target.value;
+                                                            setEditingModule({...editingModule, steps: newSteps});
+                                                          }
+                                                        }}
+                                                        className="text-[10px] font-black uppercase text-emerald-600 border-none w-full"
+                                                        placeholder="Judul Tabel"
+                                                       />
+                                                       <button onClick={() => {
+                                                          const newSteps = [...(editingModule.steps || [])];
+                                                          const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                          if (targetKeg && targetKeg.tables) {
+                                                            targetKeg.tables = targetKeg.tables.filter((_, i) => i !== tIdx);
+                                                            setEditingModule({...editingModule, steps: newSteps});
+                                                          }
+                                                       }}><X size={14}/></button>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                       {table.columns.map((col: string, cIdx: number) => (
+                                                         <div key={cIdx} className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border">
+                                                            <input type="text" value={col} onChange={e => {
+                                                              const newSteps = [...(editingModule.steps || [])];
+                                                              const targetTable = newSteps[sIdx].kegiatan?.[kIdx]?.tables?.[tIdx];
+                                                              if (targetTable && targetTable.columns) {
+                                                                targetTable.columns[cIdx] = e.target.value;
+                                                                setEditingModule({...editingModule, steps: newSteps});
+                                                              }
+                                                            }} className="bg-transparent border-none text-[9px] w-16" />
+                                                            <button onClick={() => {
+                                                              const newSteps = [...(editingModule.steps || [])];
+                                                              const targetTable = newSteps[sIdx].kegiatan?.[kIdx]?.tables?.[tIdx];
+                                                              if (targetTable && targetTable.columns) {
+                                                                targetTable.columns = targetTable.columns.filter((_, i) => i !== cIdx);
+                                                                setEditingModule({...editingModule, steps: newSteps});
+                                                              }
+                                                            }}><X size={8}/></button>
+                                                         </div>
+                                                       ))}
+                                                       <button onClick={() => {
+                                                          const newSteps = [...(editingModule.steps || [])];
+                                                          const targetTable = newSteps[sIdx].kegiatan?.[kIdx]?.tables?.[tIdx];
+                                                          if (targetTable) {
+                                                            if (!targetTable.columns) targetTable.columns = [];
+                                                            targetTable.columns.push('Kolom');
+                                                            setEditingModule({...editingModule, steps: newSteps});
+                                                          }
+                                                       }} className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-bold">+ Kolom</button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                       <label className="text-[9px] font-black text-slate-400">BARIS:</label>
+                                                       <input type="number" value={table.rows} onChange={e => {
+                                                          const newSteps = [...(editingModule.steps || [])];
+                                                          const targetTable = newSteps[sIdx].kegiatan?.[kIdx]?.tables?.[tIdx];
+                                                          if (targetTable) {
+                                                            targetTable.rows = parseInt(e.target.value) || 1;
+                                                            setEditingModule({...editingModule, steps: newSteps});
+                                                          }
+                                                       }} className="w-12 bg-slate-50 border rounded-lg px-2 py-1 text-[9px] font-bold" />
+                                                    </div>
+                                                 </div>
+                                               ))}
+                                               <button onClick={() => {
+                                                  const newSteps = [...(editingModule.steps || [])];
+                                                  const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                  if (targetKeg) {
+                                                    if (!targetKeg.tables) targetKeg.tables = [];
+                                                    targetKeg.tables.push({ title: '', columns: ['Data'], rows: 3 });
+                                                    setEditingModule({...editingModule, steps: newSteps});
+                                                  }
+                                               }} className="w-full py-3 bg-white border border-slate-200 border-dashed rounded-xl text-[9px] font-black text-emerald-500 uppercase tracking-widest">+ Tabel Baru</button>
+                                            </div>
+                                         </div>
+                                      </div>
+                                   </div>
+                                 ))}
                               </div>
                            </div>
                         </div>

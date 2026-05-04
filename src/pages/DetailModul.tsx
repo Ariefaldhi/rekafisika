@@ -5,7 +5,7 @@ import {
   ArrowLeft, FileText, Play, Brain, 
   ChevronLeft, ChevronRight, CheckCircle, 
   Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ChevronsLeft,
-  Layout, Table as TableIcon
+  Edit3, Book
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -91,13 +91,14 @@ export default function DetailModul() {
   const [isShowingPathReflection, setIsShowingPathReflection] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showLKPD, setShowLKPD] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'interactive' | 'pdf'>('interactive');
   
   // Registration State
   const [groupName, setGroupName] = useState('');
   const [members, setMembers] = useState('');
   const [teachingCode, setTeachingCode] = useState('');
   
-  // Answers State (Combined for questions and tables)
+  // Answers State
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [pathReflectionAnswers, setPathReflectionAnswers] = useState<Record<number, string>>({});
   const [saveStatus, setSaveStatus] = useState<string>('');
@@ -176,7 +177,7 @@ export default function DetailModul() {
         setCurrentPage(0);
       }
 
-      // Load existing answers from DB
+      // Load existing answers
       const { data: existingAnswers } = await supabase
         .from('reflection_answers')
         .select('*')
@@ -699,7 +700,7 @@ export default function DetailModul() {
 
   return (
     <div className={`min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32 overflow-hidden relative transition-all duration-300 ${showLKPD ? 'lkpd-open' : ''}`}>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-[60] bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/home')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
             <ArrowLeft size={18} />
@@ -711,191 +712,158 @@ export default function DetailModul() {
         </div>
         <div className="flex items-center gap-4">
           {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
-          {module.lkpd_url && (
-            <button 
-              onClick={() => setShowLKPD(!showLKPD)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-sm ${
-                showLKPD ? 'bg-slate-900 text-white shadow-slate-500/20' : 'bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100'
-              }`}
-            >
-              {showLKPD ? <ChevronsLeft className="rotate-180" size={14} /> : <FileText size={14} />} 
-              {showLKPD ? 'Tutup LKPD' : 'Buka LKPD'}
-            </button>
-          )}
+          <button 
+            onClick={() => setShowLKPD(!showLKPD)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-sm ${
+              showLKPD ? 'bg-slate-900 text-white shadow-slate-500/20' : 'bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100'
+            }`}
+          >
+            {showLKPD ? <ChevronsLeft className="rotate-180" size={14} /> : <FileText size={14} />} 
+            {showLKPD ? 'Tutup Worksheet' : 'Buka Worksheet'}
+          </button>
         </div>
       </header>
 
       <div className="flex flex-1 relative overflow-hidden h-full">
-        {/* LKPD Sidebar */}
+        {/* SIDEBAR: WORKSHEET CENTER (LKPD + Interactive Kegiatan) */}
         <aside 
-          className={`fixed top-[73px] left-0 bottom-0 w-full lg:w-[28rem] bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col z-[45] transition-transform duration-300 ease-out ${showLKPD ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`fixed top-[73px] left-0 bottom-0 w-full lg:w-[32rem] bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col z-[45] transition-transform duration-300 ease-out ${showLKPD ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          <div className="p-6 border-b flex items-center justify-between bg-slate-50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                <FileText size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
-              </div>
-            </div>
-            <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
-              <X size={20} />
-            </button>
+          {/* Sidebar Tabs */}
+          <div className="flex bg-slate-50 border-b border-slate-200">
+             <button 
+              onClick={() => setSidebarTab('interactive')}
+              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${sidebarTab === 'interactive' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+             >
+                <Edit3 size={14} /> Larik Isian
+             </button>
+             <button 
+              onClick={() => setSidebarTab('pdf')}
+              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${sidebarTab === 'pdf' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+             >
+                <Book size={14} /> Buku LKPD
+             </button>
           </div>
-          <div className="flex-1 bg-slate-100">
-            {module.lkpd_url && (
-              <iframe 
-                src={module.lkpd_url} 
-                className="w-full h-full border-none"
-                title="LKPD Viewer"
-              />
-            )}
-          </div>
-        </aside>
 
-        {/* Main Content */}
-        <main 
-          id="page-container"
-          className={`flex-1 px-4 py-6 relative overflow-hidden transition-all duration-300 ease-out ${showLKPD ? 'lg:ml-[28rem] lg:w-[calc(100%-28rem)]' : 'ml-0 w-full'}`}
-        >
-          <div className="max-w-5xl mx-auto w-full h-full flex flex-col">
-            <AnimatePresence mode="wait">
-              <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6 flex-1 flex flex-col">
-                <div className="flex items-center gap-4 mb-8">
-                  <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
-                    {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
-                  </span>
-                  <div>
-                    <h4 className="text-xl font-black text-slate-900 leading-tight">{currentStep.title}</h4>
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
-                  </div>
-                </div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 bg-slate-50/50">
+            {sidebarTab === 'interactive' ? (
+              <div className="space-y-10 pb-20">
+                {/* Render Kegiatan Sections */}
+                {currentStep?.kegiatan && currentStep.kegiatan.length > 0 ? (
+                  currentStep.kegiatan.map((keg: any, kIdx: number) => (
+                    <div key={kIdx} className="space-y-8">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg shadow-blue-500/20">
+                             {kIdx + 1}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-black text-slate-800 tracking-tight">{keg.title}</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktivitas Pembelajaran</p>
+                          </div>
+                       </div>
 
-                {currentStep.instruction && (
-                  <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500 shadow-sm">
-                    <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
-                  </div>
-                )}
-
-                <div className="immersive-content flex-1 flex flex-col min-h-0 space-y-8">
-                  {/* Step Main Media */}
-                  {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
-                    <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
-                  )}
-                  {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
-                  {currentStep.type === 'phet' && (
-                    <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl min-h-[500px]">
-                      <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
-                    </div>
-                  )}
-
-                  {/* ISIAN & TABEL (Integrated LKPD Replacement) */}
-                  <div className="space-y-10 mt-4">
-                    {/* Questions Section */}
-                    {currentStep.questions && currentStep.questions.length > 0 && (
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                           <Layout className="text-blue-500" size={20} />
-                           <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Isian Pembelajaran</h4>
-                        </div>
-                        <div className="grid grid-cols-1 gap-6">
-                          {currentStep.questions.map((q: string, qIdx: number) => (
-                            <div key={qIdx} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                              <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                              <textarea 
+                       {/* Questions in Activity */}
+                       {keg.questions && keg.questions.length > 0 && (
+                         <div className="space-y-5 pl-4 border-l-2 border-slate-100">
+                           {keg.questions.map((q: string, qIdx: number) => (
+                             <div key={qIdx} className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-sm space-y-4">
+                               <p className="text-sm font-bold text-slate-700 leading-relaxed">{qIdx + 1}. {q}</p>
+                               <textarea 
                                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                 rows={3}
-                                placeholder="Ketik jawaban Anda di sini..."
-                                value={answers[currentPage]?.questions?.[qIdx] || ''}
+                                placeholder="Ketik jawaban di sini..."
+                                value={answers[currentPage]?.kegiatan?.[kIdx]?.questions?.[qIdx] || ''}
                                 onChange={(e) => {
                                   const newAns = { ...answers };
-                                  if (!newAns[currentPage]) newAns[currentPage] = { questions: [], tables: [] };
-                                  if (!newAns[currentPage].questions) newAns[currentPage].questions = [];
-                                  newAns[currentPage].questions[qIdx] = e.target.value;
+                                  if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
+                                  if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
+                                  if (!newAns[currentPage].kegiatan[kIdx].questions) newAns[currentPage].kegiatan[kIdx].questions = [];
+                                  newAns[currentPage].kegiatan[kIdx].questions[qIdx] = e.target.value;
                                   setAnswers(newAns);
                                 }}
                                 onBlur={() => saveAnswers(currentPage, answers[currentPage])}
                                 disabled={isTeacher}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                               />
+                             </div>
+                           ))}
+                         </div>
+                       )}
 
-                    {/* Tables Section */}
-                    {currentStep.tables && currentStep.tables.length > 0 && (
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                           <TableIcon className="text-emerald-500" size={20} />
-                           <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Tabel Observasi</h4>
-                        </div>
-                        <div className="space-y-10">
-                          {currentStep.tables.map((table: any, tIdx: number) => (
-                            <div key={tIdx} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                                <h5 className="text-xs font-black uppercase tracking-widest text-slate-600">{table.title || `Tabel ${tIdx + 1}`}</h5>
-                              </div>
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                  <thead className="bg-slate-900 text-white">
-                                    <tr>
-                                      <th className="px-6 py-4 border-r border-slate-800 text-center w-16">No</th>
-                                      {table.columns.map((col: string, cIdx: number) => (
-                                        <th key={cIdx} className="px-6 py-4 border-r border-slate-800 text-left font-bold">{col}</th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {Array.from({ length: table.rows || 1 }).map((_, rIdx) => (
-                                      <tr key={rIdx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-4 border-r border-slate-100 text-center font-bold text-slate-400">{rIdx + 1}</td>
-                                        {table.columns.map((_: string, cIdx: number) => (
-                                          <td key={cIdx} className="px-4 py-2 border-r border-slate-100">
-                                            <input 
-                                              type="text"
-                                              className="w-full bg-transparent border-none outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg px-2 py-1 font-medium"
-                                              placeholder="..."
-                                              value={answers[currentPage]?.tables?.[tIdx]?.[rIdx]?.[cIdx] || ''}
-                                              onChange={(e) => {
-                                                const newAns = { ...answers };
-                                                if (!newAns[currentPage]) newAns[currentPage] = { questions: [], tables: [] };
-                                                if (!newAns[currentPage].tables) newAns[currentPage].tables = [];
-                                                if (!newAns[currentPage].tables[tIdx]) newAns[currentPage].tables[tIdx] = [];
-                                                if (!newAns[currentPage].tables[tIdx][rIdx]) newAns[currentPage].tables[tIdx][rIdx] = [];
-                                                newAns[currentPage].tables[tIdx][rIdx][cIdx] = e.target.value;
-                                                setAnswers(newAns);
-                                              }}
-                                              onBlur={() => saveAnswers(currentPage, answers[currentPage])}
-                                              disabled={isTeacher}
-                                            />
-                                          </td>
+                       {/* Tables in Activity */}
+                       {keg.tables && keg.tables.length > 0 && (
+                         <div className="space-y-6 pl-4 border-l-2 border-slate-100">
+                           {keg.tables.map((table: any, tIdx: number) => (
+                             <div key={tIdx} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                <div className="bg-slate-900 px-6 py-4">
+                                   <h5 className="text-[10px] font-black uppercase tracking-widest text-white/70">{table.title || `Tabel Pengamatan`}</h5>
+                                </div>
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-xs">
+                                    <thead className="bg-slate-100 text-slate-600 border-b">
+                                      <tr>
+                                        <th className="px-4 py-3 border-r text-center w-12">No</th>
+                                        {table.columns.map((col: string, cIdx: number) => (
+                                          <th key={cIdx} className="px-4 py-3 border-r text-left font-black uppercase tracking-tighter">{col}</th>
                                         ))}
                                       </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                                    </thead>
+                                    <tbody>
+                                      {Array.from({ length: table.rows || 1 }).map((_, rIdx) => (
+                                        <tr key={rIdx} className="border-b border-slate-50 last:border-0">
+                                          <td className="px-4 py-3 border-r bg-slate-50/50 text-center font-bold text-slate-400">{rIdx + 1}</td>
+                                          {table.columns.map((_: string, cIdx: number) => (
+                                            <td key={cIdx} className="px-2 py-1 border-r">
+                                              <input 
+                                                type="text"
+                                                className="w-full bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-2 font-medium"
+                                                placeholder="..."
+                                                value={answers[currentPage]?.kegiatan?.[kIdx]?.tables?.[tIdx]?.[rIdx]?.[cIdx] || ''}
+                                                onChange={(e) => {
+                                                  const newAns = { ...answers };
+                                                  if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
+                                                  if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [] };
+                                                  if (!newAns[currentPage].kegiatan[kIdx].tables) newAns[currentPage].kegiatan[kIdx].tables = [];
+                                                  if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx] = [];
+                                                  if (!newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx]) newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx] = [];
+                                                  newAns[currentPage].kegiatan[kIdx].tables[tIdx][rIdx][cIdx] = e.target.value;
+                                                  setAnswers(newAns);
+                                                }}
+                                                onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                                disabled={isTeacher}
+                                              />
+                                            </td>
+                                          ))}
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="h-[60vh] flex flex-col items-center justify-center text-center p-10 space-y-4">
+                     <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-3xl flex items-center justify-center">
+                        <Edit3 size={32} />
+                     </div>
+                     <p className="text-sm font-bold text-slate-400">Tidak ada isian digital untuk langkah ini.<br/>Silakan fokus pada media pembelajaran.</p>
                   </div>
+                )}
 
-                  {/* Refleksi (Special Type) */}
-                  {currentStep.type === 'refleksi' && (
-                    <div className="space-y-6 pb-24">
-                       <div className="flex items-center gap-3">
-                           <Brain className="text-purple-500" size={24} />
-                           <h4 className="text-xl font-black text-slate-800">Fase Refleksi Akhir</h4>
-                        </div>
-                      {(currentStep.questions || []).map((q: string, qIdx: number) => (
-                        <div key={qIdx} className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                {/* Legacy Refleksi Integration */}
+                {currentStep?.type === 'refleksi' && (
+                  <div className="space-y-8">
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-xs">R</div>
+                        <h3 className="text-lg font-black text-slate-800">Refleksi Mandiri</h3>
+                     </div>
+                     {(currentStep.questions || []).map((q: string, qIdx: number) => (
+                        <div key={qIdx} className="p-6 bg-white rounded-3xl border border-slate-200 space-y-4">
                           <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={4} value={answers[currentPage]?.reflections?.[qIdx] || ''} onChange={(e) => {
+                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm outline-none" rows={4} value={answers[currentPage]?.reflections?.[qIdx] || ''} onChange={(e) => {
                             const newAns = { ...answers };
                             if (!newAns[currentPage]) newAns[currentPage] = { reflections: [] };
                             if (!newAns[currentPage].reflections) newAns[currentPage].reflections = [];
@@ -904,6 +872,65 @@ export default function DetailModul() {
                           }} onBlur={() => saveAnswers(currentPage, answers[currentPage])} disabled={isTeacher} />
                         </div>
                       ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-full bg-slate-100 rounded-2xl overflow-hidden shadow-inner">
+                {module.lkpd_url ? (
+                  <iframe src={module.lkpd_url} className="w-full h-full border-none" title="LKPD Viewer" />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-slate-400 text-xs font-bold">Dokumen LKPD tidak tersedia</div>
+                )}
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT AREA: LEARNING MEDIA */}
+        <main 
+          id="page-container"
+          className={`flex-1 px-4 py-6 relative overflow-hidden transition-all duration-300 ease-out ${showLKPD ? 'lg:ml-[32rem] lg:w-[calc(100%-32rem)]' : 'ml-0 w-full'}`}
+        >
+          <div className="max-w-6xl mx-auto w-full h-full flex flex-col">
+            <AnimatePresence mode="wait">
+              <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6 flex-1 flex flex-col">
+                <div className="flex items-center gap-4 mb-4">
+                  <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl shadow-sm`}>
+                    {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
+                  </span>
+                  <div>
+                    <h4 className="text-xl font-black text-slate-900 tracking-tight">{currentStep.title}</h4>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{currentStep.type}</span>
+                  </div>
+                </div>
+
+                {currentStep.instruction && (
+                  <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm border-l-4 border-l-blue-500">
+                    <p className="text-sm leading-relaxed font-medium text-slate-600">{currentStep.instruction}</p>
+                  </div>
+                )}
+
+                <div className="immersive-content flex-1 flex flex-col min-h-0">
+                  {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
+                    <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
+                  )}
+                  {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
+                  {currentStep.type === 'phet' && (
+                    <div className="w-full rounded-[3rem] overflow-hidden border border-slate-200 shadow-2xl flex-1 min-h-[500px] bg-white">
+                      <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
+                    </div>
+                  )}
+                  {currentStep.type === 'refleksi' && (
+                    <div className="h-[50vh] flex flex-col items-center justify-center text-center space-y-6">
+                       <div className="w-24 h-24 bg-purple-100 text-purple-600 rounded-[2.5rem] flex items-center justify-center shadow-xl shadow-purple-500/10">
+                          <Brain size={48} />
+                       </div>
+                       <div className="max-w-md space-y-2">
+                         <h3 className="text-2xl font-black text-slate-800">Waktunya Refleksi</h3>
+                         <p className="text-slate-500 text-sm font-medium">Silakan buka bilah **Worksheet** di sebelah kiri untuk mengisi lembar refleksi Anda.</p>
+                       </div>
+                       <button onClick={() => setShowLKPD(true)} className="px-8 py-4 bg-purple-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-purple-500/20">Buka Lembar Refleksi</button>
                     </div>
                   )}
                 </div>
@@ -915,7 +942,7 @@ export default function DetailModul() {
 
       {/* Footer Navigation */}
       <div id="step-nav-container" className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
-        <div className={`max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4 transition-all duration-300 ${showLKPD ? 'lg:translate-x-[14rem]' : ''}`}>
+        <div className={`max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4 transition-all duration-300 ${showLKPD ? 'lg:translate-x-[16rem]' : ''}`}>
           <button onClick={handlePrev} disabled={!isTeacher || currentPage <= 1} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 disabled:opacity-30">
             <ChevronLeft size={20} /> <span className="hidden sm:inline">Sebelumnya</span>
           </button>
