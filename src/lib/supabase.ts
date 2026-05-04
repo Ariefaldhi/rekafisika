@@ -38,7 +38,8 @@ export interface ModuleStep {
   end_time?: number;
   phet_questions?: string[];
   phet_tables?: { columns: string[]; rows: number }[];
-  questions?: string[]; // for refleksi
+  questions?: string[]; 
+  tables?: { title: string; columns: string[]; rows: number }[];
 }
 
 export interface Module {

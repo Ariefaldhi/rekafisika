@@ -7,7 +7,8 @@ import {
   ShieldCheck, ArrowLeft, Trash2, Plus, 
   X, Lock, Unlock, FileText, 
   Upload, Sparkles, LogOut,
-  Route, ArrowUp, ArrowDown, Brain
+  Route, ArrowUp, ArrowDown, Brain,
+  Layout, Table as TableIcon, Columns
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -539,7 +540,7 @@ export default function Admin() {
            <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white w-full max-w-5xl h-[90vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden"
+            className="bg-white w-full max-w-6xl h-[90vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden"
            >
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingModule.id ? 'Edit Modul' : 'Tambah Modul Baru'}</h3>
@@ -560,7 +561,7 @@ export default function Admin() {
                    </div>
                    <div className="md:col-span-4">
                      <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">DESKRIPSI</label>
-                     <textarea value={editingModule.description} onChange={e => setEditingModule({...editingModule, description: e.target.value})} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium outline-none" />
+                     <textarea value={editingModule.description} onChange={e => setEditingModule({...editingModule, description: e.target.value})} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium outline-none" />
                    </div>
                 </div>
 
@@ -579,30 +580,34 @@ export default function Admin() {
                    <div className="flex justify-between items-center pb-4 border-b">
                      <h4 className="font-black text-slate-800 text-xl">Langkah Pembelajaran</h4>
                      <button onClick={() => {
-                       const newSteps: ModuleStep[] = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '' } as ModuleStep];
+                       const newSteps: ModuleStep[] = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '', questions: [], tables: [] } as any];
                        setEditingModule({...editingModule, steps: newSteps});
                      }} className="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Tambah Langkah</button>
                    </div>
-                   <div className="space-y-4">
-                      {editingModule.steps?.map((step, sIdx) => (
-                        <div key={sIdx} className="bg-slate-50 p-6 rounded-3xl border border-slate-200/50 space-y-4 relative">
-                           <button onClick={() => setEditingModule({...editingModule, steps: editingModule.steps?.filter((_, i) => i !== sIdx)})} className="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><Trash2 size={16} /></button>
-                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div className="space-y-12">
+                      {editingModule.steps?.map((step: any, sIdx) => (
+                        <div key={sIdx} className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 space-y-8 relative shadow-sm">
+                           <div className="absolute top-6 right-6 flex items-center gap-3">
+                              <span className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm">{sIdx + 1}</span>
+                              <button onClick={() => setEditingModule({...editingModule, steps: editingModule.steps?.filter((_, i) => i !== sIdx)})} className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-100 transition-colors"><Trash2 size={18} /></button>
+                           </div>
+
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                               <div className="md:col-span-2">
-                                <label className="block text-[10px] font-black text-slate-400 mb-1">JUDUL</label>
+                                <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">JUDUL LANGKAH</label>
                                 <input type="text" value={step.title} onChange={e => {
                                   const newSteps = [...(editingModule.steps || [])];
                                   newSteps[sIdx].title = e.target.value;
                                   setEditingModule({...editingModule, steps: newSteps});
-                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" />
+                                }} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold" />
                               </div>
                               <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-1">TIPE</label>
+                                <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">TIPE KONTEN</label>
                                 <select value={step.type} onChange={e => {
                                   const newSteps = [...(editingModule.steps || [])];
                                   newSteps[sIdx].type = e.target.value as any;
                                   setEditingModule({...editingModule, steps: newSteps});
-                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold uppercase">
+                                }} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-black uppercase">
                                   <option value="ppt">PowerPoint</option>
                                   <option value="pdf">PDF Viewer</option>
                                   <option value="video">Video (YT)</option>
@@ -612,12 +617,175 @@ export default function Admin() {
                                 </select>
                               </div>
                               <div className="md:col-span-3">
-                                <label className="block text-[10px] font-black text-slate-400 mb-1">URL / SUMBER</label>
+                                <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">URL / SUMBER MEDIA</label>
                                 <input type="text" value={step.url} onChange={e => {
                                   const newSteps = [...(editingModule.steps || [])];
                                   newSteps[sIdx].url = e.target.value;
                                   setEditingModule({...editingModule, steps: newSteps});
-                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-blue-600" />
+                                }} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-xs font-mono text-blue-600" />
+                              </div>
+                              <div className="md:col-span-3">
+                                <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">INSTRUKSI KHUSUS</label>
+                                <textarea value={step.instruction} onChange={e => {
+                                  const newSteps = [...(editingModule.steps || [])];
+                                  newSteps[sIdx].instruction = e.target.value;
+                                  setEditingModule({...editingModule, steps: newSteps});
+                                }} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-xs font-medium" />
+                              </div>
+                           </div>
+
+                           {/* INTERACTIVE ELEMENTS EDITOR */}
+                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
+                              {/* Questions Editor */}
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-3 mb-2">
+                                   <Layout className="text-blue-500" size={18} />
+                                   <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Digital Input (Isian)</h5>
+                                </div>
+                                <div className="space-y-3">
+                                   {(step.questions || []).map((q: string, qIdx: number) => (
+                                     <div key={qIdx} className="flex gap-2">
+                                        <input 
+                                          type="text" 
+                                          value={q}
+                                          onChange={e => {
+                                            const newSteps = [...(editingModule.steps || [])];
+                                            if (!newSteps[sIdx].questions) newSteps[sIdx].questions = [];
+                                            newSteps[sIdx].questions[qIdx] = e.target.value;
+                                            setEditingModule({...editingModule, steps: newSteps});
+                                          }}
+                                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium"
+                                          placeholder={`Pertanyaan ${qIdx + 1}`}
+                                        />
+                                        <button onClick={() => {
+                                          const newSteps = [...(editingModule.steps || [])];
+                                          const currentQs = newSteps[sIdx].questions || [];
+                                          newSteps[sIdx].questions = currentQs.filter((_:any, i:any) => i !== qIdx);
+                                          setEditingModule({...editingModule, steps: newSteps});
+                                        }} className="text-rose-400 hover:text-rose-600"><Trash2 size={16}/></button>
+                                     </div>
+                                   ))}
+                                   <button 
+                                    onClick={() => {
+                                      const newSteps = [...(editingModule.steps || [])];
+                                      if (!newSteps[sIdx].questions) newSteps[sIdx].questions = [];
+                                      newSteps[sIdx].questions.push('');
+                                      setEditingModule({...editingModule, steps: newSteps});
+                                    }}
+                                    className="w-full py-3 bg-blue-50 border border-blue-100 border-dashed rounded-xl text-[9px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-100 transition-all"
+                                   >
+                                     + Tambah Pertanyaan
+                                   </button>
+                                </div>
+                              </div>
+
+                              {/* Tables Editor */}
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-3 mb-2">
+                                   <TableIcon className="text-emerald-500" size={18} />
+                                   <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Tabel Digital</h5>
+                                </div>
+                                <div className="space-y-6">
+                                   {(step.tables || []).map((table: any, tIdx: number) => (
+                                     <div key={tIdx} className="p-5 bg-emerald-50/50 rounded-[2rem] border border-emerald-100 space-y-4">
+                                        <div className="flex justify-between items-center">
+                                           <input 
+                                            type="text" 
+                                            value={table.title}
+                                            onChange={e => {
+                                              const newSteps = [...(editingModule.steps || [])];
+                                              const currentTable = newSteps[sIdx].tables?.[tIdx];
+                                              if (currentTable) {
+                                                currentTable.title = e.target.value;
+                                                setEditingModule({...editingModule, steps: newSteps});
+                                              }
+                                            }}
+                                            className="bg-white border-none text-[10px] font-black uppercase tracking-widest text-emerald-700 w-full"
+                                            placeholder="JUDUL TABEL"
+                                           />
+                                           <button onClick={() => {
+                                              const newSteps = [...(editingModule.steps || [])];
+                                              const currentTables = newSteps[sIdx].tables || [];
+                                              newSteps[sIdx].tables = currentTables.filter((_:any, i:any) => i !== tIdx);
+                                              setEditingModule({...editingModule, steps: newSteps});
+                                           }} className="text-rose-400"><Trash2 size={14}/></button>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                           <div className="flex items-center gap-2">
+                                              <Columns size={12} className="text-emerald-400" />
+                                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kolom Tabel</p>
+                                           </div>
+                                           <div className="flex flex-wrap gap-2">
+                                              {table.columns.map((col: string, cIdx: number) => (
+                                                <div key={cIdx} className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-emerald-100">
+                                                   <input 
+                                                    type="text" 
+                                                    value={col}
+                                                    onChange={e => {
+                                                      const newSteps = [...(editingModule.steps || [])];
+                                                      if (newSteps[sIdx].tables?.[tIdx]) {
+                                                        newSteps[sIdx].tables[tIdx].columns[cIdx] = e.target.value;
+                                                        setEditingModule({...editingModule, steps: newSteps});
+                                                      }
+                                                    }}
+                                                    className="bg-transparent border-none text-[10px] font-bold w-20 outline-none"
+                                                   />
+                                                   <button onClick={() => {
+                                                      const newSteps = [...(editingModule.steps || [])];
+                                                      const currentCols = newSteps[sIdx].tables?.[tIdx].columns || [];
+                                                      if (newSteps[sIdx].tables?.[tIdx]) {
+                                                        newSteps[sIdx].tables[tIdx].columns = currentCols.filter((_:any, i:any) => i !== cIdx);
+                                                      }
+                                                      setEditingModule({...editingModule, steps: newSteps});
+                                                   }} className="text-rose-300 hover:text-rose-500"><X size={10}/></button>
+                                                </div>
+                                              ))}
+                                              <button 
+                                                onClick={() => {
+                                                  const newSteps = [...(editingModule.steps || [])];
+                                                  if (newSteps[sIdx].tables?.[tIdx]) {
+                                                    newSteps[sIdx].tables[tIdx].columns.push('Baru');
+                                                    setEditingModule({...editingModule, steps: newSteps});
+                                                  }
+                                                }}
+                                                className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-[9px] font-black"
+                                              >+ Kolom</button>
+                                           </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                           <div className="flex-1">
+                                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Jumlah Baris</label>
+                                              <input 
+                                                type="number" 
+                                                value={table.rows}
+                                                onChange={e => {
+                                                  const newSteps = [...(editingModule.steps || [])];
+                                                  const targetTable = newSteps[sIdx].tables?.[tIdx];
+                                                  if (targetTable) {
+                                                    targetTable.rows = parseInt(e.target.value) || 1;
+                                                    setEditingModule({...editingModule, steps: newSteps});
+                                                  }
+                                                }}
+                                                className="w-full bg-white border border-emerald-100 rounded-xl px-4 py-2 text-xs font-bold"
+                                              />
+                                           </div>
+                                        </div>
+                                     </div>
+                                   ))}
+                                   <button 
+                                    onClick={() => {
+                                      const newSteps = [...(editingModule.steps || [])];
+                                      if (!newSteps[sIdx].tables) newSteps[sIdx].tables = [];
+                                      newSteps[sIdx].tables.push({ title: '', columns: ['Data 1', 'Data 2'], rows: 3 });
+                                      setEditingModule({...editingModule, steps: newSteps});
+                                    }}
+                                    className="w-full py-3 bg-emerald-50 border border-emerald-100 border-dashed rounded-xl text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-100 transition-all"
+                                   >
+                                     + Tambah Tabel Digital
+                                   </button>
+                                </div>
                               </div>
                            </div>
                         </div>

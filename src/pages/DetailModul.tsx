@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, Brain, 
   ChevronLeft, ChevronRight, CheckCircle, 
-  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ChevronsLeft
+  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ChevronsLeft,
+  Layout, Table as TableIcon
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -96,7 +97,7 @@ export default function DetailModul() {
   const [members, setMembers] = useState('');
   const [teachingCode, setTeachingCode] = useState('');
   
-  // Reflection Answers State
+  // Answers State (Combined for questions and tables)
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [pathReflectionAnswers, setPathReflectionAnswers] = useState<Record<number, string>>({});
   const [saveStatus, setSaveStatus] = useState<string>('');
@@ -173,6 +174,21 @@ export default function DetailModul() {
         setInWaitingRoom(false);
       } else {
         setCurrentPage(0);
+      }
+
+      // Load existing answers from DB
+      const { data: existingAnswers } = await supabase
+        .from('reflection_answers')
+        .select('*')
+        .eq('module_id', id)
+        .eq('student_nim', user?.nim);
+      
+      if (existingAnswers) {
+        const ansMap: Record<number, any> = {};
+        existingAnswers.forEach(a => {
+          ansMap[a.step_index] = a.answers;
+        });
+        setAnswers(ansMap);
       }
 
       setIsShowingPathReflection(false);
@@ -376,7 +392,8 @@ export default function DetailModul() {
     }
   };
 
-  const saveRefleksi = async (stepIdx: number, stepAnswers: any) => {
+  const saveAnswers = async (stepIdx: number, stepAnswers: any) => {
+    if (isTeacher) return;
     setSaveStatus('Menyimpan...');
     try {
       const { error } = await supabase.from('reflection_answers').upsert({
@@ -694,7 +711,7 @@ export default function DetailModul() {
         </div>
         <div className="flex items-center gap-4">
           {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
-          {currentStep?.type === 'phet' && module.lkpd_url && (
+          {module.lkpd_url && (
             <button 
               onClick={() => setShowLKPD(!showLKPD)}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-sm ${
@@ -709,7 +726,7 @@ export default function DetailModul() {
       </header>
 
       <div className="flex flex-1 relative overflow-hidden h-full">
-        {/* LKPD Sidebar - Exact replica of legacy behavior */}
+        {/* LKPD Sidebar */}
         <aside 
           className={`fixed top-[73px] left-0 bottom-0 w-full lg:w-[28rem] bg-white border-r border-slate-200 shadow-2xl overflow-hidden flex flex-col z-[45] transition-transform duration-300 ease-out ${showLKPD ? 'translate-x-0' : '-translate-x-full'}`}
         >
@@ -738,7 +755,7 @@ export default function DetailModul() {
           </div>
         </aside>
 
-        {/* Main Content - Pushed using margin exactly like legacy */}
+        {/* Main Content */}
         <main 
           id="page-container"
           className={`flex-1 px-4 py-6 relative overflow-hidden transition-all duration-300 ease-out ${showLKPD ? 'lg:ml-[28rem] lg:w-[calc(100%-28rem)]' : 'ml-0 w-full'}`}
@@ -757,27 +774,134 @@ export default function DetailModul() {
                 </div>
 
                 {currentStep.instruction && (
-                  <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
+                  <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500 shadow-sm">
                     <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
                   </div>
                 )}
 
-                <div className="immersive-content flex-1 flex flex-col min-h-0">
+                <div className="immersive-content flex-1 flex flex-col min-h-0 space-y-8">
+                  {/* Step Main Media */}
                   {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
                     <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
                   )}
                   {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
                   {currentStep.type === 'phet' && (
-                    <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl flex-1 min-h-[500px]">
+                    <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl min-h-[500px]">
                       <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
                     </div>
                   )}
+
+                  {/* ISIAN & TABEL (Integrated LKPD Replacement) */}
+                  <div className="space-y-10 mt-4">
+                    {/* Questions Section */}
+                    {currentStep.questions && currentStep.questions.length > 0 && (
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Layout className="text-blue-500" size={20} />
+                           <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Isian Pembelajaran</h4>
+                        </div>
+                        <div className="grid grid-cols-1 gap-6">
+                          {currentStep.questions.map((q: string, qIdx: number) => (
+                            <div key={qIdx} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                              <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
+                              <textarea 
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                rows={3}
+                                placeholder="Ketik jawaban Anda di sini..."
+                                value={answers[currentPage]?.questions?.[qIdx] || ''}
+                                onChange={(e) => {
+                                  const newAns = { ...answers };
+                                  if (!newAns[currentPage]) newAns[currentPage] = { questions: [], tables: [] };
+                                  if (!newAns[currentPage].questions) newAns[currentPage].questions = [];
+                                  newAns[currentPage].questions[qIdx] = e.target.value;
+                                  setAnswers(newAns);
+                                }}
+                                onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                disabled={isTeacher}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tables Section */}
+                    {currentStep.tables && currentStep.tables.length > 0 && (
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                           <TableIcon className="text-emerald-500" size={20} />
+                           <h4 className="text-sm font-black uppercase tracking-widest text-slate-800">Tabel Observasi</h4>
+                        </div>
+                        <div className="space-y-10">
+                          {currentStep.tables.map((table: any, tIdx: number) => (
+                            <div key={tIdx} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                                <h5 className="text-xs font-black uppercase tracking-widest text-slate-600">{table.title || `Tabel ${tIdx + 1}`}</h5>
+                              </div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead className="bg-slate-900 text-white">
+                                    <tr>
+                                      <th className="px-6 py-4 border-r border-slate-800 text-center w-16">No</th>
+                                      {table.columns.map((col: string, cIdx: number) => (
+                                        <th key={cIdx} className="px-6 py-4 border-r border-slate-800 text-left font-bold">{col}</th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {Array.from({ length: table.rows || 1 }).map((_, rIdx) => (
+                                      <tr key={rIdx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-4 border-r border-slate-100 text-center font-bold text-slate-400">{rIdx + 1}</td>
+                                        {table.columns.map((_: string, cIdx: number) => (
+                                          <td key={cIdx} className="px-4 py-2 border-r border-slate-100">
+                                            <input 
+                                              type="text"
+                                              className="w-full bg-transparent border-none outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg px-2 py-1 font-medium"
+                                              placeholder="..."
+                                              value={answers[currentPage]?.tables?.[tIdx]?.[rIdx]?.[cIdx] || ''}
+                                              onChange={(e) => {
+                                                const newAns = { ...answers };
+                                                if (!newAns[currentPage]) newAns[currentPage] = { questions: [], tables: [] };
+                                                if (!newAns[currentPage].tables) newAns[currentPage].tables = [];
+                                                if (!newAns[currentPage].tables[tIdx]) newAns[currentPage].tables[tIdx] = [];
+                                                if (!newAns[currentPage].tables[tIdx][rIdx]) newAns[currentPage].tables[tIdx][rIdx] = [];
+                                                newAns[currentPage].tables[tIdx][rIdx][cIdx] = e.target.value;
+                                                setAnswers(newAns);
+                                              }}
+                                              onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                              disabled={isTeacher}
+                                            />
+                                          </td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Refleksi (Special Type) */}
                   {currentStep.type === 'refleksi' && (
                     <div className="space-y-6 pb-24">
-                      {(currentStep.questions || []).map((q, qIdx) => (
-                        <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                       <div className="flex items-center gap-3">
+                           <Brain className="text-purple-500" size={24} />
+                           <h4 className="text-xl font-black text-slate-800">Fase Refleksi Akhir</h4>
+                        </div>
+                      {(currentStep.questions || []).map((q: string, qIdx: number) => (
+                        <div key={qIdx} className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
                           <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
+                          <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={4} value={answers[currentPage]?.reflections?.[qIdx] || ''} onChange={(e) => {
+                            const newAns = { ...answers };
+                            if (!newAns[currentPage]) newAns[currentPage] = { reflections: [] };
+                            if (!newAns[currentPage].reflections) newAns[currentPage].reflections = [];
+                            newAns[currentPage].reflections[qIdx] = e.target.value;
+                            setAnswers(newAns);
+                          }} onBlur={() => saveAnswers(currentPage, answers[currentPage])} disabled={isTeacher} />
                         </div>
                       ))}
                     </div>
