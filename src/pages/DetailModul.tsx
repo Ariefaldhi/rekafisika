@@ -102,9 +102,27 @@ export default function DetailModul() {
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [pathReflectionAnswers, setPathReflectionAnswers] = useState<Record<number, string>>({});
   const [saveStatus, setSaveStatus] = useState<string>('');
+  const [lastTeacherPulse, setLastTeacherPulse] = useState<number>(Date.now());
+  const [isTeacherOnline, setIsTeacherOnline] = useState(true);
 
   const channelRef = useRef<any>(null);
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+
+  // Student Watchdog for Teacher Presence
+  useEffect(() => {
+    if (!isTeacher && isSyncing && !isLoading) {
+      const watchdog = setInterval(() => {
+        const diff = Date.now() - lastTeacherPulse;
+        if (diff > 20000) { // 20 seconds timeout for safety
+          setIsTeacherOnline(false);
+          setIsSyncing(false);
+          alert('Sesi terputus: Guru meninggalkan kelas.');
+          navigate('/home');
+        }
+      }, 5000);
+      return () => clearInterval(watchdog);
+    }
+  }, [isTeacher, isSyncing, lastTeacherPulse, navigate, isLoading]);
 
   useEffect(() => {
     fetchData();
@@ -131,8 +149,19 @@ export default function DetailModul() {
       }
     }
 
+    const handleUnload = () => {
+      if (isTeacher && channelRef.current) {
+        channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleUnload);
       if (channelRef.current) {
+        if (isTeacher) {
+          channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
+        }
         channelRef.current.unsubscribe();
       }
     };
@@ -148,6 +177,18 @@ export default function DetailModul() {
   useEffect(() => {
     if (isTeacher && module && teachingCode) {
       updateTeacherState(currentPage, id);
+      
+      // Teacher Heartbeat
+      const heartbeat = setInterval(() => {
+        if (channelRef.current) {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'teacher_active',
+            payload: { timestamp: Date.now() }
+          });
+        }
+      }, 5000);
+      return () => clearInterval(heartbeat);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [module, currentPage]);
@@ -230,8 +271,15 @@ export default function DetailModul() {
 
     channel
       .on('broadcast', { event: 'ping' }, ({ payload }) => {
-        if (isTeacher) {
+        if (isTeacher && payload.moduleId === id) {
           setJoinedGroups(prev => new Set(prev).add(payload.group));
+        }
+      })
+      .on('broadcast', { event: 'teacher_active' }, () => {
+        if (!isTeacher) {
+          setLastTeacherPulse(Date.now());
+          setIsTeacherOnline(true);
+          setIsSyncing(true);
         }
       })
       .on('broadcast', { event: 'page_sync' }, ({ payload }) => {
@@ -263,7 +311,7 @@ export default function DetailModul() {
             channel.send({
               type: 'broadcast',
               event: 'ping',
-              payload: { group: groupName }
+              payload: { group: groupName, moduleId: id }
             });
 
             const interval = setInterval(() => {
@@ -271,7 +319,7 @@ export default function DetailModul() {
                 channel.send({
                   type: 'broadcast',
                   event: 'ping',
-                  payload: { group: groupName }
+                  payload: { group: groupName, moduleId: id }
                 });
               } else {
                 clearInterval(interval);
