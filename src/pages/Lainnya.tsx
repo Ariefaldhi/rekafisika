@@ -71,14 +71,9 @@ export default function Lainnya() {
   };
 
   const menuItems = [
-    { to: '/buku', icon: <BookOpen size={22} className="text-blue-600" />, bg: 'bg-blue-100', label: 'Referensi' },
-    { to: '/bank-soal', icon: <FolderOpen size={22} className="text-purple-600" />, bg: 'bg-purple-100', label: 'Bank Soal' },
     { to: '/panduan', icon: <HelpCircle size={22} className="text-slate-600" />, bg: 'bg-slate-100', label: 'Panduan' },
     ...(user?.role === 'teacher' || user?.role === 'admin'
       ? [{ to: '/hasil-ajar', icon: <TrendingUp size={22} className="text-emerald-600" />, bg: 'bg-emerald-100', label: 'Hasil Ajar' }]
-      : []),
-    ...(user?.role === 'admin'
-      ? [{ to: '/admin', icon: <ShieldCheck size={22} className="text-white" />, bg: 'bg-slate-800', label: 'Admin Panel', dark: true }]
       : []),
   ];
 
@@ -162,6 +157,31 @@ export default function Lainnya() {
             <p className="text-xs text-slate-400 text-center mt-2">
               {copied ? '✅ Kode berhasil disalin!' : 'Bagikan kode ini ke siswa untuk join sesi'}
             </p>
+          </motion.div>
+        )}
+
+        {/* Admin Dashboard Button */}
+        {user?.role === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+          >
+            <Link
+              to="/admin"
+              className="flex items-center justify-between bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-900/20 group hover:scale-[1.02] transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <ShieldCheck size={24} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg">Admin Dashboard</h3>
+                  <p className="text-xs text-slate-400 font-medium">Kelola sistem dan pengguna</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-slate-500 group-hover:text-white transition-colors" />
+            </Link>
           </motion.div>
         )}
 

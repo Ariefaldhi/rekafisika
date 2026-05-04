@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, ListTodo, BookOpen, Megaphone, Users, Star, 
   QrCode, LineChart, Shield, Settings, LogOut, Search, 
   Trash2, X, ChevronRight, Menu, Loader2,
-  ShieldCheck, AlertTriangle
+  ShieldCheck, AlertTriangle, ArrowLeft
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -180,6 +181,13 @@ export default function Admin() {
             <h2 className="text-xl font-black text-slate-800 capitalize">{activeSection}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <Link 
+              to="/home" 
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+            >
+              <ArrowLeft size={14} />
+              Kembali ke Beranda
+            </Link>
             <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-xl text-slate-500 text-xs font-bold">
               <ShieldCheck size={14} className="text-primary-500" />
               Super Admin
