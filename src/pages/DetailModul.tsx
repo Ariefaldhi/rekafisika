@@ -103,7 +103,6 @@ export default function DetailModul() {
   const [pathReflectionAnswers, setPathReflectionAnswers] = useState<Record<number, string>>({});
   const [saveStatus, setSaveStatus] = useState<string>('');
   const [lastTeacherPulse, setLastTeacherPulse] = useState<number>(Date.now());
-  const [isTeacherOnline, setIsTeacherOnline] = useState(true);
 
   const channelRef = useRef<any>(null);
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
@@ -114,7 +113,6 @@ export default function DetailModul() {
       const watchdog = setInterval(() => {
         const diff = Date.now() - lastTeacherPulse;
         if (diff > 20000) { // 20 seconds timeout for safety
-          setIsTeacherOnline(false);
           setIsSyncing(false);
           alert('Sesi terputus: Guru meninggalkan kelas.');
           navigate('/home');
@@ -278,7 +276,6 @@ export default function DetailModul() {
       .on('broadcast', { event: 'teacher_active' }, () => {
         if (!isTeacher) {
           setLastTeacherPulse(Date.now());
-          setIsTeacherOnline(true);
           setIsSyncing(true);
         }
       })
