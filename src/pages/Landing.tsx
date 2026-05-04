@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, Radio, FlaskConical, ShieldCheck, ArrowRight, Key } from 'lucide-react';
@@ -102,13 +102,9 @@ export default function Landing() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="space-y-10"
           >
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              <Zap size={14} className="text-yellow-500 animate-pulse" /> Platform Belajar Generasi Baru
-            </div>
-
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
-              Landing Page<br />
-              <span className="text-blue-500">Creative Design.</span>
+              Eksplorasi Fisika<br />
+              <span className="text-blue-500">Secara Interaktif.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed font-medium">
