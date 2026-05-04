@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, FlaskConical, Brain, Link as LinkIcon, 
   ChevronLeft, ChevronRight, CheckCircle, Users, Hourglass, 
-  MessageSquare, Loader2, Info, Layout, DoorOpen, Radio, ShieldCheck
+  MessageSquare, Loader2, Info, Radio, DoorOpen
 } from 'lucide-react';
-import { supabase, type Module, type ModuleStep } from '../lib/supabase';
+import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { marked } from 'marked';
 

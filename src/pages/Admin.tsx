@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  LayoutDashboard, ListTodo, BookOpen, Bullhorn, Users, Star, 
-  QrCode, LineChart, UserShield, Settings, LogOut, Search, 
-  Plus, Trash2, Edit, Save, X, ChevronRight, Menu, Loader2,
-  ShieldCheck, AlertTriangle, CheckCircle
+  LayoutDashboard, ListTodo, BookOpen, Megaphone, Users, Star, 
+  QrCode, LineChart, Shield, Settings, LogOut, Search, 
+  Trash2, X, ChevronRight, Menu, Loader2,
+  ShieldCheck, AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 
 // --- Types ---
 interface Profile {
@@ -32,7 +31,6 @@ export default function Admin() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
 
   // Data States
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -57,7 +55,7 @@ export default function Admin() {
 
       setStats([
         { label: 'Mahasiswa', value: studentCount || 0, icon: Users, color: 'bg-blue-500' },
-        { label: 'Dosen/Guru', value: teacherCount || 0, icon: UserShield, color: 'bg-indigo-500' },
+        { label: 'Dosen/Guru', value: teacherCount || 0, icon: Shield, color: 'bg-indigo-500' },
         { label: 'Modul Ajar', value: moduleCount || 0, icon: BookOpen, color: 'bg-emerald-500' },
         { label: 'Tugas Aktif', value: assignmentCount || 0, icon: ListTodo, color: 'bg-orange-500' },
       ]);
@@ -91,7 +89,7 @@ export default function Admin() {
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'tasks', label: 'Tugas', icon: ListTodo },
     { id: 'modules', label: 'Modul', icon: BookOpen },
-    { id: 'news', label: 'Pengumuman', icon: Bullhorn },
+    { id: 'news', label: 'Pengumuman', icon: Megaphone },
     { id: 'students', label: 'Mahasiswa', icon: Users },
     { id: 'points', label: 'Poin Keaktifan', icon: Star },
     { id: 'presence', label: 'Presensi', icon: QrCode },
@@ -328,7 +326,7 @@ export default function Admin() {
                 {/* Placeholder for other sections */}
                 {!['dashboard', 'users'].includes(activeSection) && (
                   <div className="bg-white p-20 rounded-[3rem] border border-slate-100 shadow-sm text-center">
-                    <Layout size={64} className="mx-auto text-slate-200 mb-6" />
+                    <LayoutDashboard size={64} className="mx-auto text-slate-200 mb-6" />
                     <h3 className="text-2xl font-black text-slate-800 mb-2">Halaman Sedang Dimigrasi</h3>
                     <p className="text-slate-400 max-w-sm mx-auto">Section <span className="font-bold text-primary-500">{activeSection}</span> sedang dalam proses konversi ke React TypeScript. Silakan cek kembali nanti.</p>
                   </div>
