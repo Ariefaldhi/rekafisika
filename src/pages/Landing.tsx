@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Radio, FlaskConical, ShieldCheck, ArrowRight, Key } from 'lucide-react';
+import { Radio, FlaskConical, ShieldCheck, ArrowRight, Key } from 'lucide-react';
 import logoUrl from '/logo.png';
 
 export default function Landing() {
