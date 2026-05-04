@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import BottomNav from '../components/BottomNav';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Lainnya() {
   const { user, login, logout } = useAuth();
@@ -84,7 +84,7 @@ export default function Lainnya() {
   ];
 
   return (
-    <div className="bg-slate-50 font-[Inter,sans-serif] text-slate-800 min-h-screen pb-28 selection:bg-blue-500/30">
+    <div className="bg-slate-50 font-[Inter,sans-serif] text-slate-800 min-h-screen pb-28 selection:bg-blue-500/30 w-full">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
@@ -95,7 +95,7 @@ export default function Lainnya() {
         <p className="text-sm text-slate-500 mt-1">Akses semua fitur lainnya disini.</p>
       </motion.div>
 
-      <div className="max-w-2xl mx-auto px-6 py-6 space-y-4">
+      <div className="w-full px-6 lg:px-12 py-8 space-y-8">
         {/* Profile Card */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -171,7 +171,7 @@ export default function Lainnya() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="grid grid-cols-3 gap-3"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
         >
           {menuItems.map((item, i) => (
             <Link
@@ -229,7 +229,7 @@ export default function Lainnya() {
         </motion.div>
       </div>
 
-      <BottomNav />
+      </div>
     </div>
   );
 }

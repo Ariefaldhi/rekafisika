@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/DashboardLayout';
 
 // Pages
 import Landing from './pages/Landing';
@@ -33,16 +34,16 @@ export default function App() {
 
             {/* ── Teacher Protected ── */}
             <Route path="/home" element={
-              <ProtectedRoute><Home /></ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><Home /></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/modul" element={
-              <ProtectedRoute><Modul /></ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><Modul /></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/profil" element={
-              <ProtectedRoute><Profil /></ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><Profil /></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/lainnya" element={
-              <ProtectedRoute><Lainnya /></ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><Lainnya /></DashboardLayout></ProtectedRoute>
             } />
 
             {/* Detail Modul accessible by guests too (they arrive via code) */}

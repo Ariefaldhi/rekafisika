@@ -9,7 +9,7 @@ const navItems = [
 
 export default function BottomNav() {
   return (
-    <div className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+    <div className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50 lg:hidden">
       <nav className="max-w-md mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 py-3 px-8 flex justify-between items-center shadow-2xl rounded-3xl pointer-events-auto">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
