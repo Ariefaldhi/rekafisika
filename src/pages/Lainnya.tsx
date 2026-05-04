@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { useAuth } from '../hooks/useAuth';
 
 export default function Lainnya() {
   const { user, login, logout } = useAuth();

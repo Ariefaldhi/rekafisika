@@ -153,8 +153,8 @@ export default function Home() {
 
           <div className="space-y-3">
             {isLoading ? (
-              [1, 2, 3, 4].map((i) => <div key={i} className="animate-pulse bg-slate-200 p-6 rounded-2xl h-16" />)
-            ) : modules.map((item, i) => (
+              [1, 2, 3, 4].map((_) => <div key={_} className="animate-pulse bg-slate-200 p-6 rounded-2xl h-16" />)
+            ) : modules.map((item) => (
               <Link
                 key={item.id}
                 to={`/detail-modul/${item.id}`}

@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
-import { Home, Compass, MoreHorizontal, User, LogOut, Shield } from 'lucide-react';
+import { Home, Compass, MoreHorizontal, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import logoUrl from '/logo.png';
 

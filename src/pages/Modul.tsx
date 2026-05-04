@@ -15,7 +15,6 @@ export default function Modul() {
   const { user } = useAuth();
   const [modules, setModules] = useState<ModuleWithProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     loadModules();

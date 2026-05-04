@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, LogOut, Camera, Copy, GraduationCap, ClipboardCheck, HandMetal, ListChecks, Flame } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { useAuth } from '../hooks/useAuth';
 
 export default function Profil() {
   const { user, login, logout } = useAuth();
