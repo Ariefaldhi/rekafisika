@@ -228,8 +228,6 @@ export default function Lainnya() {
           <p className="text-center text-xs text-slate-300 mt-6">Versi 3.0.0 (React + TypeScript)</p>
         </motion.div>
       </div>
-
-      </div>
     </div>
   );
 }

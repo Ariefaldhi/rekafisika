@@ -210,8 +210,6 @@ export default function Profil() {
 
         <p className="text-center text-xs text-slate-300 pb-4">Versi Aplikasi v3.0.0</p>
       </main>
-
-      </main>
     </div>
   );
 }
