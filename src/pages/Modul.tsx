@@ -23,7 +23,6 @@ export default function Modul() {
 
   async function loadModules() {
     setIsLoading(true);
-    setError('');
     try {
       const { data: mods, error: modsErr } = await supabase
         .from('modules')
@@ -48,7 +47,7 @@ export default function Modul() {
 
       setModules(enriched);
     } catch (e: any) {
-      setError(e.message);
+      console.error(e.message);
     } finally {
       setIsLoading(false);
     }
