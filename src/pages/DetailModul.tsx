@@ -261,6 +261,8 @@ export default function DetailModul() {
       return;
     }
 
+    setIsSyncing(true);
+
     const sessionData = {
       groupName: isTeacher ? 'GURU' : groupName,
       members: isTeacher ? user?.nama : members,
@@ -605,11 +607,14 @@ export default function DetailModul() {
                       <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-sm">
                          <Radio className="animate-pulse" size={40} />
                       </div>
-                      <h2 className="text-3xl font-black text-slate-900 tracking-tight">Ruang Tunggu Kelas</h2>
-                      <div className="inline-flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-xl">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">KODE AKSES</span>
-                        <span className="font-black text-slate-800 tracking-wider">{teachingCode}</span>
-                      </div>
+                       <h2 className="text-3xl font-black text-slate-900 tracking-tight">Sesi Pembelajaran</h2>
+                       <div className="flex flex-col items-center gap-2">
+                         <div className="inline-flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-xl">
+                           <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">KODE AKSES</span>
+                           <span className="font-black text-blue-700 tracking-wider">{teachingCode}</span>
+                         </div>
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] animate-pulse">Menghubungkan ke Server...</p>
+                       </div>
                    </div>
 
                    {isTeacher ? (
