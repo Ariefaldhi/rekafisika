@@ -192,7 +192,7 @@ export default function DetailModul() {
       // from the first content page instead of the cover
       if (pathId && saved) {
         setCurrentPage(1);
-        if (!isTeacher) setInWaitingRoom(false);
+        setInWaitingRoom(false);
       } else {
         setCurrentPage(0);
       }
@@ -348,11 +348,20 @@ export default function DetailModul() {
     if (!isTeacher) return;
     
     if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'page_sync',
-        payload: { page, moduleId: moduleId || id, isPathReflection, pathId }
-      });
+      const sendSync = () => {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'page_sync',
+          payload: { page, moduleId: moduleId || id, isPathReflection, pathId }
+        });
+      };
+
+      if (channelRef.current.state === 'joined') {
+        sendSync();
+      } else {
+        // If not joined yet, wait a bit and try once
+        setTimeout(sendSync, 500);
+      }
     }
 
     const cleanCode = (isTeacher ? user?.teaching_code : teachingCode)?.trim().toUpperCase();
@@ -644,7 +653,7 @@ export default function DetailModul() {
         </main>
 
         <AnimatePresence>
-          {isSyncing && inWaitingRoom && (
+          {currentPage === 0 && isSyncing && inWaitingRoom && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
