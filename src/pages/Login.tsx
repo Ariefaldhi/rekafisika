@@ -35,9 +35,11 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { login, user } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (Teacher/Admin only)
   useEffect(() => {
-    if (user) navigate(user.role === 'admin' ? '/admin' : '/home', { replace: true });
+    if (user && !user.is_guest && user.role !== 'student') {
+      navigate(user.role === 'admin' ? '/admin' : '/home', { replace: true });
+    }
   }, [user, navigate]);
 
   // Handle ?mode=code&kode=XXXXXX from landing page
