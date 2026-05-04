@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, FileText, Play, Brain, 
   ChevronLeft, ChevronRight, CheckCircle, 
-  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ExternalLink
+  Hourglass, Loader2, Radio, DoorOpen, X, AlertTriangle, Users, ChevronsLeft
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -89,6 +89,7 @@ export default function DetailModul() {
   const [inWaitingRoom, setInWaitingRoom] = useState(true);
   const [isShowingPathReflection, setIsShowingPathReflection] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showLKPD, setShowLKPD] = useState(false);
   
   // Registration State
   const [groupName, setGroupName] = useState('');
@@ -680,7 +681,7 @@ export default function DetailModul() {
   const currentStep = module.steps[currentPage - 1];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32">
+    <div className="min-h-screen bg-slate-50 font-[Inter,sans-serif] flex flex-col pb-32 overflow-hidden relative">
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/home')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
@@ -691,14 +692,62 @@ export default function DetailModul() {
             <h1 className="text-sm font-bold text-slate-800 line-clamp-1">{module.topic}</h1>
           </div>
         </div>
-        {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
+        <div className="flex items-center gap-4">
+          {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
+          {currentStep?.type === 'phet' && module.lkpd_url && (
+            <button 
+              onClick={() => setShowLKPD(!showLKPD)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-sm ${
+                showLKPD ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-white border border-slate-200 text-blue-600 hover:bg-blue-50'
+              }`}
+            >
+              {showLKPD ? <ChevronsLeft className="rotate-180" size={14} /> : <FileText size={14} />} 
+              {showLKPD ? 'Tutup LKPD' : 'Buka LKPD'}
+            </button>
+          )}
+        </div>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full p-6">
-        <AnimatePresence mode="wait">
-          <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
+      <div className="flex flex-1 relative overflow-hidden">
+        {/* LKPD Sidebar */}
+        <AnimatePresence>
+          {showLKPD && module.lkpd_url && (
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute inset-y-0 left-0 w-full lg:w-[450px] bg-white border-r border-slate-200 z-50 shadow-2xl flex flex-col"
+            >
+              <div className="p-6 border-b flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Lembar Kerja</h4>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siswa (LKPD)</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowLKPD(false)} className="w-10 h-10 rounded-xl hover:bg-slate-200 text-slate-400 transition-colors flex items-center justify-center">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 bg-slate-100">
+                <iframe 
+                  src={module.lkpd_url} 
+                  className="w-full h-full border-none"
+                  title="LKPD Viewer"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <main className="flex-1 max-w-4xl mx-auto w-full p-6 h-full overflow-y-auto custom-scrollbar">
+          <AnimatePresence mode="wait">
+            <motion.div key={currentPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <div className="flex items-center gap-4 mb-8">
                 <span className={`w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 font-bold flex items-center justify-center text-xl`}>
                   {currentStep.type === 'video' ? <Play /> : (currentStep.type === 'refleksi' ? <Brain /> : <FileText />)}
                 </span>
@@ -708,48 +757,37 @@ export default function DetailModul() {
                 </div>
               </div>
 
-              {currentStep.type === 'phet' && module.lkpd_url && (
-                <a 
-                  href={module.lkpd_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm"
-                >
-                  <ExternalLink size={14} /> Buka LKPD
-                </a>
+              {currentStep.instruction && (
+                <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
+                  <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
+                </div>
               )}
-            </div>
 
-            {currentStep.instruction && (
-              <div className="bg-blue-50 text-blue-900 text-sm p-5 rounded-2xl border-l-4 border-blue-500">
-                <p className="leading-relaxed font-medium">{currentStep.instruction}</p>
+              <div className="immersive-content">
+                {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
+                  <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
+                )}
+                {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
+                {currentStep.type === 'phet' && (
+                  <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl h-[600px]">
+                    <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
+                  </div>
+                )}
+                {currentStep.type === 'refleksi' && (
+                  <div className="space-y-6">
+                    {(currentStep.questions || []).map((q, qIdx) => (
+                      <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
+                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-
-            <div className="immersive-content">
-              {(currentStep.type === 'pdf' || currentStep.type === 'ppt') && (
-                <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
-              )}
-              {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
-              {currentStep.type === 'phet' && (
-                <div className="w-full rounded-3xl overflow-hidden border border-slate-200 shadow-xl h-[600px]">
-                  <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />
-                </div>
-              )}
-              {currentStep.type === 'refleksi' && (
-                <div className="space-y-6">
-                  {(currentStep.questions || []).map((q, qIdx) => (
-                    <div key={qIdx} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                      <p className="text-sm font-bold text-slate-700">{qIdx + 1}. {q}</p>
-                      <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" rows={3} value={answers[currentPage]?.[qIdx] || ''} onChange={(e) => setAnswers({ ...answers, [currentPage]: { ...answers[currentPage], [qIdx]: e.target.value } })} onBlur={() => saveRefleksi(currentPage, answers[currentPage])} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </main>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
 
       <div className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
         <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4">
