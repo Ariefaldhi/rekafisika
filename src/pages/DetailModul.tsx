@@ -139,10 +139,14 @@ export default function DetailModul() {
       }
 
       if (parsed.teachingCode) {
-        setupRealtime(parsed.teachingCode);
-        setIsSyncing(true); // Auto-sync if session exists
-        if (!isTeacher) {
-          fetchTeacherState(parsed.teachingCode);
+        const isResume = searchParams.get('resume') === 'true';
+        // Auto-sync for students, OR teachers who explicitly chose "Resume"
+        if (!isTeacher || isResume) {
+          setupRealtime(parsed.teachingCode);
+          setIsSyncing(true);
+          if (!isTeacher) {
+            fetchTeacherState(parsed.teachingCode);
+          }
         }
       }
     }
@@ -173,7 +177,8 @@ export default function DetailModul() {
   }, [isTeacher, user?.teaching_code]);
 
   useEffect(() => {
-    if (isTeacher && module && teachingCode) {
+    // Only update DB and broadcast if session is active (isSyncing is true)
+    if (isTeacher && module && teachingCode && isSyncing) {
       updateTeacherState(currentPage, id);
       
       // Teacher Heartbeat
@@ -274,8 +279,8 @@ export default function DetailModul() {
 
     channel
       .on('broadcast', { event: 'ping' }, ({ payload }) => {
-        if (isTeacher && payload.moduleId === id) {
-          setJoinedGroups(prev => new Set(prev).add(payload.group));
+        if (isTeacher && payload.moduleId === id && payload.group?.trim()) {
+          setJoinedGroups(prev => new Set(prev).add(payload.group.trim()));
         }
       })
       .on('broadcast', { event: 'teacher_active' }, () => {
@@ -309,20 +314,22 @@ export default function DetailModul() {
           console.log('Successfully subscribed to realtime channel');
           setIsSyncing(true);
           if (!isTeacher) {
-            // Immediate ping
-            channel.send({
-              type: 'broadcast',
-              event: 'ping',
-              payload: { group: groupName, moduleId: id }
-            });
-
-            const interval = setInterval(() => {
-              if (channelRef.current) {
+            const sendPing = () => {
+              if (groupName?.trim()) {
                 channel.send({
                   type: 'broadcast',
                   event: 'ping',
-                  payload: { group: groupName, moduleId: id }
+                  payload: { group: groupName.trim(), moduleId: id }
                 });
+              }
+            };
+
+            // Immediate ping
+            sendPing();
+
+            const interval = setInterval(() => {
+              if (channelRef.current) {
+                sendPing();
               } else {
                 clearInterval(interval);
               }

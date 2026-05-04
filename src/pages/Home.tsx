@@ -137,7 +137,7 @@ export default function Home() {
                   </p>
                 </div>
                 <Link
-                  to={`/detail-modul/${activeSession.module_id}${activeSession.path_id ? `?path=${activeSession.path_id}` : ''}`}
+                  to={`/detail-modul/${activeSession.module_id}${activeSession.path_id ? `?path=${activeSession.path_id}` : ''}&resume=true`}
                   className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95"
                 >
                   Lanjutkan Mengajar <ChevronRight size={16} />
