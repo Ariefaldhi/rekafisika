@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, CheckCircle2, Lock, ChevronRight, Rocket, Clock, ArrowRight, Route, Sparkles } from 'lucide-react';
+import { BookOpen, CheckCircle2, Lock, ChevronRight, Rocket, Route } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import type { Module, ModuleProgress, LearningPath } from '../lib/supabase';
@@ -24,7 +24,7 @@ export default function Home() {
   const { user } = useAuth();
   const [modules, setModules] = useState<ModuleWithProgress[]>([]);
   const [paths, setPaths] = useState<LearningPath[]>([]);
-  const [resumeModule, setResumeModule] = useState<ModuleWithProgress | null>(null);
+  const [featuredPath, setFeaturedPath] = useState<LearningPath | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -60,9 +60,11 @@ export default function Home() {
 
       setModules(enriched);
       setPaths(pathList);
-
-      const incomplete = enriched.find((m) => !m.prog?.is_completed);
-      setResumeModule(incomplete ?? enriched[enriched.length - 1] ?? null);
+      
+      // Set the first path as featured (often used by teachers)
+      if (pathList.length > 0) {
+        setFeaturedPath(pathList[0]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -104,54 +106,58 @@ export default function Home() {
         {/* ── Main Layout ── */}
         <div className="flex flex-col gap-16">
           
-          {/* Resume Banner */}
-          {resumeModule && (
+          {/* Featured Path Banner (Frequently used by teachers) */}
+          {featuredPath && (
             <motion.div 
               initial={{ opacity: 0, y: 24 }} 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <Link
-                to={`/detail-modul/${resumeModule.id}`}
+                to={`/detail-modul/${featuredPath.learning_path_modules?.[0]?.module_id}?path=${featuredPath.id}`}
                 className="block relative bg-slate-900 rounded-[3rem] p-8 lg:p-12 text-white shadow-2xl shadow-slate-900/40 overflow-hidden group hover:scale-[1.005] transition-transform duration-500"
               >
-                <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-600/20 rounded-full blur-[100px] -mr-40 -mt-40 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-purple-600/20 rounded-full blur-[100px] -mr-40 -mt-40 pointer-events-none" />
                 <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                   <div className="flex-1 space-y-6">
                     <div className="flex items-center gap-3">
-                      <span className="px-4 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 backdrop-blur-sm">
-                        {resumeModule.prog?.is_completed ? 'Review Sesi' : 'Lanjutkan Materi Terakhir'}
+                      <span className="px-4 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-purple-400 backdrop-blur-sm">
+                        Rekomendasi Rangkaian Ajar
                       </span>
                     </div>
-                    <h2 className="text-4xl lg:text-5xl font-black mb-2 leading-[1.1] tracking-tight">{resumeModule.topic}</h2>
-                    <p className="text-slate-400 text-lg lg:text-xl max-w-xl line-clamp-2">{resumeModule.description || 'Pelajari konsep fisika ini dengan simulasi interaktif.'}</p>
-                    <div className="flex items-center gap-6 pt-4">
-                      <div className="flex-1 bg-white/10 rounded-full h-4 overflow-hidden backdrop-blur-sm border border-white/5">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${resumeModule.percent}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                          className="bg-gradient-to-r from-blue-400 to-indigo-400 h-full rounded-full" 
-                        />
-                      </div>
-                      <span className="text-2xl font-black font-mono text-white">{resumeModule.percent}%</span>
+                    <h2 className="text-4xl lg:text-5xl font-black mb-2 leading-[1.1] tracking-tight">{featuredPath.title}</h2>
+                    <p className="text-slate-400 text-lg lg:text-xl max-w-xl line-clamp-2">{featuredPath.description || 'Alur pembelajaran terstruktur yang sering digunakan untuk penguasaan materi yang mendalam.'}</p>
+                    
+                    <div className="flex items-center gap-4 pt-4">
+                       <div className="px-6 py-3 bg-white/10 rounded-2xl border border-white/5 backdrop-blur-sm">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Materi</p>
+                          <p className="text-xl font-black text-white">{featuredPath.learning_path_modules?.length || 0} Modul</p>
+                       </div>
+                       <div className="px-6 py-3 bg-white/10 rounded-2xl border border-white/5 backdrop-blur-sm">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                          <p className="text-xl font-black text-emerald-400 flex items-center gap-2">Populer <CheckCircle2 size={18} /></p>
+                       </div>
                     </div>
                   </div>
                   <div className="relative shrink-0 flex items-center justify-center lg:w-64 lg:h-64">
+                     <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
                      <Rocket size={160} className="relative z-10 text-white/90 -rotate-12 group-hover:translate-x-3 group-hover:-translate-y-3 transition-transform duration-700 ease-out" />
                   </div>
+                </div>
+                <div className="absolute bottom-8 right-12 hidden lg:flex items-center gap-2 text-purple-400 font-black uppercase tracking-widest text-xs">
+                   Mulai Rangkaian <ChevronRight size={16} />
                 </div>
               </Link>
             </motion.div>
           )}
 
-          {/* Rangkaian Ajar Section (NEW) */}
+          {/* Rangkaian Ajar List Section */}
           {paths.length > 0 && (
             <div className="space-y-8">
                <div className="flex items-end justify-between px-2">
                 <div>
                   <h3 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                    <Route className="text-purple-600" size={32} /> Rangkaian Ajar
+                    <Route className="text-purple-600" size={32} /> Pilihan Rangkaian
                   </h3>
                   <p className="text-slate-400 font-medium mt-1">Alur materi terstruktur untuk penguasaan konsep yang mendalam.</p>
                 </div>
@@ -192,8 +198,6 @@ export default function Home() {
                           Mulai Alur <ChevronRight size={16} />
                         </div>
                       </div>
-                      
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700" />
                     </Link>
                   </motion.div>
                 ))}

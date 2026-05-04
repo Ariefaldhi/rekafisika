@@ -50,6 +50,7 @@ export interface Module {
   is_locked: boolean;
   steps: ModuleStep[];
   lkpd_url?: string;
+  lkpd_title?: string;
   created_at: string;
 }
 
@@ -59,7 +60,7 @@ export interface LearningPath {
   description: string;
   is_visible: boolean;
   created_at: string;
-  modules?: LearningPathModule[];
+  learning_path_modules?: LearningPathModule[];
 }
 
 export interface LearningPathModule {

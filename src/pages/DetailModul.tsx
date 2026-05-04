@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, FileText, Play, FlaskConical, Brain, Link as LinkIcon, 
-  ChevronLeft, ChevronRight, CheckCircle, Users, Hourglass, 
-  MessageSquare, Loader2, Info, Radio, DoorOpen, Route
+  ArrowLeft, FileText, Play, Brain, 
+  ChevronLeft, ChevronRight, CheckCircle, 
+  Hourglass, Loader2, Radio, DoorOpen
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -103,10 +103,8 @@ export default function DetailModul() {
   useEffect(() => {
     fetchData();
     
-    // Auto-fill from user session if available
     if (user?.teaching_code) setTeachingCode(user.teaching_code);
     
-    // Check if previously joined in this path or module
     const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
     const saved = localStorage.getItem(sessionKey);
     if (saved) {
@@ -121,6 +119,7 @@ export default function DetailModul() {
         channelRef.current.unsubscribe();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, pathId]);
 
   const fetchData = async () => {
@@ -139,7 +138,6 @@ export default function DetailModul() {
         return;
       }
 
-      // Filter out reflections if in path and not the last module
       let finalSteps = modData.steps || [];
       if (pathId) {
         const { data: lpData } = await supabase
@@ -184,7 +182,6 @@ export default function DetailModul() {
       .on('broadcast', { event: 'page_sync' }, ({ payload }) => {
         if (!isTeacher) {
           if (payload.moduleId && payload.moduleId !== id) {
-            // Redirect students to the next module in path
             navigate(`/detail-modul/${payload.moduleId}?path=${pathId || ''}`);
             return;
           }
@@ -313,7 +310,7 @@ export default function DetailModul() {
         
         if (currentIdx < sortedModules.length - 1) {
           const nextModuleId = sortedModules[currentIdx + 1].module_id;
-          updateTeacherState(0, nextModuleId); // Reset to cover of next module
+          updateTeacherState(0, nextModuleId);
           navigate(`/detail-modul/${nextModuleId}?path=${pathId}`);
           return;
         }
@@ -519,6 +516,7 @@ export default function DetailModul() {
             <h1 className="text-sm font-bold text-slate-800 line-clamp-1">{module.topic}</h1>
           </div>
         </div>
+        {saveStatus && <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{saveStatus}</span>}
       </header>
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-6">

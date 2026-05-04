@@ -5,13 +5,13 @@ import {
   LayoutDashboard, BookOpen, Users, 
   ChevronRight, Menu, Loader2,
   ShieldCheck, ArrowLeft, Trash2, Plus, 
-  Save, X, Lock, Unlock, FileText, 
-  List, Upload, Sparkles, LogOut,
-  Route, ArrowUp, ArrowDown, Settings
+  X, Lock, Unlock, FileText, 
+  Upload, Sparkles, LogOut,
+  Route, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import type { Module, LearningPath, LearningPathModule } from '../lib/supabase';
+import type { Module, LearningPath, ModuleStep } from '../lib/supabase';
 
 // --- Types ---
 interface Profile {
@@ -63,7 +63,7 @@ export default function Admin() {
       const [pRes, mRes, lpRes] = await Promise.all([
         supabase.from('profiles').select('*').order('nama'),
         supabase.from('modules').select('*').order('sort_order'),
-        supabase.from('learning_paths').select('*, modules:learning_path_modules(module_id, order_index)').order('created_at', { ascending: false })
+        supabase.from('learning_paths').select('*, learning_path_modules(module_id, order_index)').order('created_at', { ascending: false })
       ]);
 
       setProfiles(pRes.data || []);
@@ -173,7 +173,6 @@ export default function Admin() {
       let pathId = editingPath.id;
       if (pathId) {
         await supabase.from('learning_paths').update(pathPayload).eq('id', pathId);
-        // Delete old relations
         await supabase.from('learning_path_modules').delete().eq('path_id', pathId);
       } else {
         const { data, error } = await supabase.from('learning_paths').insert([pathPayload]).select().single();
@@ -181,7 +180,6 @@ export default function Admin() {
         pathId = data.id;
       }
 
-      // Insert new relations
       const relations = pathModules.map((mId, idx) => ({
         path_id: pathId,
         module_id: mId,
@@ -424,7 +422,8 @@ export default function Admin() {
                               <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onClick={() => {
                                   setEditingPath(path);
-                                  setPathModules(path.modules?.sort((a,b) => a.order_index - b.order_index).map(m => m.module_id) || []);
+                                  const sorted = (path as any).learning_path_modules?.sort((a:any, b:any) => a.order_index - b.order_index) || [];
+                                  setPathModules(sorted.map((m:any) => m.module_id));
                                 }} className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg"><FileText size={16}/></button>
                                 <button onClick={() => deletePath(path.id)} className="p-2 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-lg"><Trash2 size={16}/></button>
                               </div>
@@ -435,7 +434,7 @@ export default function Admin() {
                            <div className="space-y-3">
                               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Alur Materi:</p>
                               <div className="flex flex-col gap-2">
-                                {path.modules?.sort((a,b) => a.order_index - b.order_index).map((pm, idx) => (
+                                {(path as any).learning_path_modules?.sort((a:any, b:any) => a.order_index - b.order_index).map((pm:any, idx:number) => (
                                   <div key={idx} className="flex items-center gap-3 text-xs font-bold text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                                     <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] border border-slate-200">{idx+1}</span>
                                     {modules.find(m => m.id === pm.module_id)?.topic || 'Materi tidak ditemukan'}
@@ -445,12 +444,6 @@ export default function Admin() {
                            </div>
                         </div>
                       ))}
-                      {learningPaths.length === 0 && (
-                        <div className="md:col-span-2 text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
-                           <Route size={48} className="mx-auto text-slate-200 mb-4" />
-                           <p className="text-slate-400 font-medium">Belum ada rangkaian ajar yang dibuat.</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -547,134 +540,68 @@ export default function Admin() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white w-full max-w-5xl h-[90vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden"
            >
-              {/* Modal Header */}
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingModule.id ? 'Edit Modul' : 'Tambah Modul Baru'}</h3>
-                  <p className="text-sm text-slate-400 font-medium">Isi detail modul dan langkah pembelajarannya.</p>
-                </div>
-                <button onClick={() => setEditingModule(null)} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingModule.id ? 'Edit Modul' : 'Tambah Modul Baru'}</h3>
+                <button onClick={() => setEditingModule(null)} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
                   <X size={24} />
                 </button>
               </div>
 
-              {/* Modal Body */}
               <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-                
-                {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                    <div className="md:col-span-1">
-                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Urutan Tampil</label>
-                     <input 
-                      type="number" 
-                      value={editingModule.sort_order}
-                      onChange={e => setEditingModule({...editingModule, sort_order: parseInt(e.target.value)})}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                     />
+                     <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">URUTAN TAMPIL</label>
+                     <input type="number" value={editingModule.sort_order} onChange={e => setEditingModule({...editingModule, sort_order: parseInt(e.target.value)})} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg outline-none" />
                    </div>
                    <div className="md:col-span-3">
-                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Topik / Judul Modul</label>
-                     <input 
-                      type="text" 
-                      value={editingModule.topic}
-                      onChange={e => setEditingModule({...editingModule, topic: e.target.value})}
-                      placeholder="Contoh: Pengantar Kinematika"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                     />
+                     <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">JUDUL MODUL</label>
+                     <input type="text" value={editingModule.topic} onChange={e => setEditingModule({...editingModule, topic: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg outline-none" />
                    </div>
                    <div className="md:col-span-4">
-                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Deskripsi Singkat</label>
-                     <textarea 
-                      value={editingModule.description}
-                      onChange={e => setEditingModule({...editingModule, description: e.target.value})}
-                      placeholder="Ringkasan materi yang akan dipelajari..."
-                      rows={3}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                     />
+                     <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">DESKRIPSI</label>
+                     <textarea value={editingModule.description} onChange={e => setEditingModule({...editingModule, description: e.target.value})} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium outline-none" />
                    </div>
                 </div>
 
-                {/* LKPD Section */}
                 <div className="bg-blue-50/50 p-8 rounded-[2.5rem] border border-blue-100/50 space-y-6">
-                  <h4 className="flex items-center gap-3 text-blue-700 font-black uppercase tracking-widest text-xs">
-                    <FileText size={18} /> Pengaturan LKPD (Download)
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <input 
-                      type="text" 
-                      placeholder="Judul LKPD (Contoh: LKPD-1 Gerak Lurus)"
-                      value={editingModule.lkpd_title || ''}
-                      onChange={e => setEditingModule({...editingModule, lkpd_title: e.target.value})}
-                      className="bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                     />
+                   <h4 className="flex items-center gap-3 text-blue-700 font-black uppercase tracking-widest text-xs"><FileText size={18} /> LKPD SETTINGS</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <input type="text" placeholder="Judul LKPD" value={editingModule.lkpd_title || ''} onChange={e => setEditingModule({...editingModule, lkpd_title: e.target.value})} className="bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
                      <div className="flex gap-2">
-                       <input 
-                        type="text" 
-                        placeholder="Link File (Google Drive / URL)"
-                        value={editingModule.lkpd_url || ''}
-                        onChange={e => setEditingModule({...editingModule, lkpd_url: e.target.value})}
-                        className="flex-1 bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                       />
-                       <button className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-blue-700 transition-all shrink-0">
-                         <Upload size={20} />
-                       </button>
+                       <input type="text" placeholder="URL LKPD" value={editingModule.lkpd_url || ''} onChange={e => setEditingModule({...editingModule, lkpd_url: e.target.value})} className="flex-1 bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
+                       <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shrink-0"><Upload size={20} /></div>
                      </div>
-                  </div>
+                   </div>
                 </div>
 
-                {/* Steps Builder */}
                 <div className="space-y-6">
-                   <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                     <h4 className="font-black text-slate-800 text-xl tracking-tight">Langkah Pembelajaran ({editingModule.steps?.length || 0})</h4>
-                     <button 
-                      onClick={() => {
-                        const newSteps = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '' }];
-                        setEditingModule({...editingModule, steps: newSteps});
-                      }}
-                      className="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
-                     >
-                        Tambah Langkah
-                     </button>
+                   <div className="flex justify-between items-center pb-4 border-b">
+                     <h4 className="font-black text-slate-800 text-xl">Langkah Pembelajaran</h4>
+                     <button onClick={() => {
+                       const newSteps: ModuleStep[] = [...(editingModule.steps || []), { title: '', type: 'pdf', url: '', instruction: '' } as ModuleStep];
+                       setEditingModule({...editingModule, steps: newSteps});
+                     }} className="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Tambah Langkah</button>
                    </div>
-
                    <div className="space-y-4">
                       {editingModule.steps?.map((step, sIdx) => (
-                        <div key={sIdx} className="bg-slate-50 p-6 rounded-3xl border border-slate-200/50 space-y-4 relative group">
-                           <button 
-                            onClick={() => {
-                              const newSteps = editingModule.steps?.filter((_, i) => i !== sIdx);
-                              setEditingModule({...editingModule, steps: newSteps});
-                            }}
-                            className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors"
-                           >
-                             <Trash2 size={16} />
-                           </button>
-
+                        <div key={sIdx} className="bg-slate-50 p-6 rounded-3xl border border-slate-200/50 space-y-4 relative">
+                           <button onClick={() => setEditingModule({...editingModule, steps: editingModule.steps?.filter((_, i) => i !== sIdx)})} className="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><Trash2 size={16} /></button>
                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="md:col-span-2">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-1">Judul Langkah</label>
-                                <input 
-                                  type="text" 
-                                  value={step.title}
-                                  onChange={e => {
-                                    const newSteps = [...(editingModule.steps || [])];
-                                    newSteps[sIdx].title = e.target.value;
-                                    setEditingModule({...editingModule, steps: newSteps});
-                                  }}
-                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold"
-                                />
+                                <label className="block text-[10px] font-black text-slate-400 mb-1">JUDUL</label>
+                                <input type="text" value={step.title} onChange={e => {
+                                  const newSteps = [...(editingModule.steps || [])];
+                                  newSteps[sIdx].title = e.target.value;
+                                  setEditingModule({...editingModule, steps: newSteps});
+                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold" />
                               </div>
                               <div>
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-1">Tipe Konten</label>
-                                <select 
-                                  value={step.type}
-                                  onChange={e => {
-                                    const newSteps = [...(editingModule.steps || [])];
-                                    newSteps[sIdx].type = e.target.value;
-                                    setEditingModule({...editingModule, steps: newSteps});
-                                  }}
-                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold uppercase"
-                                >
+                                <label className="block text-[10px] font-black text-slate-400 mb-1">TIPE</label>
+                                <select value={step.type} onChange={e => {
+                                  const newSteps = [...(editingModule.steps || [])];
+                                  newSteps[sIdx].type = e.target.value as any;
+                                  setEditingModule({...editingModule, steps: newSteps});
+                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold uppercase">
                                   <option value="ppt">PowerPoint</option>
                                   <option value="pdf">PDF Viewer</option>
                                   <option value="video">Video (YT)</option>
@@ -684,48 +611,24 @@ export default function Admin() {
                                 </select>
                               </div>
                               <div className="md:col-span-3">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-1">URL / Sumber Konten</label>
-                                <input 
-                                  type="text" 
-                                  value={step.url}
-                                  onChange={e => {
-                                    const newSteps = [...(editingModule.steps || [])];
-                                    newSteps[sIdx].url = e.target.value;
-                                    setEditingModule({...editingModule, steps: newSteps});
-                                  }}
-                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-blue-600"
-                                  placeholder="Link YouTube, PDF, atau Simulasi..."
-                                />
+                                <label className="block text-[10px] font-black text-slate-400 mb-1">URL / SUMBER</label>
+                                <input type="text" value={step.url} onChange={e => {
+                                  const newSteps = [...(editingModule.steps || [])];
+                                  newSteps[sIdx].url = e.target.value;
+                                  setEditingModule({...editingModule, steps: newSteps});
+                                }} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-blue-600" />
                               </div>
                            </div>
                         </div>
                       ))}
-                      
-                      {(!editingModule.steps || editingModule.steps.length === 0) && (
-                        <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-[2.5rem]">
-                           <List size={40} className="mx-auto text-slate-200 mb-4" />
-                           <p className="text-slate-400 font-medium">Belum ada langkah pembelajaran.</p>
-                        </div>
-                      )}
                    </div>
                 </div>
               </div>
 
-              {/* Modal Footer */}
-              <div className="p-8 border-t border-slate-100 flex items-center justify-end gap-4 bg-slate-50/50">
-                <button 
-                  onClick={() => setEditingModule(null)}
-                  className="px-8 py-4 rounded-2xl font-bold text-slate-400 hover:bg-white hover:text-slate-600 transition-all"
-                >
-                  Batal
-                </button>
-                <button 
-                  onClick={handleSaveModule}
-                  disabled={isSaving}
-                  className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50"
-                >
-                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  Simpan Modul
+              <div className="p-8 border-t flex justify-end gap-4 bg-slate-50/50">
+                <button onClick={() => setEditingModule(null)} className="px-8 py-4 font-bold text-slate-400">Batal</button>
+                <button onClick={handleSaveModule} disabled={isSaving} className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-sm shadow-xl shadow-blue-600/20 disabled:opacity-50">
+                  {isSaving ? <Loader2 className="animate-spin" /> : 'Simpan Modul'}
                 </button>
               </div>
            </motion.div>
@@ -735,139 +638,59 @@ export default function Admin() {
       {/* --- MODAL: EDIT LEARNING PATH --- */}
       {editingPath && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white w-full max-w-4xl h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden"
-           >
-              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingPath.id ? 'Edit Rangkaian' : 'Buat Rangkaian Ajar'}</h3>
-                  <p className="text-sm text-slate-400 font-medium">Gabungkan beberapa materi menjadi satu alur.</p>
-                </div>
-                <button onClick={() => setEditingPath(null)} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center">
-                  <X size={24} />
-                </button>
+           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-4xl h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden">
+              <div className="p-8 border-b flex justify-between">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{editingPath.id ? 'Edit Rangkaian' : 'Buat Rangkaian Ajar'}</h3>
+                <button onClick={() => setEditingPath(null)}><X size={24} /></button>
               </div>
-
               <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Nama Rangkaian</label>
-                    <input 
-                      type="text" 
-                      value={editingPath.title}
-                      onChange={e => setEditingPath({...editingPath, title: e.target.value})}
-                      placeholder="Contoh: Rangkaian Dasar Kinematika"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Deskripsi</label>
-                    <textarea 
-                      value={editingPath.description}
-                      onChange={e => setEditingPath({...editingPath, description: e.target.value})}
-                      placeholder="Jelaskan tujuan rangkaian ajar ini..."
-                      rows={2}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-purple-500 outline-none"
-                    />
-                  </div>
+                  <input type="text" value={editingPath.title} onChange={e => setEditingPath({...editingPath, title: e.target.value})} placeholder="Nama Rangkaian" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg outline-none" />
+                  <textarea value={editingPath.description} onChange={e => setEditingPath({...editingPath, description: e.target.value})} placeholder="Deskripsi" rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-medium outline-none" />
                 </div>
-
-                <div className="space-y-6">
-                   <h4 className="font-black text-slate-800 text-xl tracking-tight">Alur Materi</h4>
-                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Selected Modules */}
-                      <div className="space-y-3">
-                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Urutan Materi:</p>
-                         <div className="flex flex-col gap-3 min-h-[100px] p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                           {pathModules.map((mId, idx) => {
-                             const m = modules.find(mod => mod.id === mId);
-                             return (
-                               <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group">
-                                 <div className="flex items-center gap-3">
-                                   <span className="w-6 h-6 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
-                                   <span className="text-xs font-bold text-slate-700">{m?.topic || 'Materi tidak ditemukan'}</span>
-                                 </div>
-                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                   <button 
-                                    onClick={() => {
-                                      if (idx === 0) return;
-                                      const newModules = [...pathModules];
-                                      [newModules[idx], newModules[idx-1]] = [newModules[idx-1], newModules[idx]];
-                                      setPathModules(newModules);
-                                    }}
-                                    className="p-1.5 text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
-                                   ><ArrowUp size={14}/></button>
-                                   <button 
-                                    onClick={() => {
-                                      if (idx === pathModules.length - 1) return;
-                                      const newModules = [...pathModules];
-                                      [newModules[idx], newModules[idx+1]] = [newModules[idx+1], newModules[idx]];
-                                      setPathModules(newModules);
-                                    }}
-                                    className="p-1.5 text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-md"
-                                   ><ArrowDown size={14}/></button>
-                                   <button 
-                                    onClick={() => setPathModules(pathModules.filter((_, i) => i !== idx))}
-                                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md"
-                                   ><Trash2 size={14}/></button>
-                                 </div>
-                               </div>
-                             );
-                           })}
-                           {pathModules.length === 0 && <p className="text-center text-xs text-slate-400 italic py-6">Klik materi di sebelah kanan untuk menambahkan</p>}
-                         </div>
-                      </div>
-
-                      {/* Available Modules */}
-                      <div className="space-y-3">
-                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Pilih Materi:</p>
-                         <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-                           {modules.filter(m => !pathModules.includes(m.id)).map(m => (
-                             <button 
-                              key={m.id}
-                              onClick={() => setPathModules([...pathModules, m.id])}
-                              className="text-left bg-white p-4 rounded-2xl border border-slate-100 hover:border-purple-300 hover:bg-purple-50/30 transition-all group"
-                             >
-                               <div className="flex items-center justify-between">
-                                 <span className="text-xs font-bold text-slate-700">{m.topic}</span>
-                                 <Plus size={14} className="text-slate-300 group-hover:text-purple-500" />
-                               </div>
-                             </button>
-                           ))}
-                         </div>
-                      </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                   <div className="space-y-3">
+                     <p className="text-[10px] font-black text-slate-300 uppercase">Urutan Materi:</p>
+                     <div className="flex flex-col gap-3 min-h-[100px] p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed">
+                       {pathModules.map((mId, idx) => {
+                         const m = modules.find(mod => mod.id === mId);
+                         return (
+                           <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center group">
+                             <div className="flex items-center gap-3">
+                               <span className="w-6 h-6 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
+                               <span className="text-xs font-bold">{m?.topic}</span>
+                             </div>
+                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                               <button onClick={() => { if(idx > 0) { const next = [...pathModules]; [next[idx], next[idx-1]] = [next[idx-1], next[idx]]; setPathModules(next); } }}><ArrowUp size={14}/></button>
+                               <button onClick={() => { if(idx < pathModules.length - 1) { const next = [...pathModules]; [next[idx], next[idx+1]] = [next[idx+1], next[idx]]; setPathModules(next); } }}><ArrowDown size={14}/></button>
+                               <button onClick={() => setPathModules(pathModules.filter((_, i) => i !== idx))}><Trash2 size={14}/></button>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   </div>
+                   <div className="space-y-3">
+                     <p className="text-[10px] font-black text-slate-300 uppercase">Pilih Materi:</p>
+                     <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                        {modules.filter(m => !pathModules.includes(m.id)).map(m => (
+                          <button key={m.id} onClick={() => setPathModules([...pathModules, m.id])} className="text-left bg-white p-4 rounded-2xl border hover:bg-purple-50 group">
+                            <div className="flex justify-between items-center"><span className="text-xs font-bold">{m.topic}</span><Plus size={14}/></div>
+                          </button>
+                        ))}
+                     </div>
                    </div>
                 </div>
               </div>
-
-              <div className="p-8 border-t border-slate-100 flex items-center justify-end gap-4 bg-slate-50/50">
-                <button 
-                  onClick={() => setEditingPath(null)}
-                  className="px-8 py-4 rounded-2xl font-bold text-slate-400 hover:bg-white transition-all"
-                >
-                  Batal
-                </button>
-                <button 
-                  onClick={handleSavePath}
-                  disabled={isSaving}
-                  className="bg-purple-600 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 hover:bg-purple-500 transition-all shadow-xl shadow-purple-600/20 disabled:opacity-50"
-                >
-                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  Simpan Rangkaian
+              <div className="p-8 border-t flex justify-end gap-4 bg-slate-50/50">
+                <button onClick={() => setEditingPath(null)} className="px-8 py-4 font-bold text-slate-400">Batal</button>
+                <button onClick={handleSavePath} disabled={isSaving} className="bg-purple-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-sm shadow-xl shadow-purple-600/20 disabled:opacity-50">
+                  {isSaving ? <Loader2 className="animate-spin" /> : 'Simpan Rangkaian'}
                 </button>
               </div>
            </motion.div>
         </div>
       )}
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
-      `}</style>
     </div>
   );
 }
