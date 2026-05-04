@@ -227,9 +227,12 @@ export default function DetailModul() {
 
       setModule({ ...modData, steps: finalSteps });
       
-      // If we are in a path and have a saved session, we likely want to continue
-      // from the first content page instead of the cover
-      if (pathId && saved) {
+      // Only skip to Page 1 if it's a path, we have a saved session, 
+      // AND it's NOT the first module in the path (to allow registration)
+      const sortedModules = pathData?.modules?.sort((a: any, b: any) => a.order_index - b.order_index) || [];
+      const isFirstModule = sortedModules.length > 0 && sortedModules[0].module_id === id;
+
+      if (pathId && saved && !isFirstModule) {
         setCurrentPage(1);
         setInWaitingRoom(false);
       } else {
@@ -477,6 +480,8 @@ export default function DetailModul() {
         channelRef.current.send({ type: 'broadcast', event: 'session_ended', payload: {} });
       }
       await supabase.from('sesi_kelas').delete().eq('kode_kelas', teachingCode);
+      const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+      localStorage.removeItem(sessionKey);
       navigate('/home');
     } else {
       await supabase.from('module_progress').upsert({
