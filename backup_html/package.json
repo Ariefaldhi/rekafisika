@@ -1,0 +1,9 @@
+{
+  "name": "rekafisika",
+  "version": "1.0.0",
+  "description": "Fisika Web App",
+  "scripts": {
+    "build": "node build-config.js"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="auth-guard.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RekaFisika | Home</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: {
+                            400: '#60A5FA', // Blue 400
+                            500: '#3B82F6', // Blue 500
+                            600: '#2563EB', // Blue 600
+                        },
+                        ui: {
+                            bg: '#F8FAFC', // Slate 50
+                            card: '#FFFFFF',
+                            text: '#1E293B', // Slate 800
+                            sub: '#64748B', // Slate 500
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 4px 20px -2px rgba(59, 130, 246, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Supabase (Load FIRST, Synchronously) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Fallback if jsdelivr blocked (run immediately after)
+        if (typeof supabase === 'undefined') {
+            document.write('<scr' + 'ipt src="https://unpkg.com/@supabase/supabase-js@2"></scr' + 'ipt>');
+        }
+    </script>
+    <style>
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-enter {
+            animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+
+        .delay-400 {
+            animation-delay: 400ms;
+        }
+    </style>
+    <script src="config.js?v=2.5"></script>
+    <script src="modal.js"></script>
+    <script src="sound-effects.js"></script>
+</head>
+
+<body class="bg-ui-bg font-inter text-ui-text min-h-screen pb-24 selection:bg-primary-500/30">
+
+    <div class="max-w-7xl mx-auto relative min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="px-6 pt-12 pb-6 bg-white sticky top-0 z-40 shadow-sm animate-enter flex justify-between items-start">
+        <div>
+            <p class="text-ui-sub text-sm font-medium mb-1" id="greeting">Selamat Siang! ☀️</p>
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="RekaFisika Logo" class="w-8 h-8 object-contain">
+                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">RekaFisika</h1>
+            </div>
+            <p class="text-sm text-slate-500">Asisten Belajar Fisika SD, SMP, SMA</p>
+        </div>
+        <a href="profil.html" class="relative group">
+            <div id="user-avatar"
+                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform">
+                G
+            </div>
+            <!-- Status Dot -->
+            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        </a>
+    </header>
+
+
+
+    <!-- Resume Learning (Dynamic) -->
+    <div id="resume-learning-container" class="px-6 mb-8 hidden animate-enter delay-200">
+        <!-- Injected via JS -->
+    </div>
+
+    <script>
+        async function loadResumeLearning() {
+            if (!window.supabaseClient) return;
+
+            const user = typeof checkAuth === 'function' ? checkAuth() : null;
+            if (!user) return; // Don't show if not logged in
+
+            try {
+                // 1. Fetch All Modules
+                const { data: modules } = await supabaseClient.from('modules').select('*').order('week', { ascending: true });
+                // 2. Fetch User Progress
+                const { data: progress } = await supabaseClient.from('module_progress').select('module_id').eq('student_nim', user.nim).eq('is_completed', true);
+
+                const completedIds = new Set(progress ? progress.map(p => p.module_id) : []);
+
+                // 3. Find First Incomplete Module
+                let currentModule = modules.find(m => !completedIds.has(m.id));
+
+                // If all completed, show the last one (or a "Done" state)
+                if (!currentModule && modules.length > 0) currentModule = modules[modules.length - 1];
+                if (!currentModule) return; // No modules at all
+
+                // Calculate Real Progress % based on Steps
+                let percent = 0;
+                let isReview = completedIds.has(currentModule.id);
+
+                if (isReview) {
+                    percent = 100;
+                } else {
+                    // Fetch specific progress for this module to get steps
+                    const { data: stepProg } = await supabaseClient
+                        .from('module_progress')
+                        .select('completed_steps')
+                        .eq('student_nim', user.nim)
+                        .eq('module_id', currentModule.id)
+                        .maybeSingle();
+
+                    if (stepProg && stepProg.completed_steps && currentModule.steps) {
+                        const totalSteps = currentModule.steps.length;
+                        const doneSteps = stepProg.completed_steps.length;
+                        if (totalSteps > 0) percent = Math.round((doneSteps / totalSteps) * 100);
+                    }
+                }
+
+                const container = document.getElementById('resume-learning-container');
+                container.classList.remove('hidden');
+                container.innerHTML = `
+                    <a href="modul.html"
+                        class="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] p-6 text-white shadow-lg shadow-blue-500/30 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                        <!-- Deco -->
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-blue-400 opacity-20 rounded-full blur-xl -ml-5 -mb-5"></div>
+
+                        <div class="relative z-10 flex items-center justify-between mb-2">
+                            <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold backdrop-blur-sm border border-white/10 shadow-sm">
+                                ${completedIds.has(currentModule.id) ? 'Review Materi' : 'Lanjutkan Belajar'}
+                            </span>
+                            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:rotate-45 transition-transform duration-300">
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 mt-3">
+                            <h2 class="text-xl font-black mb-1 leading-tight line-clamp-2">${currentModule.topic}</h2>
+                            <p class="text-blue-100 text-xs font-medium mb-5">Minggu ${currentModule.week} • Fisika</p>
+
+                            <!-- Progress Bar -->
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-black/20 rounded-full h-2.5 overflow-hidden backdrop-blur-sm border border-white/5">
+                                    <div class="bg-white h-full rounded-full transition-all duration-700" style="width: ${percent}%"></div>
+                                </div>
+                                <span class="text-xs font-bold font-mono">${percent}%</span>
+                            </div>
+                        </div>
+
+                        <!-- Big Icon -->
+                        <i class="fa-solid fa-rocket absolute -bottom-4 -right-4 text-9xl text-indigo-900 opacity-20 rotate-12 group-hover:translate-x-2 transition-transform duration-500"></i>
+                    </a>
+                `;
+
+            } catch (e) {
+                console.error("Resume Learning Error:", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadResumeLearning);
+    </script>
+
+    <!-- Announcements Section -->
+    <div class="px-6 mb-8 hidden" id="announcement-section">
+        <h3 class="font-bold text-lg text-slate-800 mb-3">Pengumuman Terbaru</h3>
+        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide" id="announcement-list">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Materi Section -->
+    <div class="px-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg text-slate-800">📚 Semua Materi</h3>
+            <a href="modul.html" class="text-primary-500 text-sm font-medium">Lihat Semua →</a>
+        </div>
+        <div id="home-module-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Loading skeleton -->
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
+            <div class="animate-pulse bg-white p-5 rounded-2xl h-20"></div>
+        </div>
+    </div>
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
+        <nav
+            class="max-w-md mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 py-3 px-8 flex justify-between items-center shadow-2xl rounded-3xl pointer-events-auto">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-primary-500">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[10px] font-bold">Beranda</span>
+            </a>
+            <a href="modul.html"
+                class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="text-[10px] font-medium">Jelajah</span>
+            </a>
+            <a href="lainnya.html"
+                class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary-500 transition-colors">
+                <i class="fa-solid fa-bars text-xl"></i>
+                <span class="text-[10px] font-medium">Lainnya</span>
+            </a>
+        </nav>
+    </div>
+</div>
+
+    <!-- Scripts -->
+
+    <script>
+        // Greeting Logic
+        const hour = new Date().getHours();
+        const greetingEl = document.getElementById('greeting');
+        let greeting = 'Selamat Pagi! ☀️';
+        if (hour >= 11 && hour < 15) greeting = 'Selamat Siang! ☀️';
+        else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore! 🌅';
+        else if (hour >= 18) greeting = 'Selamat Malam! 🌙';
+        greetingEl.textContent = greeting;
+
+        // User Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = typeof checkAuth === 'function' ? checkAuth() : null;
+            const avatarEl = document.getElementById('user-avatar');
+
+            if (user) {
+                // Profile Pic vs Initials
+                if (user.profile_photo_url) {
+                    // Replace text content with Image
+                    avatarEl.innerHTML = `<img src="${user.profile_photo_url}" class="w-full h-full object-cover rounded-full">`;
+                    avatarEl.classList.add('overflow-hidden'); // Ensure rounded
+                    avatarEl.classList.remove('bg-emerald-100', 'text-emerald-600'); // Remove default colors if desired, or keep as bg
+                } else {
+                    const initials = user.nama ? user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'US';
+                    avatarEl.textContent = initials;
+                }
+
+                // Load Assignment Preview (Simple fetch)
+                loadAssignmentPreview();
+            } else {
+                avatarEl.textContent = 'G'; // Guest
+            }
+        });
+
+        // Async Init: Load Modules on Home
+        (async function initApp() {
+            const client = await window.ensureSupabase();
+            const container = document.getElementById('home-module-list');
+
+            if (!client) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm"><i class="fa-solid fa-wifi-slash text-2xl mb-2 block"></i>Database tidak terhubung.</div>`;
+                return;
+            }
+
+            try {
+                const user = typeof checkAuth === 'function' ? checkAuth() : null;
+
+                const { data: modules, error } = await supabaseClient
+                    .from('modules')
+                    .select('*')
+                    .eq('is_visible', true)
+                    .order('week', { ascending: true })
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                // Fetch progress if user is logged in
+                const { data: progressList } = user ? await supabaseClient
+                    .from('module_progress')
+                    .select('*')
+                    .eq('student_nim', user.nim)
+                    : { data: [] };
+
+                const progressMap = {};
+                if (progressList) progressList.forEach(p => progressMap[p.module_id] = p);
+
+                if (!modules || modules.length === 0) {
+                    container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>Belum ada materi tersedia.</div>`;
+                    return;
+                }
+
+                // Group by week
+                const byWeek = {};
+                modules.forEach(m => {
+                    if (!byWeek[m.week]) byWeek[m.week] = [];
+                    byWeek[m.week].push(m);
+                });
+
+                let html = '';
+                modules.forEach(item => {
+                    const prog = progressMap[item.id] || {};
+                        const isCompleted = prog.is_completed;
+                        const isLocked = item.is_locked;
+
+                        let totalSteps = item.steps ? item.steps.length : 0;
+                        let doneSteps = prog.completed_steps ? prog.completed_steps.length : 0;
+                        let percent = isCompleted ? 100 : (totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0);
+
+                        const cardBg = isCompleted ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100';
+                        const iconBg = isLocked ? 'bg-slate-100' : (isCompleted ? 'bg-emerald-100' : 'bg-primary-50');
+                        const iconEl = isLocked
+                            ? '<i class="fa-solid fa-lock text-slate-400"></i>'
+                            : (isCompleted
+                                ? '<i class="fa-solid fa-check text-emerald-500"></i>'
+                                : '<i class="fa-solid fa-book-open text-primary-500"></i>');
+                        const href = isLocked ? 'javascript:void(0)' : `detail_modul.html?id=${item.id}`;
+                        const click = isLocked ? `onclick="VisualModal.alert('Modul ini belum dibuka.', 'Terkunci', 'lock');return false;"` : '';
+                        const progressBar = isLocked ? '' : `
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 bg-slate-100 rounded-full h-1 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-primary-500'}" style="width:${percent}%"></div>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400">${percent}%</span>
+                            </div>`;
+
+                        html += `
+                            <a href="${href}" ${click} class="group flex items-center gap-4 p-4 rounded-2xl border ${cardBg} shadow-sm hover:shadow-md transition-all block">
+                                <div class="w-10 h-10 rounded-full ${iconBg} flex items-center justify-center shrink-0">
+                                    ${iconEl}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-slate-800 text-sm leading-tight truncate group-hover:text-primary-600 transition-colors">${item.topic}</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5 line-clamp-1">${item.description || 'Pelajari materi ini.'}</p>
+                                    ${progressBar}
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary-500 transition-colors shrink-0"></i>
+                            </a>`;
+                });
+
+                container.innerHTML = html;
+
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `<p class="text-red-500 text-center text-sm">Gagal memuat materi.</p>`;
+            }
+        })();
+
+        async function loadAnnouncements() {
+            if (!window.supabaseClient) return;
+            const { data } = await supabaseClient.from('announcements').select('*').order('created_at', { ascending: false }).limit(5);
+
+            if (data && data.length > 0) {
+                document.getElementById('announcement-section').classList.remove('hidden');
+                document.getElementById('announcement-list').innerHTML = data.map(n => {
+                    let bg = 'bg-blue-500';
+                    let icon = 'fa-info-circle';
+                    if (n.type === 'warning') { bg = 'bg-orange-500'; icon = 'fa-exclamation-triangle'; }
+                    if (n.type === 'urgent') { bg = 'bg-red-500'; icon = 'fa-bell'; }
+
+                    return `
+                        <div class="min-w-[280px] bg-white p-5 rounded-[2rem] shadow-soft border border-slate-100 flex flex-col gap-3 relative overflow-hidden group">
+                            <div class="flex justify-between items-start z-10">
+                                <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                                    <i class="fa-regular fa-calendar mr-1"></i> ${new Date(n.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}
+                                </span>
+                                <span class="text-[10px] font-bold text-slate-300">Admin</span>
+                            </div>
+                            
+                            <div class="z-10">
+                                <h4 class="font-bold text-slate-800 text-lg leading-tight mb-2">${n.title}</h4>
+                                <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">${n.content}</p>
+                            </div>
+
+                            <!-- Deco -->
+                            <div class="absolute -right-4 -bottom-4 w-24 h-24 ${bg.replace('500', '100')} rounded-full opacity-50 z-0"></div>
+                            <i class="fa-solid ${icon} absolute bottom-4 right-4 text-4xl ${bg.replace('bg-', 'text-').replace('500', '200')} z-0 opacity-50"></i>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function initCountdown() {
+            // Target: Next Monday 07:00
+            const now = new Date();
+            const target = new Date();
+            target.setDate(now.getDate() + (1 + 7 - now.getDay()) % 7); // Next Monday
+            target.setHours(7, 0, 0, 0);
+            if (target < now) target.setDate(target.getDate() + 7);
+
+            function update() {
+                const diff = target - new Date();
+                if (diff <= 0) return;
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('cd-days').innerText = String(d).padStart(2, '0');
+                document.getElementById('cd-hours').innerText = String(h).padStart(2, '0');
+                document.getElementById('cd-min').innerText = String(m).padStart(2, '0');
+                document.getElementById('cd-sec').innerText = String(s).padStart(2, '0');
+            }
+            setInterval(update, 1000);
+            update();
+        }
+
+        // Init
+        loadAnnouncements();
+        initCountdown();
+
+
+    </script>
+</body>
+
+</html>
