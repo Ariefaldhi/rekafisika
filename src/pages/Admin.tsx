@@ -169,8 +169,9 @@ export default function Admin() {
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `lkpd/${fileName}`;
 
+      // Menggunakan bucket 'materials'
       const { error: uploadError } = await supabase.storage
-        .from('lkpd')
+        .from('materials')
         .upload(filePath, file);
 
       if (uploadError) {
@@ -178,14 +179,14 @@ export default function Admin() {
       }
 
       const { data: urlData } = supabase.storage
-        .from('lkpd')
+        .from('materials')
         .getPublicUrl(filePath);
 
       setEditingModule(prev => prev ? { ...prev, lkpd_url: urlData.publicUrl } : null);
       alert('Upload berhasil!');
     } catch (error: any) {
       console.error('Upload error:', error);
-      alert(`Gagal upload file: ${error.message}. Pastikan bucket storage 'lkpd' sudah dibuat di Supabase dan diset Public.`);
+      alert(`Gagal upload file: ${error.message}. Pastikan bucket 'materials' sudah Public.`);
     } finally {
       setIsSaving(false);
     }
