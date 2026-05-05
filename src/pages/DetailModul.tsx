@@ -10,6 +10,7 @@ import {
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { marked } from 'marked';
+import { useModal } from '../contexts/ModalContext';
 
 // --- Sub-Components ---
 
@@ -78,6 +79,7 @@ export default function DetailModul() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useModal();
 
   const pathId = searchParams.get('path');
 
@@ -114,8 +116,9 @@ export default function DetailModul() {
         const diff = Date.now() - lastTeacherPulse;
         if (diff > 45000) { // Increased to 45 seconds for better resilience
           setIsSyncing(false);
-          alert('Sesi terputus: Guru meninggalkan kelas atau koneksi bermasalah.');
-          navigate('/home');
+          showAlert({ title: 'Sesi Terputus', message: 'Guru meninggalkan kelas atau koneksi bermasalah.', type: 'error' }).then(() => {
+            navigate('/home');
+          });
         }
       }, 5000);
       return () => clearInterval(watchdog);
@@ -222,8 +225,9 @@ export default function DetailModul() {
 
       if (modError) throw modError;
       if (modData.is_locked && !isTeacher) {
-        alert('Modul ini masih terkunci.');
-        navigate('/home');
+        showAlert({ title: 'Terkunci', message: 'Modul ini masih terkunci.', type: 'alert' }).then(() => {
+          navigate('/home');
+        });
         return;
       }
 
@@ -262,18 +266,30 @@ export default function DetailModul() {
       }
 
       // Load existing answers
-      const { data: existingAnswers } = await supabase
-        .from('reflection_answers')
-        .select('*')
-        .eq('module_id', id)
-        .eq('student_nim', user?.nim);
+      let currentNim = user?.nim;
+      if (!currentNim && saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.groupName && parsed.teachingCode) {
+            currentNim = `guest-${parsed.teachingCode}-${parsed.groupName.replace(/\\s+/g, '_').toLowerCase()}`;
+          }
+        } catch(e) {}
+      }
 
-      if (existingAnswers) {
-        const ansMap: Record<number, any> = {};
-        existingAnswers.forEach(a => {
-          ansMap[a.step_index] = a.answers;
-        });
-        setAnswers(ansMap);
+      if (currentNim) {
+        const { data: existingAnswers } = await supabase
+          .from('reflection_answers')
+          .select('*')
+          .eq('module_id', id)
+          .eq('student_nim', currentNim);
+
+        if (existingAnswers) {
+          const ansMap: Record<number, any> = {};
+          existingAnswers.forEach(a => {
+            ansMap[a.step_index] = a.answers;
+          });
+          setAnswers(ansMap);
+        }
       }
 
       setIsShowingPathReflection(false);
@@ -358,7 +374,7 @@ export default function DetailModul() {
 
   const handleJoin = () => {
     if (!teachingCode || (!isTeacher && (!groupName || !members))) {
-      alert('Silakan lengkapi data pendaftaran.');
+      showAlert({ title: 'Data Belum Lengkap', message: 'Silakan lengkapi data pendaftaran (Kelompok dan Anggota).', type: 'alert' });
       return;
     }
 
@@ -402,7 +418,7 @@ export default function DetailModul() {
 
     if (!data) {
       if (!isTeacher) {
-        alert('Maaf, Guru belum membuka sesi untuk materi ini. Silakan tunggu instruksi guru.');
+        showAlert({ title: 'Sesi Belum Dibuka', message: 'Maaf, Guru belum membuka sesi untuk materi ini. Silakan tunggu instruksi guru di depan kelas.', type: 'alert' });
         // Clean up any stale sync state
         setIsSyncing(false);
         const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
@@ -497,7 +513,10 @@ export default function DetailModul() {
   };
 
   const handleFinishModule = async (auto = false) => {
-    if (!auto && !window.confirm('Selesaikan modul ini?')) return;
+    if (!auto) {
+      const confirmed = await showConfirm({ title: 'Selesaikan Modul', message: 'Apakah Anda yakin ingin menyelesaikan modul ini dan mengirimkan jawaban Anda?' });
+      if (!confirmed) return;
+    }
 
     if (isTeacher) {
       if (pathId && pathData) {
@@ -524,8 +543,9 @@ export default function DetailModul() {
       localStorage.removeItem(sessionKey);
       navigate('/home');
     } else {
+      const currentNim = user?.nim || `guest-${teachingCode}-${groupName.replace(/\\s+/g, '_').toLowerCase()}`;
       await supabase.from('module_progress').upsert({
-        student_nim: user?.nim,
+        student_nim: currentNim,
         module_id: id,
         is_completed: true,
         completed_at: new Date().toISOString()
@@ -545,7 +565,7 @@ export default function DetailModul() {
         }
       }
 
-      alert('Selamat! Anda telah menyelesaikan modul.');
+      await showAlert({ title: 'Modul Selesai!', message: 'Selamat! Anda telah menyelesaikan modul dan jawaban Anda telah terkirim.', type: 'success' });
       navigate('/home');
     }
   };
@@ -553,9 +573,10 @@ export default function DetailModul() {
   const saveAnswers = async (stepIdx: number, stepAnswers: any) => {
     if (isTeacher) return;
     setSaveStatus('Menyimpan...');
+    const currentNim = user?.nim || `guest-${teachingCode}-${groupName.replace(/\\s+/g, '_').toLowerCase()}`;
     try {
       const { error } = await supabase.from('reflection_answers').upsert({
-        student_nim: user?.nim,
+        student_nim: currentNim,
         module_id: id,
         step_index: stepIdx,
         teaching_code: teachingCode,
@@ -574,9 +595,10 @@ export default function DetailModul() {
 
   const savePathReflection = async () => {
     setSaveStatus('Menyimpan Refleksi Akhir...');
+    const currentNim = user?.nim || `guest-${teachingCode}-${groupName.replace(/\\s+/g, '_').toLowerCase()}`;
     try {
       const { error } = await supabase.from('path_reflection_answers').upsert({
-        student_nim: user?.nim,
+        student_nim: currentNim,
         path_id: pathId,
         teaching_code: teachingCode,
         group_name: groupName,
@@ -586,10 +608,10 @@ export default function DetailModul() {
 
       if (error) throw error;
       setSaveStatus('Selesai!');
-      alert('Terima kasih! Seluruh rangkaian ajar telah selesai.');
+      await showAlert({ title: 'Rangkaian Selesai!', message: 'Terima kasih! Seluruh rangkaian ajar telah selesai dan jawaban Anda telah terkirim.', type: 'success' });
       navigate('/home');
     } catch (err) {
-      alert('Gagal menyimpan refleksi rangkaian.');
+      showAlert({ title: 'Gagal', message: 'Gagal menyimpan refleksi rangkaian.', type: 'error' });
     }
   };
 

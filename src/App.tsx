@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
+import { ModalProvider } from './contexts/ModalContext';
 
 // Pages
 import Landing from './pages/Landing';
@@ -26,7 +27,8 @@ const PageLoader = () => (
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ModalProvider>
+        <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* ── Public ── */}
@@ -63,6 +65,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </BrowserRouter>
+      </ModalProvider>
     </AuthProvider>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import type { Module, LearningPath, ModuleStep } from '../lib/supabase';
+import { useModal } from '../contexts/ModalContext';
 
 // --- Types ---
 interface Profile {
@@ -37,6 +38,7 @@ export default function Admin() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
+  const { showAlert, showConfirm } = useModal();
 
   // Data States
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -101,13 +103,16 @@ export default function Admin() {
       if (error) throw error;
       setProfiles(prev => prev.map(p => p.id === userId ? { ...p, role: newRole as any } : p));
     } catch (err) {
-      alert('Gagal update role: ' + (err as any).message);
+      showAlert({ title: 'Gagal', message: 'Gagal update role: ' + (err as any).message, type: 'error' });
     }
   };
 
   // --- Module Management ---
   const handleSaveModule = async () => {
-    if (!editingModule?.topic) return alert('Judul wajib diisi');
+    if (!editingModule?.topic) {
+      showAlert({ title: 'Validasi', message: 'Judul wajib diisi', type: 'alert' });
+      return;
+    }
     setIsSaving(true);
     try {
       const payload = {
@@ -134,19 +139,20 @@ export default function Admin() {
       setEditingModule(null);
       fetchInitialData();
     } catch (err) {
-      alert('Gagal simpan modul: ' + (err as any).message);
+      showAlert({ title: 'Gagal', message: 'Gagal simpan modul: ' + (err as any).message, type: 'error' });
     } finally {
       setIsSaving(false);
     }
   };
 
   const deleteModule = async (id: string) => {
-    if (!confirm('Hapus modul ini secara permanen?')) return;
+    const confirmed = await showConfirm({ title: 'Hapus Modul', message: 'Hapus modul ini secara permanen?' });
+    if (!confirmed) return;
     try {
       await supabase.from('modules').delete().eq('id', id);
       fetchInitialData();
     } catch (err) {
-      alert('Gagal hapus modul');
+      showAlert({ title: 'Gagal', message: 'Gagal hapus modul', type: 'error' });
     }
   };
 
@@ -155,7 +161,7 @@ export default function Admin() {
       await supabase.from('modules').update({ is_locked: !current }).eq('id', id);
       setModules(prev => prev.map(m => m.id === id ? { ...m, is_locked: !current } : m));
     } catch (err) {
-      alert('Gagal update status kunci');
+      showAlert({ title: 'Gagal', message: 'Gagal update status kunci', type: 'error' });
     }
   };
 
@@ -183,10 +189,10 @@ export default function Admin() {
         .getPublicUrl(filePath);
 
       setEditingModule(prev => prev ? { ...prev, lkpd_url: urlData.publicUrl } : null);
-      alert('Upload berhasil!');
+      showAlert({ title: 'Berhasil', message: 'Upload berhasil!', type: 'success' });
     } catch (error: any) {
       console.error('Upload error:', error);
-      alert(`Gagal upload file: ${error.message}. Pastikan bucket 'materials' sudah Public.`);
+      showAlert({ title: 'Gagal', message: `Gagal upload file: ${error.message}. Pastikan bucket 'materials' sudah Public.`, type: 'error' });
     } finally {
       setIsSaving(false);
     }
@@ -194,8 +200,14 @@ export default function Admin() {
 
   // --- Learning Path Management ---
   const handleSavePath = async () => {
-    if (!editingPath?.title) return alert('Judul wajib diisi');
-    if (pathModules.length === 0) return alert('Pilih minimal satu materi');
+    if (!editingPath?.title) {
+      showAlert({ title: 'Validasi', message: 'Judul wajib diisi', type: 'alert' });
+      return;
+    }
+    if (pathModules.length === 0) {
+      showAlert({ title: 'Validasi', message: 'Pilih minimal satu materi', type: 'alert' });
+      return;
+    }
     
     setIsSaving(true);
     try {
@@ -228,19 +240,20 @@ export default function Admin() {
       setPathModules([]);
       fetchInitialData();
     } catch (err) {
-      alert('Gagal simpan rangkaian: ' + (err as any).message);
+      showAlert({ title: 'Gagal', message: 'Gagal simpan rangkaian: ' + (err as any).message, type: 'error' });
     } finally {
       setIsSaving(false);
     }
   };
 
   const deletePath = async (id: string) => {
-    if (!confirm('Hapus rangkaian ajar ini?')) return;
+    const confirmed = await showConfirm({ title: 'Hapus Rangkaian', message: 'Hapus rangkaian ajar ini?' });
+    if (!confirmed) return;
     try {
       await supabase.from('learning_paths').delete().eq('id', id);
       fetchInitialData();
     } catch (err) {
-      alert('Gagal hapus rangkaian');
+      showAlert({ title: 'Gagal', message: 'Gagal hapus rangkaian', type: 'error' });
     }
   };
 
