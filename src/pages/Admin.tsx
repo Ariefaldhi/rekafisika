@@ -159,6 +159,38 @@ export default function Admin() {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsSaving(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `lkpd/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('lkpd')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('lkpd')
+        .getPublicUrl(filePath);
+
+      setEditingModule(prev => prev ? { ...prev, lkpd_url: urlData.publicUrl } : null);
+      alert('Upload berhasil!');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      alert(`Gagal upload file: ${error.message}. Pastikan bucket storage 'lkpd' sudah dibuat di Supabase dan diset Public.`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // --- Learning Path Management ---
   const handleSavePath = async () => {
     if (!editingPath?.title) return alert('Judul wajib diisi');
@@ -572,7 +604,10 @@ export default function Admin() {
                      <input type="text" placeholder="Judul LKPD" value={editingModule.lkpd_title || ''} onChange={e => setEditingModule({...editingModule, lkpd_title: e.target.value})} className="bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
                      <div className="flex gap-2">
                        <input type="text" placeholder="URL LKPD" value={editingModule.lkpd_url || ''} onChange={e => setEditingModule({...editingModule, lkpd_url: e.target.value})} className="flex-1 bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
-                       <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shrink-0"><Upload size={20} /></div>
+                       <label htmlFor="lkpd-upload-input" className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center shrink-0 cursor-pointer transition-colors shadow-lg shadow-blue-500/20">
+                         {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
+                       </label>
+                       <input id="lkpd-upload-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleFileUpload} disabled={isSaving} />
                      </div>
                    </div>
                 </div>
