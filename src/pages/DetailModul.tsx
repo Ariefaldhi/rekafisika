@@ -548,7 +548,7 @@ export default function DetailModul() {
         student_nim: currentNim,
         module_id: id,
         is_completed: true,
-        completed_at: new Date().toISOString()
+        updated_at: new Date().toISOString()
       }, { onConflict: 'student_nim, module_id' });
 
       if (pathId && pathData) {
