@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Lock, ChevronRight, Zap,
-  ChevronDown, GraduationCap, Search, X
+  GraduationCap, Search, X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Module } from '../lib/supabase';
