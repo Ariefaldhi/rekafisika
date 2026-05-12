@@ -124,6 +124,8 @@ export default function Admin() {
         lkpd_title: editingModule.lkpd_title || null,
         is_visible: editingModule.is_visible ?? true,
         is_locked: editingModule.is_locked ?? false,
+        kelas: (editingModule as any).kelas || null,
+        kategori: (editingModule as any).kategori || null,
       };
 
       let error;
@@ -605,6 +607,14 @@ export default function Admin() {
                    <div className="md:col-span-3">
                      <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">JUDUL MODUL</label>
                      <input type="text" value={editingModule.topic} onChange={e => setEditingModule({...editingModule, topic: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-black text-lg outline-none" />
+                   </div>
+                   <div className="md:col-span-2">
+                     <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">KELAS</label>
+                     <input type="text" placeholder="Kelas 12 (SMA/SMK)" value={(editingModule as any).kelas || ''} onChange={e => setEditingModule({...editingModule, ...{ kelas: e.target.value } as any})} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none" />
+                   </div>
+                   <div className="md:col-span-2">
+                     <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">KATEGORI</label>
+                     <input type="text" placeholder="Listrik Dinamis" value={(editingModule as any).kategori || ''} onChange={e => setEditingModule({...editingModule, ...{ kategori: e.target.value } as any})} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none" />
                    </div>
                    <div className="md:col-span-4">
                      <label className="block text-[10px] font-black text-slate-400 mb-2 pl-2">DESKRIPSI</label>

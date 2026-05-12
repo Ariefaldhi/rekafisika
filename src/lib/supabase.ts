@@ -59,6 +59,8 @@ export interface Module {
   steps: ModuleStep[];
   lkpd_url?: string;
   lkpd_title?: string;
+  kelas?: string;    // e.g., "Kelas 12 (SMA/SMK)"
+  kategori?: string; // e.g., "Listrik Dinamis"
   created_at: string;
 }
 
