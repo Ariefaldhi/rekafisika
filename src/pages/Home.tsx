@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  BookOpen, CheckCircle2, Lock, ChevronRight,
-  Route, ChevronDown, Star, Zap
+  BookOpen, Lock, ChevronRight,
+  Route, ChevronDown, Star, Zap, GraduationCap
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import type { Module, ModuleProgress, LearningPath } from '../lib/supabase';
+import type { Module, LearningPath } from '../lib/supabase';
 import logoUrl from '/logo.png';
 
 function getGreeting() {
@@ -18,9 +18,7 @@ function getGreeting() {
   return 'Selamat Malam';
 }
 
-interface ModuleWithProgress extends Module {
-  prog?: ModuleProgress;
-}
+interface ModuleWithProgress extends Module {}
 
 interface GroupedContent {
   kategori: string;
@@ -34,6 +32,7 @@ export default function Home() {
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [activeSession, setActiveSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [kelasDipilihCount, setKelasDipilihCount] = useState(0);
   const [selectedKelas, setSelectedKelas] = useState<string>('');
   const [selectedKategori, setSelectedKategori] = useState<string | null>(null);
 
@@ -45,11 +44,8 @@ export default function Home() {
   async function loadAll() {
     setIsLoading(true);
     try {
-      const [modsRes, progressRes, pathsRes] = await Promise.all([
+      const [modsRes, pathsRes] = await Promise.all([
         supabase.from('modules').select('*').eq('is_visible', true).order('sort_order', { ascending: true }),
-        user
-          ? supabase.from('module_progress').select('*').eq('student_nim', user.nim)
-          : Promise.resolve({ data: [] }),
         supabase
           .from('learning_paths')
           .select('*, learning_path_modules(module_id, order_index)')
@@ -57,16 +53,15 @@ export default function Home() {
       ]);
 
       const mods: Module[] = modsRes.data || [];
-      const progressList: ModuleProgress[] = (progressRes.data as ModuleProgress[]) || [];
       const pathList: LearningPath[] = pathsRes.data || [];
-
-      const progressMap: Record<string, ModuleProgress> = {};
-      progressList.forEach((p) => { progressMap[p.module_id] = p; });
-
-      const enriched: ModuleWithProgress[] = mods.map((m) => ({ ...m, prog: progressMap[m.id] }));
+      const enriched: ModuleWithProgress[] = mods.map((m) => ({ ...m }));
 
       setModules(enriched);
       setPaths(pathList);
+
+      // Hitung jumlah kategori unik
+      const uniqueKategoris = new Set(mods.map((m) => m.kategori).filter(Boolean));
+      setKelasDipilihCount(uniqueKategoris.size);
 
       // Default kelas → first unique value found
       const kelasList = [...new Set(enriched.map((m) => m.kelas).filter(Boolean))] as string[];
@@ -107,8 +102,6 @@ export default function Home() {
   const initials = user?.nama
     ? user.nama.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
     : 'G';
-
-  const completedCount = modules.filter((m) => m.prog?.is_completed).length;
 
   return (
     <div className="bg-slate-50 font-[Inter,sans-serif] min-h-screen w-full pb-28">
@@ -161,13 +154,13 @@ export default function Home() {
               <h1 className="text-3xl lg:text-5xl font-black text-white leading-[1.1] tracking-tight">
                 Halo,{' '}
                 <span className="text-blue-200">
-                  {user?.nama?.split(' ')[0] || 'Teman Belajar'}!
+                  {user?.nama?.split(' ')[0] || 'Pengajar'}!
                 </span>
                 <br />
-                <span className="text-white/90 text-2xl lg:text-3xl font-bold">Siap belajar fisika hari ini?</span>
+                <span className="text-white/90 text-2xl lg:text-3xl font-bold">Siap mengajar hari ini?</span>
               </h1>
               <p className="text-blue-100/70 text-sm lg:text-base leading-relaxed">
-                Platform interaktif fisika untuk pembelajaran sinkron dan mandiri di kelas.
+                Kelola materi, rangkaian ajar, dan sesi kelas interaktif Anda di sini.
               </p>
             </div>
 
@@ -176,7 +169,7 @@ export default function Home() {
               {[
                 { value: modules.length, label: 'Modul', icon: <BookOpen size={16} /> },
                 { value: paths.length, label: 'Rangkaian', icon: <Route size={16} /> },
-                { value: completedCount, label: 'Selesai', icon: <CheckCircle2 size={16} /> },
+                { value: kelasDipilihCount, label: 'Kategori', icon: <GraduationCap size={16} /> },
               ].map((stat) => (
                 <div
                   key={stat.label}
@@ -448,32 +441,17 @@ export default function Home() {
                             className={`group block h-full bg-white p-6 rounded-[2.5rem] border-2 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 flex flex-col ${
                               item.is_locked
                                 ? 'opacity-60 grayscale cursor-not-allowed border-slate-100'
-                                : item.prog?.is_completed
-                                  ? 'border-emerald-100 hover:border-emerald-300 hover:shadow-emerald-100'
-                                  : 'border-transparent hover:border-blue-200'
+                                : 'border-transparent hover:border-blue-200'
                             }`}
                           >
                             <div className="flex items-start justify-between mb-5">
                               <div
-                                className={`w-13 h-13 w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 ${
-                                  item.is_locked
-                                    ? 'bg-slate-100 text-slate-400'
-                                    : item.prog?.is_completed
-                                      ? 'bg-emerald-50 text-emerald-500'
-                                      : 'bg-blue-50 text-blue-500'
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 ${
+                                  item.is_locked ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-500'
                                 }`}
                               >
-                                {item.is_locked
-                                  ? <Lock size={20} />
-                                  : item.prog?.is_completed
-                                    ? <CheckCircle2 size={22} />
-                                    : <BookOpen size={22} />}
+                                {item.is_locked ? <Lock size={20} /> : <BookOpen size={22} />}
                               </div>
-                              {item.prog?.is_completed && (
-                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-widest">
-                                  Selesai
-                                </span>
-                              )}
                             </div>
 
                             <div className="flex-1">
