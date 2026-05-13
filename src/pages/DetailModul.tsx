@@ -11,6 +11,7 @@ import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { marked } from 'marked';
 import { useModal } from '../contexts/ModalContext';
+import ClassroomTools from '../components/ClassroomTools';
 
 // --- Sub-Components ---
 
@@ -1162,6 +1163,16 @@ export default function DetailModul() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
       `}</style>
+
+      {/* ── Classroom Tools: Reactions, Timer, Calculator ── */}
+      <ClassroomTools
+        isTeacher={isTeacher}
+        isSyncing={isSyncing}
+        inWaitingRoom={inWaitingRoom}
+        groupName={groupName}
+        moduleKategori={module?.kategori}
+        channelRef={channelRef}
+      />
     </div>
   );
 }
