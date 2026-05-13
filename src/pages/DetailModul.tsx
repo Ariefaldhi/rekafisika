@@ -110,11 +110,12 @@ export default function DetailModul() {
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
 
   // Student Watchdog for Teacher Presence
+  // Only active after student leaves the waiting room (inWaitingRoom = false)
   useEffect(() => {
-    if (!isTeacher && isSyncing && !isLoading) {
+    if (!isTeacher && isSyncing && !isLoading && !inWaitingRoom) {
       const watchdog = setInterval(() => {
         const diff = Date.now() - lastTeacherPulse;
-        if (diff > 45000) { // Increased to 45 seconds for better resilience
+        if (diff > 60000) { // 60 seconds — generous enough for slow connections
           setIsSyncing(false);
           showAlert({ title: 'Sesi Terputus', message: 'Guru meninggalkan kelas atau koneksi bermasalah.', type: 'error' }).then(() => {
             navigate('/home');
@@ -123,7 +124,7 @@ export default function DetailModul() {
       }, 5000);
       return () => clearInterval(watchdog);
     }
-  }, [isTeacher, isSyncing, lastTeacherPulse, navigate, isLoading]);
+  }, [isTeacher, isSyncing, lastTeacherPulse, navigate, isLoading, inWaitingRoom]);
 
   useEffect(() => {
     fetchData();
@@ -197,22 +198,24 @@ export default function DetailModul() {
   useEffect(() => {
     // Only update DB and broadcast if session is active (isSyncing is true)
     if (isTeacher && module && teachingCode && isSyncing) {
-      updateTeacherState(currentPage, id);
-
-      // Teacher Heartbeat
-      const heartbeat = setInterval(() => {
-        if (channelRef.current) {
-          channelRef.current.send({
-            type: 'broadcast',
-            event: 'teacher_active',
-            payload: { timestamp: Date.now() }
-          });
-        }
-      }, 5000);
-      return () => clearInterval(heartbeat);
+      // Immediately send heartbeat when session becomes active
+      if (channelRef.current) {
+        const sendHeartbeat = () => {
+          if (channelRef.current) {
+            channelRef.current.send({
+              type: 'broadcast',
+              event: 'teacher_active',
+              payload: { timestamp: Date.now() }
+            });
+          }
+        };
+        sendHeartbeat();
+        const heartbeat = setInterval(sendHeartbeat, 8000);
+        return () => clearInterval(heartbeat);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [module, currentPage]);
+  }, [isTeacher, isSyncing, module, teachingCode]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -316,8 +319,8 @@ export default function DetailModul() {
       })
       .on('broadcast', { event: 'teacher_active' }, () => {
         if (!isTeacher) {
+          // Reset pulse timer on every heartbeat received
           setLastTeacherPulse(Date.now());
-          setIsSyncing(true);
         }
       })
       .on('broadcast', { event: 'page_sync' }, ({ payload }) => {
@@ -344,6 +347,11 @@ export default function DetailModul() {
         if (status === 'SUBSCRIBED') {
           console.log('Successfully subscribed to realtime channel');
           setIsSyncing(true);
+          // Reset the teacher pulse timer fresh on subscribe so watchdog
+          // doesn't fire immediately before first heartbeat arrives
+          if (!isTeacher) {
+            setLastTeacherPulse(Date.now());
+          }
           if (!isTeacher) {
             const sendPing = () => {
               if (groupName?.trim()) {
@@ -510,6 +518,14 @@ export default function DetailModul() {
     setInWaitingRoom(false);
     setCurrentPage(1);
     updateTeacherState(1);
+    // Send immediate heartbeat so students know session is live
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'teacher_active',
+        payload: { timestamp: Date.now() }
+      });
+    }
   };
 
   const handleFinishModule = async (auto = false) => {
