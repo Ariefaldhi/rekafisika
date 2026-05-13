@@ -79,7 +79,7 @@ export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, gr
   const [timerStartedAt, setTimerStartedAt] = useState<number | null>(null);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [timerExpanded, setTimerExpanded] = useState(true);
+
 
   // ── Calculator ──────────────────────────────────────────────────
   const [showCalc, setShowCalc] = useState(false);
@@ -105,7 +105,6 @@ export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, gr
           setTimerDuration(payload.duration);
           setTimerRunning(true);
           setShowTimer(true);
-          setTimerExpanded(true);
         } else if (payload.action === 'stop') {
           setTimerRunning(false);
           setShowTimer(false);
