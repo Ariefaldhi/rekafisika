@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { supabase, type Module } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import confetti from 'canvas-confetti';
 import { marked } from 'marked';
 import { useModal } from '../contexts/ModalContext';
 import ClassroomTools from '../components/ClassroomTools';
@@ -497,6 +498,29 @@ export default function DetailModul() {
       console.log('Teacher Sync Success');
     }
   };
+
+  // Celebration on last page for teacher
+  useEffect(() => {
+    if (isTeacher && module?.steps.length && currentPage === module.steps.length) {
+      // Create a sustained confetti celebration
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      const interval: any = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+      }, 250);
+
+      return () => clearInterval(interval);
+    }
+  }, [isTeacher, currentPage, module]);
 
   const handleNext = () => {
     if (!isTeacher) return;

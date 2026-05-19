@@ -25,6 +25,29 @@ function fmt(s: number) {
   return `${m}:${sec}`;
 }
 
+const playReactionSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400 + Math.random() * 400, ctx.currentTime);
+    
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+};
+
 export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, groupName, channelRef }: Props) {
   const visible = isSyncing && !inWaitingRoom;
 
@@ -54,6 +77,7 @@ export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, gr
         // Everyone sees flying emotes!
         const emoji = REACTIONS.find(r => r.key === payload.reaction)?.emoji;
         if (emoji) {
+          playReactionSound();
           const id = Date.now() + Math.random();
           setFlyingEmotes(prev => [...prev, { id, emoji, x: Math.random() * 80 + 10 }]);
           setTimeout(() => {
