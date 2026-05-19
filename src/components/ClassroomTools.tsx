@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, Calculator, X, Play, Pause, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Timer, X, Play, Pause, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 
 
 
@@ -25,7 +25,7 @@ function fmt(s: number) {
   return `${m}:${sec}`;
 }
 
-export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, groupName, moduleKategori, channelRef }: Props) {
+export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, groupName, channelRef }: Props) {
   const visible = isSyncing && !inWaitingRoom;
 
   // ── Reactions ──────────────────────────────────────────────────
@@ -33,6 +33,14 @@ export default function ClassroomTools({ isTeacher, isSyncing, inWaitingRoom, gr
   const [reactions, setReactions] = useState<Record<string, string>>({});
   const [reactionsEnabled, setReactionsEnabled] = useState(false);
   const [flyingEmotes, setFlyingEmotes] = useState<{id: number, emoji: string, x: number}[]>([]);
+  const [showReactionSummary, setShowReactionSummary] = useState(false);
+
+  // ── Timer ───────────────────────────────────────────────────────
+  const [showTimer, setShowTimer] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(120);
+  const [timerStartedAt, setTimerStartedAt] = useState<number | null>(null);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   // Listen to channel broadcasts
   useEffect(() => {

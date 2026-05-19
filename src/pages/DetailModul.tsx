@@ -1210,7 +1210,6 @@ export default function DetailModul() {
         isSyncing={isSyncing}
         inWaitingRoom={inWaitingRoom}
         groupName={groupName}
-        moduleKategori={module?.kategori}
         channelRef={channelRef}
       />
     </div>
