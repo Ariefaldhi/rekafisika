@@ -95,6 +95,7 @@ export default function DetailModul() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showLKPD, setShowLKPD] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'interactive' | 'pdf'>('pdf');
+  const [isLkpdRevealed, setIsLkpdRevealed] = useState(false);
 
   // Registration State
   const [groupName, setGroupName] = useState('');
@@ -1079,7 +1080,46 @@ export default function DetailModul() {
             {/* PDF Tab Content - PERSISTENT */}
             <div className={`absolute inset-0 bg-slate-100 overflow-hidden ${sidebarTab === 'pdf' ? 'block' : 'hidden'}`}>
               {module.lkpd_url ? (
-                <iframe src={module.lkpd_url} className="w-full h-full border-none" title="LKPD Viewer" />
+                <div className="relative w-full h-full">
+                  <iframe 
+                    src={module.lkpd_url} 
+                    className={`w-full h-full border-none transition-all duration-300 ${isTeacher && !isLkpdRevealed ? 'blur-md brightness-50 pointer-events-none' : ''}`} 
+                    title="LKPD Viewer" 
+                  />
+                  {isTeacher && !isLkpdRevealed && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/20 backdrop-blur-sm p-6 text-center">
+                      <div className="w-16 h-16 bg-white/90 rounded-2xl shadow-xl flex items-center justify-center mb-4">
+                        <AlertTriangle className="text-amber-500" size={32} />
+                      </div>
+                      <h4 className="text-lg font-black text-slate-800 drop-shadow-md mb-2">Screen Protector Aktif</h4>
+                      <p className="text-xs font-bold text-slate-700 max-w-sm mb-6 bg-white/70 px-4 py-2 rounded-xl">
+                        Tampilan LKPD disembunyikan agar tidak terbaca oleh siswa di proyektor. Jika Anda melakukan <i>Screen Mirroring</i>, membuka kunci akan menampilkannya di proyektor.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button 
+                          onClick={() => setIsLkpdRevealed(true)}
+                          className="px-6 py-3 bg-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-sm hover:bg-slate-300 transition-all"
+                        >
+                          Buka Kunci di Sini
+                        </button>
+                        <button 
+                          onClick={() => window.open(module.lkpd_url, '_blank', 'width=800,height=600')}
+                          className="px-6 py-3 bg-slate-800 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl hover:bg-slate-700 transition-all"
+                        >
+                          Buka di Jendela Baru (Privasi)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {isTeacher && isLkpdRevealed && (
+                    <button 
+                      onClick={() => setIsLkpdRevealed(false)}
+                      className="absolute top-4 right-4 z-10 px-4 py-2 bg-rose-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg hover:bg-rose-600 transition-all"
+                    >
+                      Tutup Tampilan (Blur)
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-slate-400 text-xs font-bold p-10 text-center">Dokumen LKPD tidak tersedia</div>
               )}
