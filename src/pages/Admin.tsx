@@ -121,6 +121,7 @@ export default function Admin() {
         sort_order: editingModule.sort_order || 1,
         steps: editingModule.steps || [],
         lkpd_url: editingModule.lkpd_url || null,
+        lkpd_guru_url: editingModule.lkpd_guru_url || null,
         lkpd_title: editingModule.lkpd_title || null,
         is_visible: editingModule.is_visible ?? true,
         is_locked: editingModule.is_locked ?? false,
@@ -167,7 +168,7 @@ export default function Admin() {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, targetField: 'lkpd_url' | 'lkpd_guru_url') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -190,7 +191,7 @@ export default function Admin() {
         .from('materials')
         .getPublicUrl(filePath);
 
-      setEditingModule(prev => prev ? { ...prev, lkpd_url: urlData.publicUrl } : null);
+      setEditingModule(prev => prev ? { ...prev, [targetField]: urlData.publicUrl } : null);
       showAlert({ title: 'Berhasil', message: 'Upload berhasil!', type: 'success' });
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -623,15 +624,36 @@ export default function Admin() {
                 </div>
 
                 <div className="bg-blue-50/50 p-8 rounded-[2.5rem] border border-blue-100/50 space-y-6">
-                   <h4 className="flex items-center gap-3 text-blue-700 font-black uppercase tracking-widest text-xs"><FileText size={18} /> LKPD SETTINGS</h4>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <input type="text" placeholder="Judul LKPD" value={editingModule.lkpd_title || ''} onChange={e => setEditingModule({...editingModule, lkpd_title: e.target.value})} className="bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
-                     <div className="flex gap-2">
-                       <input type="text" placeholder="URL LKPD" value={editingModule.lkpd_url || ''} onChange={e => setEditingModule({...editingModule, lkpd_url: e.target.value})} className="flex-1 bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
-                       <label htmlFor="lkpd-upload-input" className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center shrink-0 cursor-pointer transition-colors shadow-lg shadow-blue-500/20">
-                         {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-                       </label>
-                       <input id="lkpd-upload-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleFileUpload} disabled={isSaving} />
+                   <h4 className="flex items-center gap-3 text-blue-700 font-black uppercase tracking-widest text-xs"><FileText size={18} /> PENGATURAN LKPD (WORKSHEET)</h4>
+                   
+                   <div className="space-y-4">
+                     <label className="block text-[10px] font-black text-slate-400 pl-2">JUDUL LKPD</label>
+                     <input type="text" placeholder="Masukkan Judul LKPD..." value={editingModule.lkpd_title || ''} onChange={e => setEditingModule({...editingModule, lkpd_title: e.target.value})} className="w-full bg-white border border-blue-100 rounded-2xl px-6 py-4 text-sm font-bold" />
+                   </div>
+
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-black text-slate-400 pl-2">LKPD UNTUK SISWA</label>
+                       <div className="flex gap-2">
+                         <input type="text" placeholder="URL LKPD Siswa" value={editingModule.lkpd_url || ''} onChange={e => setEditingModule({...editingModule, lkpd_url: e.target.value})} className="flex-1 bg-white border border-blue-100 rounded-2xl px-4 py-4 text-xs font-mono text-blue-600" />
+                         <label htmlFor="lkpd-siswa-upload" className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center shrink-0 cursor-pointer transition-colors shadow-lg shadow-blue-500/20">
+                           {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                         </label>
+                         <input id="lkpd-siswa-upload" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => handleFileUpload(e, 'lkpd_url')} disabled={isSaving} />
+                       </div>
+                       <p className="text-[9px] font-bold text-slate-400 pl-2">Berisi pertanyaan/tabel kosong (tanpa kunci)</p>
+                     </div>
+
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-black text-slate-400 pl-2">LKPD UNTUK GURU (KUNCI)</label>
+                       <div className="flex gap-2">
+                         <input type="text" placeholder="URL LKPD Guru" value={editingModule.lkpd_guru_url || ''} onChange={e => setEditingModule({...editingModule, lkpd_guru_url: e.target.value})} className="flex-1 bg-white border border-blue-100 rounded-2xl px-4 py-4 text-xs font-mono text-blue-600" />
+                         <label htmlFor="lkpd-guru-upload" className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center shrink-0 cursor-pointer transition-colors shadow-lg shadow-blue-500/20">
+                           {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                         </label>
+                         <input id="lkpd-guru-upload" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => handleFileUpload(e, 'lkpd_guru_url')} disabled={isSaving} />
+                       </div>
+                       <p className="text-[9px] font-bold text-slate-400 pl-2">Berisi panduan guru & kunci jawaban</p>
                      </div>
                    </div>
                 </div>

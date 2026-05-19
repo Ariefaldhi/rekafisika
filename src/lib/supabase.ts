@@ -58,6 +58,7 @@ export interface Module {
   is_locked: boolean;
   steps: ModuleStep[];
   lkpd_url?: string;
+  lkpd_guru_url?: string;
   lkpd_title?: string;
   kelas?: string;    // e.g., "Kelas 12 (SMA/SMK)"
   kategori?: string; // e.g., "Listrik Dinamis"

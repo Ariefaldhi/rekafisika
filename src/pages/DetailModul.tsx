@@ -1079,10 +1079,10 @@ export default function DetailModul() {
 
             {/* PDF Tab Content - PERSISTENT */}
             <div className={`absolute inset-0 bg-slate-100 overflow-hidden ${sidebarTab === 'pdf' ? 'block' : 'hidden'}`}>
-              {module.lkpd_url ? (
+              {(isTeacher ? (module.lkpd_guru_url || module.lkpd_url) : module.lkpd_url) ? (
                 <div className="relative w-full h-full">
                   <iframe 
-                    src={module.lkpd_url} 
+                    src={isTeacher ? (module.lkpd_guru_url || module.lkpd_url) : module.lkpd_url} 
                     className={`w-full h-full border-none transition-all duration-300 ${isTeacher && !isLkpdRevealed ? 'blur-md brightness-50 pointer-events-none' : ''}`} 
                     title="LKPD Viewer" 
                   />
@@ -1103,7 +1103,7 @@ export default function DetailModul() {
                           Buka Kunci di Sini
                         </button>
                         <button 
-                          onClick={() => window.open(module.lkpd_url, '_blank', 'width=800,height=600')}
+                          onClick={() => window.open((module.lkpd_guru_url || module.lkpd_url), '_blank', 'width=800,height=600')}
                           className="px-6 py-3 bg-slate-800 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl hover:bg-slate-700 transition-all"
                         >
                           Buka di Jendela Baru (Privasi)
