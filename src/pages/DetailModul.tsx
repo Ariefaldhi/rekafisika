@@ -1013,6 +1013,44 @@ export default function DetailModul() {
                         </div>
                       )}
 
+                      {/* Dynamic Items (Images & Questions) */}
+                      {keg.items && keg.items.length > 0 && (
+                        <div className="space-y-6 pl-4 border-l-2 border-slate-100 mt-6">
+                          {keg.items.map((item: any, iIdx: number) => (
+                            <div key={item.id} className="relative">
+                               {item.type === 'image' ? (
+                                  <div className="rounded-[2rem] overflow-hidden border border-slate-200 shadow-sm bg-white p-2">
+                                     <img src={item.content} alt={`Lampiran ${iIdx}`} className="w-full h-auto object-contain rounded-[1.5rem]" style={{ maxHeight: '400px' }} />
+                                  </div>
+                               ) : (
+                                  <div className="bg-white p-6 rounded-3xl border border-blue-100 shadow-sm space-y-4">
+                                    <div className="flex items-start gap-3">
+                                      <div className="w-6 h-6 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs shadow-sm shadow-blue-500/20">?</div>
+                                      <p className="text-sm font-bold text-slate-800 leading-relaxed pt-0.5">{item.content}</p>
+                                    </div>
+                                    <textarea
+                                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 placeholder:font-normal"
+                                      rows={3}
+                                      placeholder="Ketik jawaban Anda di sini..."
+                                      value={answers[currentPage]?.kegiatan?.[kIdx]?.items?.[iIdx] || ''}
+                                      onChange={(e) => {
+                                        const newAns = { ...answers };
+                                        if (!newAns[currentPage]) newAns[currentPage] = { kegiatan: [] };
+                                        if (!newAns[currentPage].kegiatan[kIdx]) newAns[currentPage].kegiatan[kIdx] = { questions: [], tables: [], items: [] };
+                                        if (!newAns[currentPage].kegiatan[kIdx].items) newAns[currentPage].kegiatan[kIdx].items = [];
+                                        newAns[currentPage].kegiatan[kIdx].items[iIdx] = e.target.value;
+                                        setAnswers(newAns);
+                                      }}
+                                      onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                      disabled={isTeacher}
+                                    />
+                                  </div>
+                               )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       {/* Tables in Activity */}
                       {keg.tables && keg.tables.length > 0 && (
                         <div className="space-y-6 pl-4 border-l-2 border-slate-100">
@@ -1180,6 +1218,53 @@ export default function DetailModul() {
                     <PDFViewer url={currentStep.url} startPage={currentStep.start_page} endPage={currentStep.end_page} />
                   )}
                   {currentStep.type === 'video' && <VideoViewer url={currentStep.url} startTime={currentStep.start_time} endTime={currentStep.end_time} isTeacher={isTeacher} />}
+                  {currentStep.type === 'peran' && (
+                    <div className="w-full h-full flex-1 overflow-y-auto custom-scrollbar p-8 space-y-6 bg-slate-100">
+                      <div className="text-center max-w-3xl mx-auto space-y-4 mb-10 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                         <h3 className="text-2xl font-black text-slate-800">A. Pembagian Peran Tim Berbasis Kolaborasi</h3>
+                         <p className="text-sm font-medium text-slate-600 leading-relaxed">
+                            Kerja sama tim adalah kunci utama keberhasilan eksperimen ini. Agar seluruh proses berjalan lancar dan semua anggota kelompok dapat memahami materi secara merata, tentukan peran spesifik untuk setiap orang sebelum memulai. Jika kelompok kalian hanya berisi tiga atau empat orang, satu anggota dapat memegang dua peran sekaligus.
+                         </p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto pb-10">
+                         {[
+                           { title: 'Operator Simulasi', desc: 'Bertanggung jawab penuh merakit sirkuit, memindahkan komponen, dan menggunakan alat ukur pada layar simulasi.' },
+                           { title: 'Pencatat Data', desc: 'Bertugas mengamati angka yang muncul pada alat ukur dan memasukkan data ukur tersebut secara presisi ke dalam tabel.' },
+                           { title: 'Analis Konsep', desc: 'Bertugas memimpin diskusi kelompok setiap kali menemui pertanyaan analisis dan mengaitkan angka dengan teori.' },
+                           { title: 'Verifikator', desc: 'Bertugas memeriksa ulang kebenaran rakitan sirkuit sang operator, ketepatan penulisan sang pencatat, dan fokus kelompok.' },
+                           { title: 'Fasilitator Diskusi', desc: 'Menjaga alur waktu pengerjaan agar tidak terlambat dan memandu sesi berbagi pemahaman secara lisan pada akhir kegiatan.' }
+                         ].map((role, idx) => (
+                            <div key={idx} className="bg-white p-6 rounded-3xl border-2 border-slate-200 shadow-sm space-y-4 hover:border-blue-300 hover:shadow-md transition-all group">
+                               <div className="flex items-start gap-4">
+                                  <div className="w-12 h-12 shrink-0 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">{idx + 1}</div>
+                                  <div>
+                                    <h4 className="text-lg font-black text-slate-800 leading-tight mb-1">{role.title}</h4>
+                                    <p className="text-[11px] font-bold text-slate-500 leading-relaxed">{role.desc}</p>
+                                  </div>
+                               </div>
+                               <div className="pt-4 border-t border-slate-100">
+                                  <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 pl-2">Nama Siswa Bertugas:</label>
+                                  <input 
+                                    type="text" 
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-black text-slate-700 outline-none focus:border-blue-400 focus:bg-white focus:shadow-sm transition-all"
+                                    placeholder="Ketik nama di sini..."
+                                    value={answers[currentPage]?.peran?.[idx] || ''}
+                                    onChange={(e) => {
+                                      const newAns = { ...answers };
+                                      if (!newAns[currentPage]) newAns[currentPage] = {};
+                                      if (!newAns[currentPage].peran) newAns[currentPage].peran = [];
+                                      newAns[currentPage].peran[idx] = e.target.value;
+                                      setAnswers(newAns);
+                                    }}
+                                    onBlur={() => saveAnswers(currentPage, answers[currentPage])}
+                                    disabled={isTeacher}
+                                  />
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                    </div>
+                  )}
                   {currentStep.type === 'phet' && (
                     <div className="w-full rounded-[3rem] overflow-hidden border border-slate-200 shadow-2xl flex-1 min-h-[500px] bg-white">
                       <iframe src={currentStep.url} className="w-full h-full" allowFullScreen />

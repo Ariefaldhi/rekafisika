@@ -201,6 +201,44 @@ export default function Admin() {
     }
   };
 
+  const handleItemImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, sIdx: number, kIdx: number, iIdx: number) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsSaving(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `item_${Date.now()}.${fileExt}`;
+      const filePath = `lkpd/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('materials')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('materials')
+        .getPublicUrl(filePath);
+
+      setEditingModule(prev => {
+        if (!prev) return prev;
+        const newSteps = [...(prev.steps || [])];
+        const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+        if (targetKeg && targetKeg.items) {
+           targetKeg.items[iIdx].content = urlData.publicUrl;
+        }
+        return { ...prev, steps: newSteps };
+      });
+      showAlert({ title: 'Berhasil', message: 'Gambar berhasil diupload!', type: 'success' });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      showAlert({ title: 'Gagal', message: `Gagal upload gambar: ${error.message}`, type: 'error' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // --- Learning Path Management ---
   const handleSavePath = async () => {
     if (!editingPath?.title) {
@@ -696,6 +734,7 @@ export default function Admin() {
                                   <option value="phet">PhET Simulasi</option>
                                   <option value="refleksi">Refleksi</option>
                                   <option value="link">External Link</option>
+                                  <option value="peran">Pembagian Peran</option>
                                 </select>
                               </div>
                               <div className="md:col-span-3">
@@ -729,7 +768,7 @@ export default function Admin() {
                                     const targetStep = newSteps[sIdx];
                                     if (targetStep) {
                                       if (!targetStep.kegiatan) targetStep.kegiatan = [];
-                                      targetStep.kegiatan.push({ title: 'Kegiatan Baru', questions: [], tables: [] });
+                                      targetStep.kegiatan.push({ title: 'Kegiatan Baru', items: [], questions: [], tables: [] });
                                       setEditingModule({...editingModule, steps: newSteps});
                                     }
                                   }}
@@ -771,15 +810,17 @@ export default function Admin() {
                                       </div>
 
                                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                         {/* Questions in Activity */}
+                                         {/* Items (Questions & Images) in Activity */}
                                          <div className="space-y-4">
                                             <div className="flex items-center gap-3">
                                                <Edit3 className="text-blue-400" size={16} />
-                                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pertanyaan Isian</p>
+                                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Konten Isian & Gambar</p>
                                             </div>
-                                            <div className="space-y-3">
+                                            <div className="space-y-4">
+                                               {/* Legacy Questions rendering */}
                                                {(keg.questions || []).map((q: string, qIdx: number) => (
-                                                 <div key={qIdx} className="flex gap-2">
+                                                 <div key={`legacy_${qIdx}`} className="flex gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
+                                                    <span className="text-xs text-orange-600 font-bold w-12 pt-2">Legacy</span>
                                                     <input 
                                                       type="text" 
                                                       value={q}
@@ -792,7 +833,6 @@ export default function Admin() {
                                                         }
                                                       }}
                                                       className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs"
-                                                      placeholder={`Pertanyaan ${qIdx + 1}`}
                                                     />
                                                     <button onClick={() => {
                                                        const newSteps = [...(editingModule.steps || [])];
@@ -801,18 +841,94 @@ export default function Admin() {
                                                           targetKeg.questions = targetKeg.questions.filter((_, i) => i !== qIdx);
                                                           setEditingModule({...editingModule, steps: newSteps});
                                                        }
-                                                    }} className="text-rose-300"><Trash2 size={14}/></button>
+                                                    }} className="text-rose-400"><Trash2 size={14}/></button>
                                                  </div>
                                                ))}
-                                               <button onClick={() => {
-                                                  const newSteps = [...(editingModule.steps || [])];
-                                                  const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
-                                                  if (targetKeg) {
-                                                    if (!targetKeg.questions) targetKeg.questions = [];
-                                                    targetKeg.questions.push('');
-                                                    setEditingModule({...editingModule, steps: newSteps});
-                                                  }
-                                               }} className="w-full py-3 bg-white border border-slate-200 border-dashed rounded-xl text-[9px] font-black text-blue-500 uppercase tracking-widest">+ Isian Baru</button>
+
+                                               {/* New Dynamic Items */}
+                                               {(keg.items || []).map((item: any, iIdx: number) => (
+                                                 <div key={item.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative">
+                                                    <button onClick={() => {
+                                                        const newSteps = [...(editingModule.steps || [])];
+                                                        const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                        if (targetKeg && targetKeg.items) {
+                                                           targetKeg.items = targetKeg.items.filter((_, i) => i !== iIdx);
+                                                           setEditingModule({...editingModule, steps: newSteps});
+                                                        }
+                                                    }} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><X size={12}/></button>
+                                                    
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                       <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[9px] font-black uppercase tracking-widest">{item.type}</span>
+                                                    </div>
+
+                                                    {item.type === 'question' ? (
+                                                       <textarea 
+                                                         value={item.content}
+                                                         onChange={e => {
+                                                           const newSteps = [...(editingModule.steps || [])];
+                                                           const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                           if (targetKeg && targetKeg.items) {
+                                                             targetKeg.items[iIdx].content = e.target.value;
+                                                             setEditingModule({...editingModule, steps: newSteps});
+                                                           }
+                                                         }}
+                                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                                         placeholder="Tulis instruksi / pertanyaan di sini..."
+                                                         rows={2}
+                                                       />
+                                                    ) : (
+                                                       <div className="space-y-3">
+                                                          {item.content ? (
+                                                            <div className="relative rounded-xl overflow-hidden border border-slate-200">
+                                                               <img src={item.content} alt="Preview" className="w-full h-auto object-contain bg-slate-50" style={{ maxHeight: '200px' }} />
+                                                            </div>
+                                                          ) : null}
+                                                          <div className="flex gap-2">
+                                                            <input 
+                                                              type="text" 
+                                                              value={item.content || ''}
+                                                              onChange={e => {
+                                                                const newSteps = [...(editingModule.steps || [])];
+                                                                const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                                if (targetKeg && targetKeg.items) {
+                                                                  targetKeg.items[iIdx].content = e.target.value;
+                                                                  setEditingModule({...editingModule, steps: newSteps});
+                                                                }
+                                                              }}
+                                                              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none"
+                                                              placeholder="URL Gambar"
+                                                            />
+                                                            <label className="px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-black text-[10px] uppercase cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-center">
+                                                              <Upload size={14} className="mr-1" /> UPLOAD
+                                                              <input type="file" accept="image/*" className="hidden" onChange={e => handleItemImageUpload(e, sIdx, kIdx, iIdx)} disabled={isSaving} />
+                                                            </label>
+                                                          </div>
+                                                       </div>
+                                                    )}
+                                                 </div>
+                                               ))}
+
+                                               <div className="flex gap-2 pt-2">
+                                                 <button onClick={() => {
+                                                    const newSteps = [...(editingModule.steps || [])];
+                                                    const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                    if (targetKeg) {
+                                                      if (!targetKeg.items) targetKeg.items = [];
+                                                      targetKeg.items.push({ id: Math.random().toString(36).substr(2, 9), type: 'question', content: '' });
+                                                      setEditingModule({...editingModule, steps: newSteps});
+                                                    }
+                                                 }} className="flex-1 py-3 bg-white border border-slate-200 border-dashed rounded-xl text-[9px] font-black text-blue-500 uppercase tracking-widest hover:border-blue-300 hover:bg-blue-50 transition-all">+ Teks Pertanyaan</button>
+                                                 
+                                                 <button onClick={() => {
+                                                    const newSteps = [...(editingModule.steps || [])];
+                                                    const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                    if (targetKeg) {
+                                                      if (!targetKeg.items) targetKeg.items = [];
+                                                      targetKeg.items.push({ id: Math.random().toString(36).substr(2, 9), type: 'image', content: '' });
+                                                      setEditingModule({...editingModule, steps: newSteps});
+                                                    }
+                                                 }} className="flex-1 py-3 bg-white border border-slate-200 border-dashed rounded-xl text-[9px] font-black text-emerald-500 uppercase tracking-widest hover:border-emerald-300 hover:bg-emerald-50 transition-all">+ Tambah Gambar</button>
+                                               </div>
                                             </div>
                                          </div>
 

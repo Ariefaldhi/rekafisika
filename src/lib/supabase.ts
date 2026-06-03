@@ -25,14 +25,21 @@ export interface UserSession {
   created_at?: string;
 }
 
+export interface KegiatanItem {
+  id: string;
+  type: 'image' | 'question';
+  content: string; // URL for image, question text for question
+}
+
 export interface Kegiatan {
   title: string;
   questions?: string[];
   tables?: { title: string; columns: string[]; rows: number }[];
+  items?: KegiatanItem[];
 }
 
 export interface ModuleStep {
-  type: 'ppt' | 'pdf' | 'video' | 'phet' | 'refleksi' | 'link';
+  type: 'ppt' | 'pdf' | 'video' | 'phet' | 'refleksi' | 'link' | 'peran';
   title: string;
   url: string;
   instruction?: string;
