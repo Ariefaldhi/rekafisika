@@ -27,6 +27,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [regRole, setRegRole] = useState<'teacher' | 'student'>('student');
   const [guestCode, setGuestCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,9 +36,9 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { login, user } = useAuth();
 
-  // Redirect if already logged in (Teacher/Admin only)
+  // Redirect if already logged in
   useEffect(() => {
-    if (user && !user.is_guest && user.role !== 'student') {
+    if (user && !user.is_guest) {
       navigate(user.role === 'admin' ? '/admin' : '/home', { replace: true });
     }
   }, [user, navigate]);
@@ -105,7 +106,7 @@ export default function Login() {
         const { data, error: authErr } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { nama: name, role: 'teacher' } },
+          options: { data: { nama: name, role: regRole } },
         });
 
         if (authErr) {
@@ -115,19 +116,19 @@ export default function Login() {
         }
         if (!data.user) throw new Error('Registrasi gagal.');
 
-        const teachingCode = generateTeachingCode();
+        const teachingCode = regRole === 'teacher' ? generateTeachingCode() : null;
         const userEmail = data.user.email!;
         const userId = data.user.id;
 
         await supabase.from('students').upsert([{
-          nim: userEmail, name, role: 'teacher', access_code: null, teaching_code: teachingCode,
+          nim: userEmail, name, role: regRole, access_code: null, teaching_code: teachingCode,
         }], { onConflict: 'nim' });
 
         await supabase.from('profiles').upsert([{
-          id: userId, nim: userEmail, nama: name, role: 'teacher', teaching_code: teachingCode,
+          id: userId, nim: userEmail, nama: name, role: regRole, teaching_code: teachingCode,
         }], { onConflict: 'id' });
 
-        login({ role: 'teacher', nama: name, nim: userEmail, email: userEmail, teaching_code: teachingCode });
+        login({ role: regRole, nama: name, nim: userEmail, email: userEmail, teaching_code: teachingCode });
         navigate('/home', { replace: true });
       }
     } catch (err: unknown) {
@@ -245,8 +246,16 @@ export default function Login() {
             ) : (
               <motion.div key="email-pass" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
                 {mode === 'register' && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Nama Lengkap</label>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Mendaftar Sebagai</label>
+                      <div className="flex gap-4">
+                        <button type="button" onClick={() => setRegRole('student')} className={`flex-1 py-3 rounded-xl border-2 font-bold transition-all ${regRole === 'student' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>Siswa</button>
+                        <button type="button" onClick={() => setRegRole('teacher')} className={`flex-1 py-3 rounded-xl border-2 font-bold transition-all ${regRole === 'teacher' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>Guru</button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-2">Nama Lengkap</label>
                     <div className="relative">
                       <User size={16} className="absolute left-4 top-3.5 text-slate-400" />
                       <input
@@ -258,6 +267,7 @@ export default function Login() {
                         placeholder="Contoh: Budi Santoso"
                       />
                     </div>
+                  </div>
                   </div>
                 )}
 

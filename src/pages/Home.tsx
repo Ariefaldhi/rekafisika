@@ -154,13 +154,15 @@ export default function Home() {
               <h1 className="text-3xl lg:text-5xl font-black text-white leading-[1.1] tracking-tight">
                 Halo,{' '}
                 <span className="text-blue-200">
-                  {user?.nama?.split(' ')[0] || 'Pengajar'}!
+                  {user?.nama?.split(' ')[0] || (user?.role === 'student' ? 'Siswa' : 'Pengajar')}!
                 </span>
                 <br />
-                <span className="text-white/90 text-2xl lg:text-3xl font-bold">Siap mengajar hari ini?</span>
+                <span className="text-white/90 text-2xl lg:text-3xl font-bold">Siap {user?.role === 'student' ? 'belajar' : 'mengajar'} hari ini?</span>
               </h1>
               <p className="text-blue-100/70 text-sm lg:text-base leading-relaxed">
-                Kelola materi, rangkaian ajar, dan sesi kelas interaktif Anda di sini.
+                {user?.role === 'student' 
+                  ? 'Pilih materi dan rangkaian ajar untuk mulai belajar mandiri.' 
+                  : 'Kelola materi, rangkaian ajar, dan sesi kelas interaktif Anda di sini.'}
               </p>
             </div>
 

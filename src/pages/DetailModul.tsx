@@ -102,6 +102,7 @@ export default function DetailModul() {
   const [groupName, setGroupName] = useState('');
   const [members, setMembers] = useState('');
   const [teachingCode, setTeachingCode] = useState('');
+  const [isIndependentStudent, setIsIndependentStudent] = useState(false);
 
   // Answers State
   const [answers, setAnswers] = useState<Record<number, any>>({});
@@ -115,7 +116,7 @@ export default function DetailModul() {
   // Student Watchdog for Teacher Presence
   // Only active after student leaves the waiting room (inWaitingRoom = false)
   useEffect(() => {
-    if (!isTeacher && isSyncing && !isLoading && !inWaitingRoom) {
+    if (!isTeacher && !isIndependentStudent && isSyncing && !isLoading && !inWaitingRoom) {
       const watchdog = setInterval(() => {
         const diff = Date.now() - lastTeacherPulse;
         if (diff > 60000) { // 60 seconds — generous enough for slow connections
@@ -133,6 +134,17 @@ export default function DetailModul() {
     fetchData();
 
     const codeFromUrl = searchParams.get('code');
+    const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
+    const saved = localStorage.getItem(sessionKey);
+    let parsedSaved = saved ? JSON.parse(saved) : null;
+    
+    // Determine Independent Student Mode
+    const isIndy = user?.role === 'student' && !codeFromUrl && (!parsedSaved || !parsedSaved.teachingCode);
+    if (isIndy) {
+       setIsIndependentStudent(true);
+       setInWaitingRoom(false);
+    }
+
     if (codeFromUrl) {
       const cleanCode = codeFromUrl.toUpperCase();
       setTeachingCode(cleanCode);
@@ -149,14 +161,11 @@ export default function DetailModul() {
       setTeachingCode(user.teaching_code.trim().toUpperCase());
     }
 
-    const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
-    const saved = localStorage.getItem(sessionKey);
-
-    if (saved) {
+    if (saved && !isIndy) {
       const parsed = JSON.parse(saved);
       setGroupName(parsed.groupName);
       setMembers(parsed.members);
-      if (!isTeacher) {
+      if (!isTeacher && parsed.teachingCode) {
         setTeachingCode(parsed.teachingCode.trim().toUpperCase());
       }
 
@@ -259,12 +268,20 @@ export default function DetailModul() {
 
       const sessionKey = pathId ? `rekafisika_path_${pathId}` : `rekafisika_session_${id}`;
       const saved = localStorage.getItem(sessionKey);
+      let parsedSaved = saved ? JSON.parse(saved) : null;
+      
+      const codeFromUrl = searchParams.get('code');
+      const isIndy = user?.role === 'student' && !codeFromUrl && (!parsedSaved || !parsedSaved.teachingCode);
+      
+      if (isIndy) {
+         finalSteps = finalSteps.filter((s: any) => s.type !== 'peran');
+      }
 
       setModule({ ...modData, steps: finalSteps });
 
       // Only skip to Page 1 if it's a path, we have a saved session, 
       // AND it's NOT the first module in the path (to allow registration)
-      if (pathId && saved && !isFirstModule) {
+      if (pathId && saved && !isFirstModule && !isIndy) {
         setCurrentPage(1);
         setInWaitingRoom(false);
       } else {
@@ -621,8 +638,8 @@ export default function DetailModul() {
         student_nim: currentNim,
         module_id: id,
         step_index: stepIdx,
-        teaching_code: teachingCode,
-        group_name: groupName,
+        teaching_code: teachingCode || 'mandiri',
+        group_name: groupName || 'mandiri',
         answers: stepAnswers,
         updated_at: new Date().toISOString()
       }, { onConflict: 'student_nim, module_id, step_index' });
@@ -642,8 +659,8 @@ export default function DetailModul() {
       const { error } = await supabase.from('path_reflection_answers').upsert({
         student_nim: currentNim,
         path_id: pathId,
-        teaching_code: teachingCode,
-        group_name: groupName,
+        teaching_code: teachingCode || 'mandiri',
+        group_name: groupName || 'mandiri',
         answers: pathReflectionAnswers,
         updated_at: new Date().toISOString()
       }, { onConflict: 'student_nim, path_id' });
@@ -867,6 +884,20 @@ export default function DetailModul() {
                         )}
                       </div>
                       <button onClick={handleStartSession} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all">Mulai Sesi Pembelajaran</button>
+                    </div>
+                  ) : isIndependentStudent ? (
+                    <div className="text-center py-12 space-y-8">
+                      <div className="relative">
+                        <Book className="text-blue-400 mx-auto opacity-20" size={100} />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Book className="text-blue-500" size={48} />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-black text-slate-800">Siap Memulai?</h3>
+                        <p className="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">Klik tombol di bawah untuk memulai pembelajaran mandiri Anda.</p>
+                      </div>
+                      <button onClick={() => { setCurrentPage(1); setInWaitingRoom(false); }} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all">Mulai Belajar Mandiri</button>
                     </div>
                   ) : (
                     <div className="text-center py-12 space-y-8">
@@ -1292,16 +1323,16 @@ export default function DetailModul() {
       {/* Footer Navigation */}
       <div id="step-nav-container" className="fixed bottom-0 left-0 w-full px-6 pb-6 pt-10 pointer-events-none z-50">
         <div className={`max-w-4xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200 p-4 shadow-2xl rounded-3xl pointer-events-auto flex items-center justify-between gap-4 transition-all duration-300 ${showLKPD ? 'lg:translate-x-[16rem]' : ''}`}>
-          <button onClick={handlePrev} disabled={!isTeacher || currentPage <= 1} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 disabled:opacity-30">
+          <button onClick={handlePrev} disabled={!(isTeacher || isIndependentStudent) || currentPage <= 1} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold bg-slate-100 text-slate-500 disabled:opacity-30">
             <ChevronLeft size={20} /> <span className="hidden sm:inline">Sebelumnya</span>
           </button>
 
           <div className="flex-1 text-center">
             <p className="text-sm font-bold text-slate-700">{currentPage} / {module.steps.length}</p>
-            {!isTeacher && <div className="text-[9px] text-blue-500 font-bold uppercase animate-pulse mt-1">Layar Terkendali Guru</div>}
+            {!isTeacher && !isIndependentStudent && <div className="text-[9px] text-blue-500 font-bold uppercase animate-pulse mt-1">Layar Terkendali Guru</div>}
           </div>
 
-          <button onClick={currentPage === module.steps.length ? () => handleFinishModule() : handleNext} disabled={!isTeacher} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-white shadow-lg ${currentPage === module.steps.length ? 'bg-emerald-500' : 'bg-blue-600'} disabled:opacity-50`}>
+          <button onClick={currentPage === module.steps.length ? () => handleFinishModule() : handleNext} disabled={!(isTeacher || isIndependentStudent)} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-white shadow-lg ${currentPage === module.steps.length ? 'bg-emerald-500' : 'bg-blue-600'} disabled:opacity-50`}>
             <span>{currentPage === module.steps.length ? (pathId ? 'Lanjut Rangkaian' : 'Selesai') : 'Selanjutnya'}</span>
             <ChevronRight size={20} />
           </button>
