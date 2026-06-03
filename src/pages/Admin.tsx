@@ -707,9 +707,27 @@ export default function Admin() {
                    <div className="space-y-12">
                       {editingModule.steps?.map((step: any, sIdx) => (
                         <div key={sIdx} className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 space-y-8 relative shadow-sm">
-                           <div className="absolute top-6 right-6 flex items-center gap-3">
-                              <span className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm">{sIdx + 1}</span>
-                              <button onClick={() => setEditingModule({...editingModule, steps: editingModule.steps?.filter((_, i) => i !== sIdx)})} className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-100 transition-colors"><Trash2 size={18} /></button>
+                           <div className="absolute top-6 right-6 flex items-center gap-2">
+                              {sIdx > 0 && (
+                                <button onClick={() => {
+                                   const newSteps = [...(editingModule.steps || [])];
+                                   const temp = newSteps[sIdx - 1];
+                                   newSteps[sIdx - 1] = newSteps[sIdx];
+                                   newSteps[sIdx] = temp;
+                                   setEditingModule({...editingModule, steps: newSteps});
+                                }} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors" title="Pindah ke Atas"><ArrowUp size={18} /></button>
+                              )}
+                              {sIdx < (editingModule.steps?.length || 0) - 1 && (
+                                <button onClick={() => {
+                                   const newSteps = [...(editingModule.steps || [])];
+                                   const temp = newSteps[sIdx + 1];
+                                   newSteps[sIdx + 1] = newSteps[sIdx];
+                                   newSteps[sIdx] = temp;
+                                   setEditingModule({...editingModule, steps: newSteps});
+                                }} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors" title="Pindah ke Bawah"><ArrowDown size={18} /></button>
+                              )}
+                              <span className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm ml-2">{sIdx + 1}</span>
+                              <button onClick={() => setEditingModule({...editingModule, steps: editingModule.steps?.filter((_, i) => i !== sIdx)})} className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-100 transition-colors" title="Hapus Langkah"><Trash2 size={18} /></button>
                            </div>
 
                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -848,14 +866,40 @@ export default function Admin() {
                                                {/* New Dynamic Items */}
                                                {(keg.items || []).map((item: any, iIdx: number) => (
                                                  <div key={item.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative">
-                                                    <button onClick={() => {
-                                                        const newSteps = [...(editingModule.steps || [])];
-                                                        const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
-                                                        if (targetKeg && targetKeg.items) {
-                                                           targetKeg.items = targetKeg.items.filter((_, i) => i !== iIdx);
-                                                           setEditingModule({...editingModule, steps: newSteps});
-                                                        }
-                                                    }} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><X size={12}/></button>
+                                                    <div className="absolute -top-3 -right-2 flex items-center gap-1 z-10">
+                                                       {iIdx > 0 && (
+                                                         <button onClick={() => {
+                                                            const newSteps = [...(editingModule.steps || [])];
+                                                            const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                            if (targetKeg && targetKeg.items) {
+                                                              const temp = targetKeg.items[iIdx - 1];
+                                                              targetKeg.items[iIdx - 1] = targetKeg.items[iIdx];
+                                                              targetKeg.items[iIdx] = temp;
+                                                              setEditingModule({...editingModule, steps: newSteps});
+                                                            }
+                                                         }} className="w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all shadow-sm" title="Geser ke Atas"><ArrowUp size={14}/></button>
+                                                       )}
+                                                       {iIdx < (keg.items?.length || 0) - 1 && (
+                                                         <button onClick={() => {
+                                                            const newSteps = [...(editingModule.steps || [])];
+                                                            const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                            if (targetKeg && targetKeg.items) {
+                                                              const temp = targetKeg.items[iIdx + 1];
+                                                              targetKeg.items[iIdx + 1] = targetKeg.items[iIdx];
+                                                              targetKeg.items[iIdx] = temp;
+                                                              setEditingModule({...editingModule, steps: newSteps});
+                                                            }
+                                                         }} className="w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all shadow-sm" title="Geser ke Bawah"><ArrowDown size={14}/></button>
+                                                       )}
+                                                       <button onClick={() => {
+                                                           const newSteps = [...(editingModule.steps || [])];
+                                                           const targetKeg = newSteps[sIdx].kegiatan?.[kIdx];
+                                                           if (targetKeg && targetKeg.items) {
+                                                              targetKeg.items = targetKeg.items.filter((_, i) => i !== iIdx);
+                                                              setEditingModule({...editingModule, steps: newSteps});
+                                                           }
+                                                       }} className="w-7 h-7 bg-rose-50 border border-rose-200 text-rose-500 rounded-full flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm ml-1" title="Hapus Konten"><X size={14}/></button>
+                                                    </div>
                                                     
                                                     <div className="flex items-center gap-2 mb-3">
                                                        <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[9px] font-black uppercase tracking-widest">{item.type}</span>
